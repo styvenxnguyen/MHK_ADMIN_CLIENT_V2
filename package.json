@@ -1,7 +1,7 @@
 {
   "name": "mhk-admin",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,13 +13,37 @@
     "prettier:fix": "prettier --write \"src/**/(*.tsx|*.ts|*.css|*.scss)\""
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^1.9.5",
+    "@tanem/react-nprogress": "^5.0.38",
+    "axios": "^1.4.0",
+    "bootstrap": "^4.6.0",
+    "formik": "^2.2.9",
+    "jwt-decode": "^3.1.2",
+    "moment": "^2.29.4",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-beautiful-dnd": "^13.1.1",
+    "react-bootstrap": "^1.5.2",
+    "react-datepicker": "^4.11.0",
+    "react-dom": "^18.2.0",
+    "react-helmet": "^6.1.0",
+    "react-router-dom": "^5.2.0",
+    "react-select": "^5.7.3",
+    "react-spinners": "^0.13.8",
+    "react-table": "^7.8.0",
+    "redux": "^4.2.1",
+    "sass": "^1.62.1",
+    "sweetalert2": "^11.7.5",
+    "sweetalert2-react-content": "^5.0.7",
+    "web-vitals": "^3.3.1",
+    "yarn": "^1.22.19",
+    "yup": "^1.1.1"
   },
   "devDependencies": {
     "@types/node": "^20.2.0",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
+    "@types/react-helmet": "^6.1.6",
+    "@types/react-router-dom": "^5.3.3",
     "@typescript-eslint/eslint-plugin": "^5.59.6",
     "@typescript-eslint/parser": "^5.59.6",
     "@vitejs/plugin-react-swc": "^3.0.0",
