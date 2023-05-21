@@ -183,7 +183,6 @@ const Register = () => {
                           className='btn-block mb-4'
                           color='primary'
                           disabled={isSubmitting}
-                          size='lg'
                           type='submit'
                           variant='primary'
                         >

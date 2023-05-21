@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
-
+import Friend from './Friend'
 import friend from './Chat/friends'
-import Friend from '.'
 import Chat from './Chat'
 
 const Friends = ({ listOpen }: any) => {

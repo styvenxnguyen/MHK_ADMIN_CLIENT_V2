@@ -9,6 +9,7 @@ import BTable from 'react-bootstrap/Table'
 import services from '~/services/api'
 import Swal from 'sweetalert2'
 import CustomPagination from '../Pagination'
+import GlobalFilter from '../Filter/GlobalFilter'
 
 type CustomInitialState = {
   pageIndex: number
@@ -49,7 +50,12 @@ function CustomTable({ columns, data, hiddenColumns = ['id'], handleRowClick, se
           id: 'selection',
           Header: ({ getToggleAllRowsSelectedProps }: any) => (
             <div style={{ width: '25px', textAlign: 'center' }}>
-              <input type='checkbox' {...getToggleAllRowsSelectedProps()} title='Chọn tất cả' />
+              <input
+                type='checkbox'
+                {...getToggleAllRowsSelectedProps()}
+                title='Chọn tất cả'
+                indeterminate={selectedFlatRows.length > 0 ? selectedFlatRows.length : undefined}
+              />
             </div>
           )
         },
@@ -59,7 +65,7 @@ function CustomTable({ columns, data, hiddenColumns = ['id'], handleRowClick, se
   )
   const [showGoToPage, setShowGoToPage] = useState(false)
   const [showErrorPage, setShowErrorPage] = useState(false)
-  const [pagePagination, setPagePagination] = useState(undefined)
+  const [pagePagination, setPagePagination] = useState('')
   const [currentPage, setCurrentPage] = useState(pageIndex + 1)
 
   const selectedRows = selectedFlatRows.map((row: any) => row.original)
@@ -109,7 +115,7 @@ function CustomTable({ columns, data, hiddenColumns = ['id'], handleRowClick, se
 
   const handleCloseBtn = () => {
     setShowGoToPage(false)
-    setPagePagination(undefined)
+    setPagePagination('')
     setShowErrorPage(false)
   }
 
@@ -163,7 +169,12 @@ function CustomTable({ columns, data, hiddenColumns = ['id'], handleRowClick, se
         </Col>
 
         <Col className='d-flex justify-content-end align-items-center'>
-          {/* <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} setValueInputPagination={setPagePagination} /> */}
+          <GlobalFilter
+            filter={globalFilter}
+            setFilter={setGlobalFilter}
+            setValueInputPagination={setPagePagination}
+            setShowErrorPage={setShowErrorPage}
+          />
           {ButtonAdd ? (
             <span className='ml-2'>
               <ButtonAdd />
@@ -191,7 +202,13 @@ function CustomTable({ columns, data, hiddenColumns = ['id'], handleRowClick, se
                 {row.cells.map((cell: any) => {
                   return cell.column.id === 'selection' ? (
                     <td style={{ width: '50px', textAlign: 'center' }} {...cell.getCellProps()}>
-                      <input {...row.getToggleRowSelectedProps()} type='checkbox' {...cell.getCellProps()} title='' />
+                      <input
+                        {...row.getToggleRowSelectedProps()}
+                        type='checkbox'
+                        {...cell.getCellProps()}
+                        indeterminate={selectedFlatRows.length > 0 ? selectedFlatRows.length : undefined}
+                        title=''
+                      />
                     </td>
                   ) : (
                     <td
@@ -230,6 +247,7 @@ function CustomTable({ columns, data, hiddenColumns = ['id'], handleRowClick, se
                   className='form-control ml-2'
                   value={pagePagination}
                   onChange={(e) => {
+                    setPagePagination(e.target.value)
                     const page = e.target.value ? Number(e.target.value) - 1 : 0
                     gotoPage(page)
                   }}

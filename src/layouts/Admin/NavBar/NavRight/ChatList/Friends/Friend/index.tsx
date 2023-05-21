@@ -2,9 +2,8 @@ import React from 'react'
 import { Media } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 
-
 const Friend = ({ data, activeId, clicked }: any) => {
-  const photo = `/assets/images/user/${data.photo}`
+  const photo = `/src/assets/images/user/${data.photo}`
   let timeClass = ['d-block']
   if (data.status) {
     timeClass = [...timeClass, 'text-c-green']

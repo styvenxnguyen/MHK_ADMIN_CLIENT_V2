@@ -93,7 +93,7 @@ function ListCustomers() {
               <Button style={{ marginRight: 0 }} onClick={() => history.push('/app/sell-management/customers/create')}>
                 <i className='feather icon-plus-circle mr-2'></i>
                 Thêm khách hàng
-              </Button>{' '}
+              </Button>
             </Card.Header>
             <Card.Body>
               <CustomTable

@@ -5,6 +5,7 @@ import withReactContent from 'sweetalert2-react-content'
 import useAuth from '../../../../hooks/useAuth'
 import ChatList from './ChatList'
 import { ConfigContext } from '../../../../contexts/ConfigContext'
+import PerfectScrollbar from 'react-perfect-scrollbar'
 
 import avatar1 from '~/assets/images/user/avatar-1.jpg'
 import avatar2 from '~/assets/images/user/avatar-2.jpg'
@@ -98,79 +99,83 @@ const NavRight = () => {
                   <Link to='#'>Xoá tất cả</Link>
                 </div>
               </div>
-              <ListGroup as='ul' bsPrefix=' ' variant='flush' className='noti-body'>
-                <ListGroup.Item as='li' bsPrefix=' ' className='n-title'>
-                  <p className='m-b-0'>MỚI</p>
-                </ListGroup.Item>
-                <ListGroup.Item as='li' bsPrefix=' ' className='notification'>
-                  <Media>
-                    <img className='img-radius' src={avatar1} alt='Generic placeholder' />
-                    <Media.Body>
-                      <p>
-                        <strong>Dư Huỳnh Phú</strong>
-                        <span className='n-time text-muted'>
-                          <i className='icon feather icon-clock m-r-10' />
-                          15 giây
-                        </span>
-                      </p>
-                      <p>
-                        Đã thiết lập quyền <b>Quản trị viên</b> cho bạn
-                      </p>
-                    </Media.Body>
-                  </Media>
-                </ListGroup.Item>
-                <ListGroup.Item as='li' bsPrefix=' ' className='n-title'>
-                  <p className='m-b-0'>GẦN ĐÂY</p>
-                </ListGroup.Item>
-                <ListGroup.Item as='li' bsPrefix=' ' className='notification'>
-                  <Media>
-                    <img className='img-radius' src={avatar2} alt='Generic placeholder' />
-                    <Media.Body>
-                      <p>
-                        <strong>Lê Văn Hùng</strong>
-                        <span className='n-time text-muted'>
-                          <i className='icon feather icon-clock m-r-10' />
-                          30 phút
-                        </span>
-                      </p>
-                      <p>
-                        Đã xác nhận đơn hàng <b>PS88291</b>
-                      </p>
-                    </Media.Body>
-                  </Media>
-                </ListGroup.Item>
-                <ListGroup.Item as='li' bsPrefix=' ' className='notification'>
-                  <Media>
-                    <img className='img-radius' src={avatar3} alt='Generic placeholder' />
-                    <Media.Body>
-                      <p>
-                        <strong>Phan Nguyễn Thế Anh</strong>
-                        <span className='n-time text-muted'>
-                          <i className='icon feather icon-clock m-r-10' />2 giờ
-                        </span>
-                      </p>
-                      <p>
-                        Vừa xác nhận phiếu thu <b>PTM8298</b>
-                      </p>
-                    </Media.Body>
-                  </Media>
-                </ListGroup.Item>
-                <ListGroup.Item as='li' bsPrefix=' ' className='notification'>
-                  <Media>
-                    <img className='img-radius' src={avatar4} alt='Generic placeholder' />
-                    <Media.Body>
-                      <p>
-                        <strong>Vũ Văn Quyền</strong>
-                        <span className='n-time text-muted'>
-                          <i className='icon feather icon-clock m-r-10' />
-                          Hôm qua
-                        </span>
-                      </p>
-                      <p>Vừa thêm đơn bảo hành <b>BHM1099</b></p>
-                    </Media.Body>
-                  </Media>
-                </ListGroup.Item>
-              </ListGroup>
+              <PerfectScrollbar>
+                <ListGroup as='ul' bsPrefix=' ' variant='flush' className='noti-body'>
+                  <ListGroup.Item as='li' bsPrefix=' ' className='n-title'>
+                    <p className='m-b-0'>MỚI</p>
+                  </ListGroup.Item>
+                  <ListGroup.Item as='li' bsPrefix=' ' className='notification'>
+                    <Media>
+                      <img className='img-radius' src={avatar1} alt='Generic placeholder' />
+                      <Media.Body>
+                        <p>
+                          <strong>Dư Huỳnh Phú</strong>
+                          <span className='n-time text-muted'>
+                            <i className='icon feather icon-clock m-r-10' />
+                            15 giây
+                          </span>
+                        </p>
+                        <p>
+                          Đã thiết lập quyền <b>Quản trị viên</b> cho bạn
+                        </p>
+                      </Media.Body>
+                    </Media>
+                  </ListGroup.Item>
+                  <ListGroup.Item as='li' bsPrefix=' ' className='n-title'>
+                    <p className='m-b-0'>GẦN ĐÂY</p>
+                  </ListGroup.Item>
+                  <ListGroup.Item as='li' bsPrefix=' ' className='notification'>
+                    <Media>
+                      <img className='img-radius' src={avatar2} alt='Generic placeholder' />
+                      <Media.Body>
+                        <p>
+                          <strong>Lê Văn Hùng</strong>
+                          <span className='n-time text-muted'>
+                            <i className='icon feather icon-clock m-r-10' />
+                            30 phút
+                          </span>
+                        </p>
+                        <p>
+                          Đã xác nhận đơn hàng <b>PS88291</b>
+                        </p>
+                      </Media.Body>
+                    </Media>
+                  </ListGroup.Item>
+                  <ListGroup.Item as='li' bsPrefix=' ' className='notification'>
+                    <Media>
+                      <img className='img-radius' src={avatar3} alt='Generic placeholder' />
+                      <Media.Body>
+                        <p>
+                          <strong>Phan Nguyễn Thế Anh</strong>
+                          <span className='n-time text-muted'>
+                            <i className='icon feather icon-clock m-r-10' />2 giờ
+                          </span>
+                        </p>
+                        <p>
+                          Vừa xác nhận phiếu thu <b>PTM8298</b>
+                        </p>
+                      </Media.Body>
+                    </Media>
+                  </ListGroup.Item>
+                  <ListGroup.Item as='li' bsPrefix=' ' className='notification'>
+                    <Media>
+                      <img className='img-radius' src={avatar4} alt='Generic placeholder' />
+                      <Media.Body>
+                        <p>
+                          <strong>Vũ Văn Quyền</strong>
+                          <span className='n-time text-muted'>
+                            <i className='icon feather icon-clock m-r-10' />
+                            Hôm qua
+                          </span>
+                        </p>
+                        <p>
+                          Vừa thêm đơn bảo hành <b>BHM1099</b>
+                        </p>
+                      </Media.Body>
+                    </Media>
+                  </ListGroup.Item>
+                </ListGroup>
+              </PerfectScrollbar>
               <div className='noti-footer'>
                 <Link to='#'>Hiển thị tất cả</Link>
               </div>
@@ -216,7 +221,7 @@ const NavRight = () => {
           </Dropdown>
         </ListGroup.Item>
       </ListGroup>
-      {/* <ChatList listOpen={listOpen} closed={() => setListOpen(false)} /> */}
+      <ChatList listOpen={listOpen} closed={() => setListOpen(false)} />
     </React.Fragment>
   )
 }

@@ -1,4 +1,4 @@
-const chat = [
+const chatMsg = [
   {
     friend_id: 1,
     friend_photo: 'avatar-1.jpg',
@@ -519,6 +519,6 @@ const chat = [
       }
     ]
   }
-];
+]
 
-export default chat;
+export default chatMsg

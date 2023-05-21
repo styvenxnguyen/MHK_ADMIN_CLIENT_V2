@@ -2,13 +2,12 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { Media } from 'react-bootstrap'
 
-
 const Messages = ({ message, photo, name }: any) => {
   let image: JSX.Element = <></>
   if (message.type) {
     image = (
       <Link to='#' className='media-left photo-table'>
-        <img className='media-object img-radius img-radius m-t-5' src={`~/assets/images/user/${photo}`} alt={name} />
+        <img className='media-object img-radius img-radius m-t-5' src={`/src/assets/images/user/${photo}`} alt={name} />
       </Link>
     )
   }

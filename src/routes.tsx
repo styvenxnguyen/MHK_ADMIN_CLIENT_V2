@@ -1,5 +1,5 @@
 import { Suspense, Fragment, lazy } from 'react'
-import { Switch, Route } from 'react-router-dom'
+import { Switch, Route, Redirect } from 'react-router-dom'
 import RouteLoader from './components/Loader/RouteLoad'
 import GuestGuard from './components/Auth/GuestGuard'
 import AdminLayout from '~/layouts/Admin'
@@ -19,6 +19,7 @@ export function renderRoutes(routes: RouteType[] = []) {
   return (
     <Suspense fallback={<RouteLoader />}>
       <Switch>
+        <Redirect exact from='/' to='/app/dashboard/sell' />
         {routes.map((route, i) => {
           const Guard = route.guard || Fragment
           const Layout = route.layout || Fragment
@@ -50,17 +51,17 @@ const routes: any = [
     exact: true,
     guard: GuestGuard,
     path: '/login',
-    component: lazy(() => import('~/views/Auth/Login'))
+    component: lazy(() => import('./views/Auth/Login'))
   },
   {
     exact: true,
     path: '/register',
-    component: lazy(() => import('~/views/Auth/Register'))
+    component: lazy(() => import('./views/Auth/Register'))
   },
   {
     exact: true,
     path: '/reset-password',
-    component: lazy(() => import('~/views/Auth/ResetPassword'))
+    component: lazy(() => import('./views/Auth/ResetPassword'))
   },
   {
     path: '*',

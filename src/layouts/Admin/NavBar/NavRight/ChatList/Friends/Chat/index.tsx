@@ -1,6 +1,7 @@
 import React from 'react'
 import { Media, FormControl, Button, InputGroup } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
+import PerfectScrollbar from 'react-perfect-scrollbar'
 
 import chatMsg from './chat'
 import Messages from './Messages'
@@ -41,9 +42,9 @@ const Chat = ({ user, chatOpen, listOpen, closed }: any) => {
         </div>
         <div className='h-list-body'>
           <div className='main-chat-cont'>
-            {/* <PerfectScrollbar> */}
-            <div className='main-friend-chat'>{message}</div>
-            {/* </PerfectScrollbar> */}
+            <PerfectScrollbar>
+              <div className='main-friend-chat'>{message}</div>
+            </PerfectScrollbar>
           </div>
         </div>
         <div className='h-list-footer'>
@@ -53,8 +54,8 @@ const Chat = ({ user, chatOpen, listOpen, closed }: any) => {
                 <i className='feather icon-paperclip' />
               </Button>
             </InputGroup.Prepend>
-            <FormControl type='text' name='h-chat-text' className='h-send-chat' placeholder='Write hear . . ' />
-            <Button type='submit' className='input-group-append btn-send'>
+            <FormControl type='text' name='h-chat-text' className='h-send-chat ml-2' placeholder='Tin nhắn...' />
+            <Button type='submit' variant='primary' className='input-group-append btn-send'>
               <i className='feather icon-message-circle' />
             </Button>
           </InputGroup>

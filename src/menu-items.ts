@@ -177,7 +177,7 @@ const menuItems = {
           title: 'Khách hàng',
           type: 'item',
           icon: 'feather icon-user',
-          url: '/app/customers'
+          url: '/app/sell-management/customers'
         }
       ]
     },

@@ -1,7 +1,7 @@
 import React from 'react'
 import { FormControl } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
-
+import PerfectScrollbar from 'react-perfect-scrollbar'
 import Friends from './Friends'
 
 const ChatList = ({ listOpen, closed }: any) => {
@@ -15,7 +15,7 @@ const ChatList = ({ listOpen, closed }: any) => {
       <div className={listClass.join(' ')}>
         <div className='h-list-header'>
           <div className='input-group'>
-            <FormControl type='text' id='search-friends' placeholder='Search Friend . . .' />
+            <FormControl type='text' id='search-friends' placeholder='Tìm kiếm bạn bè' />
           </div>
         </div>
         <div className='h-list-body'>
@@ -23,10 +23,10 @@ const ChatList = ({ listOpen, closed }: any) => {
             <i className='feather icon-chevrons-right' />
           </Link>
           <div className='main-friend-cont scroll-div'>
-            <div className='main-friend-list' style={{ height: 'calc(100vh - 85px)' }}>
-              {/* <PerfectScrollbar> */}
+            <div className='main-friend-list'>
+              <PerfectScrollbar>
                 <Friends listOpen={listOpen} />
-              {/* </PerfectScrollbar> */}
+              </PerfectScrollbar>
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react'
 import { ListGroup } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
-
+import PerfectScrollbar from 'react-perfect-scrollbar'
 import NavGroup from './NavGroup'
 import { ConfigContext } from '../../../../contexts/ConfigContext'
 import * as actionType from '../../../../store/actions'
@@ -109,11 +109,11 @@ const NavContent = ({ navigation }: any) => {
   } else {
     mainContent = (
       <div className='navbar-content datta-scroll'>
-        {/* <PerfectScrollbar> */}
-        <ListGroup variant='flush' as='ul' bsPrefix=' ' className='nav pcoded-inner-navbar' id='nav-ps-next'>
-          {navItems}
-        </ListGroup>
-        {/* </PerfectScrollbar> */}
+        <PerfectScrollbar>
+          <ListGroup variant='flush' as='ul' bsPrefix=' ' className='nav pcoded-inner-navbar' id='nav-ps-next'>
+            {navItems}
+          </ListGroup>
+        </PerfectScrollbar>
       </div>
     )
   }
