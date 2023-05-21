@@ -1,4 +1,5 @@
-import React, { createContext, useEffect, useReducer } from 'react'
+/* eslint-disable @typescript-eslint/no-empty-function */
+import { createContext, useEffect, useReducer } from 'react'
 import jwtDecode from 'jwt-decode'
 
 import { ACCOUNT_INITIALISE, LOGIN, LOGOUT } from '../store/actions'
@@ -33,8 +34,11 @@ const setSession = (accessToken: string) => {
 
 const JWTContext = createContext({
   ...initialState,
-  login: (phone: number, password: any) => Promise.resolve()
-  // logout: () => {}
+  login: (phone: number, password: any) => {
+    Promise.resolve()
+    console.log(phone, password)
+  },
+  logout: () => {}
 })
 
 export const JWTProvider = ({ children }: any) => {
@@ -60,9 +64,9 @@ export const JWTProvider = ({ children }: any) => {
   useEffect(() => {
     const init = async () => {
       try {
-        const serviceToken = window.localStorage.getItem('serviceToken')
-        if (serviceToken && verifyToken(serviceToken)) {
-          setSession(serviceToken)
+        const accessToken = window.localStorage.getItem('access_token')
+        if (accessToken && verifyToken(accessToken)) {
+          setSession(accessToken)
           // const response = await services.get('');
           // const { user } = response.data;
           dispatch({

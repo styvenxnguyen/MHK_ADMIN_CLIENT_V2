@@ -529,6 +529,12 @@ tbody {
   z-index: 9999 !important;
 }
 
+.swal2-styled.swal2-confirm,
+.swal2-styled.swal2-cancel
+{
+  font-size: 0.94em;
+}
+
 .long-text {
   white-space: nowrap;
   overflow: hidden;

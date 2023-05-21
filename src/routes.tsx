@@ -1,7 +1,10 @@
-import React, { Suspense, Fragment, lazy } from 'react'
-import { Switch, Redirect, Route } from 'react-router-dom'
+import { Suspense, Fragment, lazy } from 'react'
+import { Switch, Route } from 'react-router-dom'
 import RouteLoader from './components/Loader/RouteLoad'
 import GuestGuard from './components/Auth/GuestGuard'
+import AdminLayout from '~/layouts/Admin'
+import AuthGuard from './components/Auth/AuthGuard'
+import Error from './views/Errors'
 
 interface RouteType {
   exact: boolean
@@ -34,6 +37,9 @@ export function renderRoutes(routes: RouteType[] = []) {
             />
           )
         })}
+        <Route path='*'>
+          <Error errorCode='404' />
+        </Route>
       </Switch>
     </Suspense>
   )
@@ -44,17 +50,42 @@ const routes: any = [
     exact: true,
     guard: GuestGuard,
     path: '/login',
-    component: lazy(() => import('~/views/auth/login'))
+    component: lazy(() => import('~/views/Auth/Login'))
   },
   {
     exact: true,
     path: '/register',
-    component: lazy(() => import('~/views/auth/register'))
+    component: lazy(() => import('~/views/Auth/Register'))
   },
   {
     exact: true,
     path: '/reset-password',
-    component: lazy(() => import('~/views/auth/reset-password'))
+    component: lazy(() => import('~/views/Auth/ResetPassword'))
+  },
+  {
+    path: '*',
+    layout: AdminLayout,
+    guard: AuthGuard,
+    routes: [
+      //-------------------DASHBOARD---------------------------
+      {
+        exact: true,
+        path: '/app/dashboard/sell',
+        component: lazy(() => import('~/views/Dashboards/Sell'))
+      },
+      {
+        exact: true,
+        path: '/app/dashboard/crm',
+        component: lazy(() => import('~/views/Dashboards/Crm'))
+      },
+
+      //-------------------CUSTOMERS---------------------------
+      {
+        exact: true,
+        path: '/app/customers',
+        component: lazy(() => import('~/views/Customers'))
+      }
+    ]
   }
 ]
 

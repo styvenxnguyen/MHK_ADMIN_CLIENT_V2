@@ -1,7 +1,6 @@
 import React from 'react'
 import { NavLink, useHistory } from 'react-router-dom'
 import { Row, Col, Alert, Button } from 'react-bootstrap'
-import * as Yup from 'yup'
 import { Formik } from 'formik'
 import useScriptRef from '../../../hooks/useScriptRef'
 import withReactContent from 'sweetalert2-react-content'

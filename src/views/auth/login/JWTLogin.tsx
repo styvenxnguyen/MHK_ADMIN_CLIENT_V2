@@ -17,11 +17,12 @@ const JWTLogin = ({ className, ...rest }: any) => {
           setStatus({ success: true })
           setSubmitting(false)
         }
-      } catch (err: any) {
+      } catch (error: any) {
         if (scriptedRef.current) {
           setStatus({ success: false })
-          if (err.message === 'Network Error') {
-            setErrors({ submit: 'Lỗi kết nối máy chủ (500)' })
+          const errorCode: number = error.response.status
+          if (errorCode === 404 || errorCode === 500) {
+            setErrors({ submit: `Lỗi kết nối máy chủ (${errorCode})` })
             setSubmitting(false)
           } else {
             setErrors({ submit: 'Tài khoản hoặc mật khẩu không chính xác' })
@@ -89,7 +90,6 @@ const JWTLogin = ({ className, ...rest }: any) => {
                 className='btn-block mb-4'
                 color='primary'
                 disabled={isSubmitting}
-                size='lg'
                 type='submit'
                 variant='primary'
               >

@@ -7,10 +7,10 @@ const GuestGuard = ({ children }: any) => {
   const { isLoggedIn } = useAuth()
 
   if (isLoggedIn) {
-    // setTimeout(() => {
-    //   window.location.replace(BASE_URL)
-    // }, 2000)
-    return <PageLoader />
+    setTimeout(() => {
+      window.location.replace(BASE_URL)
+    }, 2000)
+    return <PageLoader option />
   }
 
   return <React.Fragment>{children}</React.Fragment>

@@ -1,7 +1,7 @@
 @font-face {
   font-family: 'cryptocoins';
-  src: url('./fonts/cryptocoins.woff2') format('woff2'), url('./fonts/cryptocoins.woff') format('woff'),
-    url('./fonts/cryptocoins.ttf') format('truetype');
+  src: url('~/assets/scss/partials/font/fonts/cryptocoins.woff2') format('woff2'), url('~/assets/scss/partials/font/fonts/cryptocoins.woff') format('woff'),
+    url('~/assets/scss/partials/font/fonts/cryptocoins.ttf') format('truetype');
 }
 
 /* .cc:before { */

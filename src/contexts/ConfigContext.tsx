@@ -1,14 +1,15 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import React, { createContext, useReducer } from 'react'
 import * as actionType from '../store/actions'
 import { CONFIG } from '~/config/constants'
 
 interface ContextType {
   state: {
-    CONFIG: any
+    layout: any
     isOpen: any[] //for active default menu
     isTrigger: any[] //for active default menu, set blank for horizontal
   }
-  dispatch: React.Dispatch<{ type: string; value: unknown }>
+  dispatch: React.Dispatch<{ type: string; value?: unknown; menu?: { id: any; type: any }; layout?: any }>
 }
 
 const initialState = {
@@ -17,8 +18,15 @@ const initialState = {
   isTrigger: [] //for active default menu, set blank for horizontal
 }
 
-const ConfigContext = createContext<ContextType | null>(null);
-const { Provider } = ConfigContext
+const ConfigContext = createContext<ContextType>({
+  state: {
+    layout: null,
+    isOpen: [],
+    isTrigger: []
+  },
+  dispatch: () => {}
+})
+const { Provider }: any = ConfigContext
 
 const ConfigProvider = ({ children }: any) => {
   let trigger: any = []
