@@ -51,17 +51,17 @@ const routes: any = [
     exact: true,
     guard: GuestGuard,
     path: '/login',
-    component: lazy(() => import('~/views/Auth/Login'))
+    component: lazy(() => import('./views/Auth/Login'))
   },
   {
     exact: true,
     path: '/register',
-    component: lazy(() => import('~/views/Auth/Register'))
+    component: lazy(() => import('./views/Auth/Register'))
   },
   {
     exact: true,
     path: '/reset-password',
-    component: lazy(() => import('~/views/Auth/ResetPassword'))
+    component: lazy(() => import('./views/Auth/ResetPassword'))
   },
   {
     path: '*',
@@ -72,19 +72,38 @@ const routes: any = [
       {
         exact: true,
         path: '/app/dashboard/sell',
-        component: lazy(() => import('~/views/Dashboards/Sell'))
+        component: lazy(() => import('./views/Dashboards/Sell'))
       },
       {
         exact: true,
         path: '/app/dashboard/crm',
-        component: lazy(() => import('~/views/Dashboards/Crm'))
+        component: lazy(() => import('./views/Dashboards/Crm'))
       },
 
       //-------------------CUSTOMERS---------------------------
       {
         exact: true,
         path: '/app/customers',
-        component: lazy(() => import('~/views/Customers'))
+        component: lazy(() => import('./views/Customers'))
+      },
+      {
+        exact: true,
+        path: '/app/customers/create',
+        component: lazy(() => import('./views/Customers/Create'))
+      },
+
+      //-------------------CONFIGURATIONS---------------------------
+      {
+        exact: true,
+        path: '/app/configurations',
+        component: lazy(() => import('./views/Configurations'))
+      },
+
+      //-------------------CONFIGURATIONS: USERS---------------------------
+      {
+        exact: true,
+        path: '/app/configurations/users',
+        component: lazy(() => import('./views/Configurations/Users'))
       }
     ]
   }

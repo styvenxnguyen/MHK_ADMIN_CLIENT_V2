@@ -92,8 +92,7 @@ function CustomTable({ columns, data, hiddenColumns = ['id'], handleRowClick, se
     }).then((isConfirm) => {
       if (isConfirm.isConfirmed) {
         Promise.all(promises)
-          .then((res) => {
-            console.log(res)
+          .then(() => {
             Swal.fire({
               title: 'Thành công',
               html: `Đã xoá ${selectedCount} ${selectedTitle} khỏi danh sách`,

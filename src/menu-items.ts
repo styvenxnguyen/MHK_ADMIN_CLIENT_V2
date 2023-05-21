@@ -10,7 +10,11 @@ const menuItems = {
           title: 'Bán hàng',
           type: 'item',
           icon: 'feather icon-database',
-          url: '/app/dashboard/sell'
+          url: '/app/dashboard/sell',
+          badge: {
+            title: 'BẢO TRÌ',
+            type: 'label-danger'
+          }
         },
         {
           id: 'dashboard-crm',
@@ -177,7 +181,7 @@ const menuItems = {
           title: 'Khách hàng',
           type: 'item',
           icon: 'feather icon-user',
-          url: '/app/sell-management/customers'
+          url: '/app/customers'
         }
       ]
     },
@@ -192,7 +196,7 @@ const menuItems = {
           title: 'Ứng dụng',
           type: 'item',
           icon: 'feather icon-grid',
-          url: '/app/application'
+          url: '/app/applications'
         },
         {
           id: 'configurations',

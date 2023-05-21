@@ -90,7 +90,7 @@ function ListCustomers() {
           <Card>
             <Card.Header className='flex-between'>
               <Card.Title as='h5'>Danh sách khách hàng</Card.Title>
-              <Button style={{ marginRight: 0 }} onClick={() => history.push('/app/sell-management/customers/create')}>
+              <Button style={{ marginRight: 0 }} onClick={() => history.push('/app/customers/create')}>
                 <i className='feather icon-plus-circle mr-2'></i>
                 Thêm khách hàng
               </Button>
