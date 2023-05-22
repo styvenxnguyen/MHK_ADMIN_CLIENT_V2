@@ -7,7 +7,6 @@ import moment from 'moment'
 import CustomTable from '~/components/Table/CustomTable'
 import Errors from '~/views/Errors'
 import PageLoader from '~/components/Loader/PageLoader'
-import BackPreviousPage from '~/components/Button/BackPreviousPage'
 
 function ListUsers() {
   const [listEmployees, setListEmployees] = useState([])
@@ -97,7 +96,6 @@ function ListUsers() {
     <React.Fragment>
       <Row>
         <Col>
-          <BackPreviousPage path='/app/users' text='Quay lại danh sách nhân viên' />
           <Card>
             <Card.Header className='flex-between'>
               <Card.Title as='h5'>Danh sách nhân viên</Card.Title>

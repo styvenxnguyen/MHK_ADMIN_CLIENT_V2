@@ -546,6 +546,7 @@ body.datta-dark {
   .table thead th,
   .table-bordered td,
   .table-bordered th {
+    color: $yiq-light-color;
     border-color: lighten($dark-layout, 5%);
   }
 

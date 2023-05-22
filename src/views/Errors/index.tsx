@@ -4,8 +4,9 @@ import { Col, Container, Row } from 'react-bootstrap'
 import backgroundNoPermission from './svg/NoPermission.svg'
 import background404 from './svg/404.svg'
 import background500 from './svg/500.svg'
+import { Helmet } from 'react-helmet'
 
-const Error = ({ errorCode = '500' }: any) => {
+const Error = ({ errorCode }: any) => {
   const [dataError, setDataError] = useState({
     title: '',
     text: '',
@@ -40,6 +41,10 @@ const Error = ({ errorCode = '500' }: any) => {
 
   return (
     <React.Fragment>
+      <Helmet>
+        <title>Trang không tồn tại</title>
+      </Helmet>
+
       <div className='error-wrapper'>
         <Container>
           <Row className='justify-content-center'>

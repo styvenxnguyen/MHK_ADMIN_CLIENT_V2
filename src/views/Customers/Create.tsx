@@ -11,6 +11,7 @@ import ProvinceDistrictSelect from '~/components/Select/ProvinceDistrict'
 import Select from 'react-select'
 import { validationSchemaCustomerCreate } from '~/hooks/useValidation'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
+import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 
 const CreateCustomer = () => {
   const history = useHistory()
@@ -79,7 +80,13 @@ const CreateCustomer = () => {
           setShowLoader(true)
           setTimeout(() => {
             setShowLoader(false)
-            history.push('/app/customers')
+            handleAlertConfirm({
+              html: `Thêm khách hàng <b>${newCustomer.user_name}</b> thành công`,
+              showCancelButton: false,
+              confirmText: 'Xác nhận',
+              icon: 'success',
+              handleConfirmed: () => history.push('/app/customers')
+            })
           }, 1000)
         })
         .catch((errors) => {

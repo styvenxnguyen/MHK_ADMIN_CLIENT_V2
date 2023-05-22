@@ -46,8 +46,9 @@ export const JWTProvider = ({ children }: any) => {
 
   const login = async (phone: number, password: string) => {
     const response = await services.post('/auth/login', { phone, password })
-    const { token, user } = response.data
-    setSession(token)
+    const { data, user } = response.data
+    const accessToken = data
+    setSession(accessToken)
     dispatch({
       type: LOGIN,
       payload: {

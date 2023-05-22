@@ -91,6 +91,11 @@ const routes: any = [
         path: '/app/customers/create',
         component: lazy(() => import('./views/Customers/Create'))
       },
+      {
+        exact: true,
+        path: '/app/customers/:id',
+        component: lazy(() => import('./views/Customers/Detail'))
+      },
 
       //-------------------CONFIGURATIONS---------------------------
       {
