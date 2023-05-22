@@ -1,7 +1,7 @@
 import { Suspense, Fragment, lazy } from 'react'
 import { Switch, Route, Redirect } from 'react-router-dom'
 import RouteLoader from './components/Loader/RouteLoad'
-import GuestGuard from './components/Auth/GuestGuard'
+// import GuestGuard from './components/Auth/GuestGuard'
 import AdminLayout from '~/layouts/Admin'
 import AuthGuard from './components/Auth/AuthGuard'
 import Error from './views/Errors'
