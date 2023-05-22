@@ -1,7 +1,7 @@
 import { Suspense, Fragment, lazy } from 'react'
 import { Switch, Route, Redirect } from 'react-router-dom'
 import RouteLoader from './components/Loader/RouteLoad'
-// import GuestGuard from './components/Auth/GuestGuard'
+import GuestGuard from './components/Auth/GuestGuard'
 import AdminLayout from '~/layouts/Admin'
 import AuthGuard from './components/Auth/AuthGuard'
 import Error from './views/Errors'
@@ -47,22 +47,22 @@ export function renderRoutes(routes: RouteType[] = []) {
 }
 
 const routes: any = [
-  // {
-  //   exact: true,
-  //   guard: GuestGuard,
-  //   path: '/login',
-  //   component: lazy(() => import('./views/Auth/Login'))
-  // },
-  // {
-  //   exact: true,
-  //   path: '/register',
-  //   component: lazy(() => import('./views/Auth/Register'))
-  // },
-  // {
-  //   exact: true,
-  //   path: '/reset-password',
-  //   component: lazy(() => import('./views/Auth/ResetPassword'))
-  // },
+  {
+    exact: true,
+    guard: GuestGuard,
+    path: '/login',
+    component: lazy(() => import('./views/Auth/Login'))
+  },
+  {
+    exact: true,
+    path: '/register',
+    component: lazy(() => import('./views/Auth/Register'))
+  },
+  {
+    exact: true,
+    path: '/reset-password',
+    component: lazy(() => import('./views/Auth/ResetPassword'))
+  },
   {
     path: '*',
     layout: AdminLayout,
