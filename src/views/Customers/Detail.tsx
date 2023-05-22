@@ -60,10 +60,10 @@ const UserDetails = () => {
       if (willExit.isConfirmed) {
         services
           .delete(`/customer/delete-by-id/${id}`)
-          .then((response) => {
+          .then(() => {
             sweetSuccessAlert()
           })
-          .catch((error) => {
+          .catch(() => {
             sweetSuccessAlert()
           })
       } else {

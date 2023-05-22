@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Row, Col, Card, Button, Alert } from 'react-bootstrap'
+import { Row, Col, Card, Button } from 'react-bootstrap'
 import { Helmet } from 'react-helmet'
 import services from '~/services/api'
 import moment from 'moment'
