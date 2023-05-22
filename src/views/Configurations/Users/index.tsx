@@ -113,7 +113,7 @@ function ListUsers() {
                 <Button className='m-0' onClick={() => history.push('/app/configurations/users/create')}>
                   <i className='feather icon-plus-circle mr-2'></i>
                   Thêm nhân viên
-                </Button>{' '}
+                </Button>
               </span>
             </Card.Header>
             <Card.Body>

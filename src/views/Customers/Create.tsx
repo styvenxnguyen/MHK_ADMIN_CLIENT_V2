@@ -11,7 +11,6 @@ import ProvinceDistrictSelect from '~/components/Select/ProvinceDistrict'
 import Select from 'react-select'
 import { validationSchemaCustomerCreate } from '~/hooks/useValidation'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
-import { ToastContainer, toast } from 'react-toastify'
 
 const CreateCustomer = () => {
   const history = useHistory()

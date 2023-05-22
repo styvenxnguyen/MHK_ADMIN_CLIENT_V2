@@ -47,22 +47,22 @@ export function renderRoutes(routes: RouteType[] = []) {
 }
 
 const routes: any = [
-  {
-    exact: true,
-    guard: GuestGuard,
-    path: '/login',
-    component: lazy(() => import('./views/Auth/Login'))
-  },
-  {
-    exact: true,
-    path: '/register',
-    component: lazy(() => import('./views/Auth/Register'))
-  },
-  {
-    exact: true,
-    path: '/reset-password',
-    component: lazy(() => import('./views/Auth/ResetPassword'))
-  },
+  // {
+  //   exact: true,
+  //   guard: GuestGuard,
+  //   path: '/login',
+  //   component: lazy(() => import('./views/Auth/Login'))
+  // },
+  // {
+  //   exact: true,
+  //   path: '/register',
+  //   component: lazy(() => import('./views/Auth/Register'))
+  // },
+  // {
+  //   exact: true,
+  //   path: '/reset-password',
+  //   component: lazy(() => import('./views/Auth/ResetPassword'))
+  // },
   {
     path: '*',
     layout: AdminLayout,
