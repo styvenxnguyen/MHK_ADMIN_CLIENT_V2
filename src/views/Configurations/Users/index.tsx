@@ -86,7 +86,7 @@ function ListUsers() {
   }
 
   if (!isFetched) {
-    return <Errors />
+    return <Errors errorCode='500' />
   }
 
   if (isNoPermission) {

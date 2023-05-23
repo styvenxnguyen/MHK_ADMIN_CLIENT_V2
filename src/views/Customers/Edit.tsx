@@ -1,6 +1,6 @@
 /* eslint-disable no-prototype-builtins */
 import { useEffect, useState } from 'react'
-import { Row, Col, Card, Form, Button } from 'react-bootstrap'
+import { Row, Col, Card, Form } from 'react-bootstrap'
 import services from '~/services/api'
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
@@ -193,24 +193,6 @@ const CustomerEdit = () => {
   const sweetSuccessAlert = () => {
     const MySwal = withReactContent(Swal)
     MySwal.fire('', `Cập nhật thông tin khách hàng thành công`, 'success')
-  }
-
-  const sweetConfirmAlert = () => {
-    const MySwal = withReactContent(Swal)
-    MySwal.fire({
-      title: 'Bạn có chắc chắn muốn thoát ?',
-      text: 'Mọi dữ liệu của bạn sẽ không được thay đổi',
-      icon: 'question',
-      confirmButtonText: 'Đồng ý',
-      cancelButtonText: 'Quay lại',
-      showCancelButton: true
-    }).then((willExit) => {
-      if (willExit.isConfirmed) {
-        return history.push(`/app/sell-management/customers/${id}`)
-      } else {
-        return
-      }
-    })
   }
 
   if (isLoading) {

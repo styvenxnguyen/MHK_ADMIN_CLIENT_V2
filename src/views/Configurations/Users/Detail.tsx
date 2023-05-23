@@ -23,7 +23,7 @@ const UserDetail = () => {
   const history = useHistory()
   const { id }: any = useParams()
   const [userData, setUserData]: any = useState({})
-  const [address, setAddress] = useState([])
+  // const [address, setAddress] = useState([])
   const [allowShippingPrice, setAllowShippingPrice] = useState(false)
   const [allowSalePrice, setAllowSalePrice] = useState(false)
   const [dataGender, setDataGender] = useState(true)
@@ -353,7 +353,7 @@ const UserDetail = () => {
                             <Form.Label column>Địa chỉ</Form.Label>
                             <Col sm={12} lg={9}>
                               <FormLabel className='text-normal' column>
-                                : {address === null ? '---' : address}
+                                {/* : {address === null ? '---' : address} */}
                               </FormLabel>
                             </Col>
                           </Form.Group>
