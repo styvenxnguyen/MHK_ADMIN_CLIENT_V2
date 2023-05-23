@@ -12,8 +12,8 @@ const menuItems = {
           icon: 'feather icon-database',
           url: '/app/dashboard/sell',
           badge: {
-            title: 'BẢO TRÌ',
-            type: 'label-danger'
+            title: 'Sắp ra mắt',
+            type: 'label-primary'
           }
         },
         {
@@ -21,7 +21,11 @@ const menuItems = {
           title: 'CRM',
           type: 'item',
           icon: 'feather icon-life-buoy',
-          url: '/app/dashboard/crm'
+          url: '/app/dashboard/crm',
+          badge: {
+            title: 'Sắp ra mắt',
+            type: 'label-primary'
+          }
         }
       ]
     },

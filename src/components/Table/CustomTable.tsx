@@ -252,7 +252,7 @@ function CustomTable({ columns, data, hiddenColumns = ['id'], handleRowClick, se
                   }}
                   onKeyDown={(e) => {
                     const inputVal = parseInt((e.target as HTMLInputElement).value + e.key)
-                    if (e.key === '-' || e.key === '+' || e.key === '.') {
+                    if (e.key === '-' || e.key === '+' || e.key === '.' || e.key === 'e') {
                       e.preventDefault()
                     } else if (inputVal > pageOptions.length || inputVal === 0) {
                       e.preventDefault()

@@ -28,7 +28,7 @@ const configsMenu = [
   }
 ]
 
-const ListConfiguration = () => {
+const ConfigurationsList = () => {
   return (
     <>
       <Helmet>
@@ -70,4 +70,4 @@ const ListConfiguration = () => {
   )
 }
 
-export default ListConfiguration
+export default ConfigurationsList

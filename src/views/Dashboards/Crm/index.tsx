@@ -1,5 +1,7 @@
+import Error from '~/views/Errors'
+
 const DashboardSell = () => {
-  return <div>Trang tổng quan CRM</div>
+  return <Error errorCode='ComingSoon' />
 }
 
 export default DashboardSell

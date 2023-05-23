@@ -1,25 +1,87 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
-import React, { useEffect, useState } from 'react'
-import { Row, Col, Card, Form } from 'react-bootstrap'
+/* eslint-disable no-prototype-builtins */
+import { useEffect, useState } from 'react'
+import { Row, Col, Card, Form, Button } from 'react-bootstrap'
 import services from '~/services/api'
 import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
 import { ButtonLoading } from '~/components/Button/LoadingButton'
-import { useHistory } from 'react-router-dom'
+import { useHistory, useParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
 import { Formik } from 'formik'
-import ProvinceDistrictSelect from '~/components/Select/ProvinceDistrict'
 import Select from 'react-select'
-import { validationSchemaCustomerCreate } from '~/hooks/useValidation'
+import Error from '~/views/Errors'
+import { validationSchemaCustomerEdit } from '~/hooks/useValidation'
+import PageLoader from '~/components/Loader/PageLoader'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
-import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 
-const CustomerCreate = () => {
-  const history = useHistory()
+const CustomerEdit = () => {
   const [showLoader, setShowLoader] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isFetched, setIsFetched] = useState(false)
   const [optionsStaff, setOptionsStaff] = useState([])
   const [optionsTag, setOptionsTag] = useState([])
   const [selectedTags, setSelectedTags] = useState([])
-  const noOptionMessage = () => 'Đang tải dữ liệu ...'
+  const [selectedStaff, setSelectedStaff] = useState({
+    label: 'Chọn nhân viên',
+    value: ''
+  })
+
+  const history = useHistory()
+  const { id }: any = useParams()
+
+  const [customerData, setCustomerData]: any = useState({
+    name: '',
+    code: '',
+    phone: '',
+    email: '',
+    note: '',
+    staff: {
+      label: '',
+      value: ''
+    },
+    tags: []
+  })
+
+  const keyMapping: any = {
+    name: 'user_name',
+    code: 'user_code',
+    phone: 'user_phone',
+    email: 'user_email',
+    note: 'staff_in_charge_note',
+    staff: 'staff_id'
+  }
+
+  useEffect(() => {
+    services
+      .get(`/customer/get-by-id/${id}`)
+      .then((response) => {
+        const data = response.data.data
+        setCustomerData({
+          name: data.customer_name,
+          code: data.user_code,
+          email: data.customer_email,
+          phone: data.customer_phone,
+          note: data.staff_in_charge_note
+        })
+        if (data.staff_in_charge) {
+          setSelectedStaff({
+            label: data.staff_in_charge.staff_name,
+            value: data.staff_in_charge.staff_id
+          })
+        }
+        setSelectedTags(
+          data.tags.map((tag: any) => ({
+            label: tag.tag_title,
+            value: tag.tag_id
+          }))
+        )
+        setIsLoading(false)
+        setIsFetched(true)
+      })
+      .catch(() => {
+        setIsLoading(false)
+      })
+  }, [id])
 
   useEffect(() => {
     services
@@ -32,7 +94,9 @@ const CustomerCreate = () => {
         }))
         setOptionsStaff(options)
       })
-      .catch(() => {})
+      .catch(() => {
+        setIsLoading(false)
+      })
   }, [])
 
   useEffect(() => {
@@ -46,47 +110,55 @@ const CustomerCreate = () => {
         }))
         setOptionsTag(options)
       })
-      .catch(() => {})
+      .catch(() => {
+        setIsLoading(false)
+      })
   }, [])
 
-  const handleSubmit = (values: any) => {
+  const filterSelectedOptions = (options: any, selectedOptions: any) => {
+    return options.filter(
+      (option: any) => !selectedOptions.find((selectedOption: any) => selectedOption.value === option.value)
+    )
+  }
+
+  const filteredOptionsTag = filterSelectedOptions(optionsTag, selectedTags)
+
+  const handleSubmit = async (values: any) => {
     setShowLoader(true)
-    const addressList = [
-      {
-        user_province: values.province,
-        user_district: values.district,
-        user_specific_address: values.address
+    //Vòng lặp for sẽ duyệt các giá trị trong values so sánh với các giá trị của Customer
+    //Nếu trường nào có giá trị không thay đổi thì không được gửi lên server
+    const updatedFields: any = {}
+    for (const key in values) {
+      if (values.hasOwnProperty(key) && values[key] !== customerData[key]) {
+        updatedFields[key] = values[key]
       }
-    ]
+    }
 
-    const tags = selectedTags.map((tag: any) => tag.value)
+    //Thay đổi những key mặc định trong updateFields thành những tên key được đặt trong server
+    //Ví dụ : name -> customer_name ...
+    const updatedFieldsWithApiKeys: any = {}
+    for (const key in updatedFields) {
+      if (updatedFields.hasOwnProperty(key)) {
+        const newKey = keyMapping[key] || key
+        updatedFieldsWithApiKeys[newKey] = updatedFields[key]
+      }
+    }
 
-    const newCustomer = {
-      user_code: values.code,
-      user_name: values.name,
-      user_email: values.email,
-      user_phone: values.phone,
-      customer_status: 'Đang giao dịch',
-      address_list: addressList,
-      staff_id: values.staff.value,
-      staff_in_charge_note: values.note,
-      tags: tags
+    const updateCustomer = {
+      ...updatedFieldsWithApiKeys,
+      staff_id: selectedStaff.value,
+      tags: selectedTags.map((tag: any) => tag.value)
     }
 
     try {
-      services
-        .post('/customer/create', newCustomer)
+      //Cập nhật khách hàng
+      await services
+        .patch(`/customer/update-personalInfo-by-id/${id}`, updateCustomer)
         .then(() => {
-          setShowLoader(true)
           setTimeout(() => {
             setShowLoader(false)
-            handleAlertConfirm({
-              html: `Thêm khách hàng <b>${newCustomer.user_name}</b> thành công`,
-              showCancelButton: false,
-              confirmText: 'Xác nhận',
-              icon: 'success',
-              handleConfirmed: () => history.push('/app/customers')
-            })
+            history.push(`/app/customers/${id}`)
+            sweetSuccessAlert()
           }, 1000)
         })
         .catch((errors) => {
@@ -100,70 +172,84 @@ const CustomerCreate = () => {
               return `Email: <b>${values.email}</b> đã tồn tại`
             } else return `Mã KH: <b>${values.code}</b> đã tồn tại`
           })
-
-          if (errorResponses) {
-            setTimeout(() => {
-              setShowLoader(false)
-              Swal.fire({
-                title: 'Thất bại',
-                html: errorMessages.join('<br>'),
-                icon: 'warning',
-                confirmButtonText: 'Xác nhận'
-              })
-            }, 1000)
-          } else {
-            console.log('CANNOT GET ERROR RESPONSE')
-          }
+          setTimeout(() => {
+            setShowLoader(false)
+            Swal.fire({
+              title: 'Thất bại',
+              html: errorMessages.join('<br>'),
+              icon: 'warning',
+              confirmButtonText: 'Xác nhận'
+            })
+          }, 1000)
         })
     } catch (error) {
       setTimeout(() => {
         setShowLoader(false)
-        Swal.fire('Thất bại', 'Đã xảy ra lỗi kết nối tới máy chủ', 'error')
+        Swal.fire('', 'Đã xảy ra lỗi khi kết nối tới máy chủ', 'error')
       }, 1000)
     }
   }
 
-  return (
-    <React.Fragment>
-      <Helmet>
-        <title>Thêm mới khách hàng</title>
-      </Helmet>
+  const sweetSuccessAlert = () => {
+    const MySwal = withReactContent(Swal)
+    MySwal.fire('', `Cập nhật thông tin khách hàng thành công`, 'success')
+  }
 
+  const sweetConfirmAlert = () => {
+    const MySwal = withReactContent(Swal)
+    MySwal.fire({
+      title: 'Bạn có chắc chắn muốn thoát ?',
+      text: 'Mọi dữ liệu của bạn sẽ không được thay đổi',
+      icon: 'question',
+      confirmButtonText: 'Đồng ý',
+      cancelButtonText: 'Quay lại',
+      showCancelButton: true
+    }).then((willExit) => {
+      if (willExit.isConfirmed) {
+        return history.push(`/app/sell-management/customers/${id}`)
+      } else {
+        return
+      }
+    })
+  }
+
+  if (isLoading) {
+    return (
+      <>
+        <Helmet>
+          <title>Cập nhật thông tin khách hàng</title>
+        </Helmet>
+        <PageLoader />
+      </>
+    )
+  }
+
+  if (!isFetched) {
+    return <Error errorCode='500' />
+  }
+
+  return (
+    <>
       <Formik
-        initialValues={{
-          name: '',
-          phone: '',
-          email: '',
-          code: '',
-          address: '',
-          province: '',
-          district: '',
-          note: '',
-          staff: ''
-        }}
-        validationSchema={validationSchemaCustomerCreate}
+        enableReinitialize={true}
+        initialValues={customerData}
+        validationSchema={validationSchemaCustomerEdit}
         onSubmit={handleSubmit}
       >
-        {({ errors, setFieldValue, handleChange, handleSubmit, touched, values }) => (
-          <Form>
+        {({ dirty, errors, handleBlur, handleChange, handleSubmit, touched, values, setFieldValue }: any) => (
+          <Form noValidate onSubmit={handleSubmit}>
             <span className='flex-between'>
-              <BackPreviousPage path='/app/customers/' text='Quay lại danh sách khách hàng' />
+              <BackPreviousPage path={`/app/customers/${id}`} text='Quay lại' />
               <ButtonLoading
-                text={
-                  <span>
-                    <i className='feather icon-plus-circle mr-2'></i>
-                    Lưu khách hàng mới
-                  </span>
-                }
+                text={'Cập nhật'}
                 onSubmit={handleSubmit}
                 loading={showLoader}
                 type='submit'
-                disabled={showLoader}
                 className='m-0 mb-3'
+                disabled={!dirty || showLoader}
               ></ButtonLoading>
             </span>
 
-            {/* Render Form Create */}
             <Row>
               <Col sm={12} lg={8}>
                 <Row>
@@ -175,15 +261,16 @@ const CustomerCreate = () => {
                       <Card.Body>
                         <Row>
                           <Col md={12}>
-                            <Form.Group controlId='nameCustomer'>
+                            <Form.Group controlId='formName'>
                               <Form.Label>
                                 Tên khách hàng <span className='text-c-red'>*</span>
                               </Form.Label>
                               <Form.Control
                                 name='name'
-                                value={values.name}
+                                onBlur={handleBlur}
                                 onChange={handleChange}
                                 placeholder='Nhập tên khách hàng'
+                                value={values.name}
                               />
                               {touched.name && errors.name && (
                                 <small className='text-danger form-text'>{errors.name}</small>
@@ -191,13 +278,14 @@ const CustomerCreate = () => {
                             </Form.Group>
                             <Form.Group controlId='emailCustomer'>
                               <Form.Label>
-                                Địa chỉ Email <span className='text-c-red'>*</span>
+                                Email <span className='text-c-red'>*</span>
                               </Form.Label>
                               <Form.Control
                                 name='email'
-                                value={values.email}
+                                onBlur={handleBlur}
                                 onChange={handleChange}
                                 type='email'
+                                value={values.email}
                                 placeholder='Nhập địa chỉ email'
                               />
                               {touched.email && errors.email && (
@@ -212,6 +300,7 @@ const CustomerCreate = () => {
                               </Form.Label>
                               <Form.Control
                                 name='code'
+                                onBlur={handleBlur}
                                 value={values.code}
                                 onChange={handleChange}
                                 type='text'
@@ -221,6 +310,7 @@ const CustomerCreate = () => {
                                 <small className='text-danger form-text'>{errors.code}</small>
                               )}
                             </Form.Group>
+                            <Row></Row>{' '}
                           </Col>
                           <Col md={6}>
                             <Form.Group controlId='phoneCustomer'>
@@ -228,45 +318,15 @@ const CustomerCreate = () => {
                                 Số điện thoại <span className='text-c-red'>*</span>
                               </Form.Label>
                               <Form.Control
+                                onBlur={handleBlur}
                                 value={values.phone}
                                 name='phone'
                                 onChange={handleChange}
+                                type='text'
                                 placeholder='Nhập số điện thoại'
                               />
                               {touched.phone && errors.phone && (
                                 <small className='text-danger form-text'>{errors.phone}</small>
-                              )}
-                            </Form.Group>
-                          </Col>
-                          <Col sm={12} lg={12}>
-                            <Form.Group>
-                              <ProvinceDistrictSelect
-                                initialValues={{ province: null, district: null }}
-                                onChange={(p: any, d: any) => {
-                                  setFieldValue('province', p, true)
-                                  setFieldValue('district', d, false)
-                                }}
-                              />
-                              {touched.province && errors.province && (
-                                <small className='text-danger form-text'>{errors.province}</small>
-                              )}
-                            </Form.Group>
-                          </Col>
-                          <Col sm={12} lg={12}>
-                            <Form.Group controlId='addressCustomer'>
-                              <Form.Label>
-                                Địa chỉ <span className='text-c-red'>*</span>
-                              </Form.Label>
-                              <Form.Control
-                                name='address'
-                                placeholder='Ghi rõ tầng, số nhà, phường xã, ...'
-                                value={values.address}
-                                onChange={handleChange}
-                                as='textarea'
-                                rows={3}
-                              />
-                              {touched.address && errors.address && (
-                                <small className='text-danger form-text'>{errors.address}</small>
                               )}
                             </Form.Group>
                           </Col>
@@ -303,12 +363,11 @@ const CustomerCreate = () => {
                           <Col md={6}>
                             <Form.Group controlId="sexCustomer">
                               <Form.Label>Giới tính</Form.Label>
-                              <Select
-                                name="gender"
-                                onChange={(g) => setFieldValue('gender', g)}
-                                options={gender}
-                                defaultValue={gender[0]}
-                              ></Select>
+                              <Form.Control as="select">
+                                <option>Khác</option>
+                                <option>Nam</option>
+                                <option>Nữ</option>
+                              </Form.Control>
                             </Form.Group>
                             <Form.Group controlId="taxIdCustomer">
                               <Form.Label>Mã số thuế</Form.Label>
@@ -334,15 +393,17 @@ const CustomerCreate = () => {
                         <Card.Title as='h5'>Thông tin khác</Card.Title>
                       </Card.Header>
                       <Card.Body>
-                        <Form.Group controlId='staff'>
+                        <Form.Group controlId='staffCb'>
                           <Form.Label>Nhân viên phụ trách</Form.Label>
                           <Select
                             name='staff'
                             options={optionsStaff}
                             placeholder='Chọn nhân viên'
-                            noOptionsMessage={noOptionMessage}
-                            defaultValue={optionsStaff[0]}
-                            onChange={(s) => setFieldValue('staff', s)}
+                            value={selectedStaff}
+                            onChange={(staff: any) => {
+                              setSelectedStaff(staff)
+                              setFieldValue('staff', staff)
+                            }}
                           />
                         </Form.Group>
                         <Form.Group controlId='description'>
@@ -355,14 +416,18 @@ const CustomerCreate = () => {
                             rows={3}
                           />
                         </Form.Group>
-                        <Form.Group>
+                        <Form.Group controlId='tag'>
                           <Form.Label>Tags</Form.Label>
                           <Select
-                            options={optionsTag}
+                            name='tags'
+                            options={filteredOptionsTag}
+                            value={selectedTags}
                             placeholder='Chọn tags'
                             isMulti
-                            noOptionsMessage={noOptionMessage}
-                            onChange={(tag: any) => setSelectedTags(tag)}
+                            onChange={(tag: any) => {
+                              setFieldValue('tags', tag)
+                              setSelectedTags(tag)
+                            }}
                           ></Select>
                         </Form.Group>
                       </Card.Body>
@@ -374,8 +439,8 @@ const CustomerCreate = () => {
           </Form>
         )}
       </Formik>
-    </React.Fragment>
+    </>
   )
 }
 
-export default CustomerCreate
+export default CustomerEdit

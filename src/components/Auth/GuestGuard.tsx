@@ -10,7 +10,7 @@ const GuestGuard = ({ children }: any) => {
     setTimeout(() => {
       window.location.replace(BASE_URL)
     }, 2000)
-    return <PageLoader option />
+    return <PageLoader option='100vh' />
   }
 
   return <React.Fragment>{children}</React.Fragment>

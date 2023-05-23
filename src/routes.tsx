@@ -96,6 +96,18 @@ const routes: any = [
         path: '/app/customers/:id',
         component: lazy(() => import('./views/Customers/Detail'))
       },
+      {
+        exact: true,
+        path: '/app/customers/:id/edit',
+        component: lazy(() => import('./views/Customers/Edit'))
+      },
+
+      //-------------------APPLICATIONS---------------------------
+      {
+        exact: true,
+        path: '/app/applications',
+        component: lazy(() => import('./views/Applications'))
+      },
 
       //-------------------CONFIGURATIONS---------------------------
       {
@@ -109,6 +121,11 @@ const routes: any = [
         exact: true,
         path: '/app/configurations/users',
         component: lazy(() => import('./views/Configurations/Users'))
+      },
+      {
+        exact: true,
+        path: '/app/configurations/users/:id',
+        component: lazy(() => import('./views/Configurations/Users/Detail'))
       }
     ]
   }

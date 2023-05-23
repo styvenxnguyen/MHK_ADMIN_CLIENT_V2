@@ -7,7 +7,8 @@ interface Props {
   icon?: any
   confirmText?: string
   handleConfirmed?: any
-  showCancelButton: boolean
+  showCancelButton?: boolean
+  confirmButtonColor?: string
 }
 
 export const handleAlertConfirm = ({
@@ -17,19 +18,23 @@ export const handleAlertConfirm = ({
   icon,
   confirmText,
   handleConfirmed,
-  showCancelButton
+  showCancelButton,
+  confirmButtonColor
 }: Props) => {
   Swal.fire({
     title: title,
     html: html,
     text: text,
     icon: icon,
-    confirmButtonText: confirmText,
-    showCancelButton: showCancelButton
+    confirmButtonText: confirmText || 'Xác nhận',
+    confirmButtonColor: confirmButtonColor || undefined,
+    showCancelButton: showCancelButton || false
   }).then((isConfirm) => {
     if (isConfirm.isConfirmed) {
-      {
-        handleConfirmed() || window.location.reload()
+      if (handleConfirmed) {
+        handleConfirmed()
+      } else {
+        window.location.reload()
       }
     }
   })

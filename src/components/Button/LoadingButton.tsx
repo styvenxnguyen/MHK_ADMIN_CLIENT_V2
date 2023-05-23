@@ -1,6 +1,6 @@
 import { Button } from 'react-bootstrap'
 
-export const Loader = () => {
+const Loader = () => {
   return (
     <span>
       <i className='spinner-border spinner-border-sm mr-1' role='status'></i>Đang xử lý...

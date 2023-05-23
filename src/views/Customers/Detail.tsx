@@ -2,14 +2,15 @@ import React, { useEffect, useState } from 'react'
 import { Row, Col, Card, Form, Button, FormLabel, Badge, Tabs, Tab, Tooltip, OverlayTrigger } from 'react-bootstrap'
 import services from '~/services/api'
 import Swal from 'sweetalert2'
-import withReactContent from 'sweetalert2-react-content'
 import { Link, useHistory, useParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
 import Error from '~/views/Errors'
 import PageLoader from '~/components/Loader/PageLoader'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
+import Addresses from './AdditionalData/Addresses'
+import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 
-const UserDetails = () => {
+const CustomerDetail = () => {
   const [showTooltipEmail, setShowTooltipEmail] = useState(false)
   const [showTooltipNote, setShowTooltipNote] = useState(false)
   const [staffName, setStaffName] = useState('---')
@@ -46,29 +47,25 @@ const UserDetails = () => {
     history.push(`/app/customers/${id}/edit`)
   }
 
-  const handleDelete = () => {
-    const MySwal = withReactContent(Swal)
-    MySwal.fire({
+  const handleDeleteBtn = () => {
+    handleAlertConfirm({
       title: 'Xoá khách hàng',
       html: `Bạn có chắc chắn muốn xoá khách hàng <b>${customerData.customer_name}</b> ? Thao tác này không thể khôi phục`,
       icon: 'warning',
-      confirmButtonText: 'Xoá',
+      showCancelButton: true,
       confirmButtonColor: 'red',
-      cancelButtonText: 'Thoát',
-      showCancelButton: true
-    }).then((willExit) => {
-      if (willExit.isConfirmed) {
+      handleConfirmed: () =>
         services
           .delete(`/customer/delete-by-id/${id}`)
           .then(() => {
-            sweetSuccessAlert()
+            {
+              history.push('/app/customers')
+              Swal.fire('', 'Xoá khách hàng thành công', 'success')
+            }
           })
           .catch(() => {
-            sweetSuccessAlert()
+            Swal.fire('', 'Xoá khách hàng thất bại', 'success')
           })
-      } else {
-        return
-      }
     })
   }
 
@@ -81,6 +78,7 @@ const UserDetails = () => {
       {customerData.customer_email}
     </Tooltip>
   )
+
   const tooltipNote = (
     <Tooltip
       id={`tooltip-${customerData.staff_in_charge_note}`}
@@ -91,16 +89,10 @@ const UserDetails = () => {
     </Tooltip>
   )
 
-  const sweetSuccessAlert = () => {
-    history.push('/app/sell-management/customers')
-    const MySwal = withReactContent(Swal)
-    MySwal.fire('', 'Xoá khách hàng thành công', 'success')
-  }
-
   if (isLoading) return <PageLoader />
 
   if (!isFetched) {
-    return <Error />
+    return <Error errorCode='500' />
   }
 
   return (
@@ -110,7 +102,7 @@ const UserDetails = () => {
       </Helmet>
       <div className='d-flex justify-content-between'>
         <BackPreviousPage path='/app/customers' text='Quay lại danh sách khách hàng' />
-        <Button onClick={handleDelete} type='submit' variant='outline-danger' className='m-0 mb-3'>
+        <Button onClick={handleDeleteBtn} type='submit' variant='outline-danger' className='m-0 mb-3'>
           <span style={{ fontWeight: 600 }}>
             <i className='feather icon-trash-2 mr-2'></i>
             Xoá khách hàng
@@ -434,7 +426,9 @@ const UserDetails = () => {
         <Col sm={12} lg={12}>
           <Tabs variant='pills' defaultActiveKey='addresses' className='tabs-menu'>
             <Tab eventKey='addresses' title='Địa chỉ'>
-              <div className='px-3'>{/* <Addresses /> */}</div>
+              <div className='px-3'>
+                <Addresses />
+              </div>
             </Tab>
             <Tab eventKey='profile' title='Công nợ'>
               <p className='text-center strong-title text-normal'>Chưa có dữ liệu về công nợ khách hàng</p>
@@ -449,4 +443,4 @@ const UserDetails = () => {
   )
 }
 
-export default UserDetails
+export default CustomerDetail

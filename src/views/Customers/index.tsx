@@ -8,7 +8,7 @@ import CustomTable from '~/components/Table/CustomTable'
 import Error from '../Errors'
 import PageLoader from '~/components/Loader/PageLoader'
 
-function ListCustomers() {
+function CustomersList() {
   const history = useHistory()
   const [listCustomer, setListCustomer] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -16,7 +16,7 @@ function ListCustomers() {
 
   const handleRowClick = (row: any) => {
     const id = row.values.id
-    history.push(`/app/sell-management/customers/${id}`)
+    history.push(`/app/customers/${id}`)
   }
 
   useEffect(() => {
@@ -111,4 +111,4 @@ function ListCustomers() {
   )
 }
 
-export default ListCustomers
+export default CustomersList

@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom'
 import Swal from 'sweetalert2'
 
 interface BackPreviousPageProps {
-  path: string
+  path: any
   text: string
 }
 

@@ -2,6 +2,7 @@ import * as Yup from 'yup'
 
 const phoneRegExp = /^(0|\+84)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0|3|4|5|7|8])+([0-9]{7})$/
 
+//----------------------AUTH----------------------
 export const validationSchemaRegister = Yup.object().shape({
   name: Yup.string().max(255).required('Tên không được bỏ trống'),
   phone: Yup.string().matches(phoneRegExp, 'Số điện thoại không hợp lệ').required('Vui lòng nhập số điện thoại'),
@@ -19,6 +20,7 @@ export const validationSchemaResetPassword = Yup.object().shape({
     .required('Vui lòng nhập địa chỉ Email')
 })
 
+//----------------------CUSTOMER----------------------
 export const validationSchemaCustomerCreate = Yup.object().shape({
   name: Yup.string().required('Tên khách hàng không được để trống'),
   email: Yup.string().email('Email không hợp lệ').required('Email không được để trống'),
@@ -35,7 +37,14 @@ export const validationSchemaCustomerEdit = Yup.object().shape({
   code: Yup.string().required('Mã khách hàng không được để trống')
 })
 
-export const validationSchemaStaff = Yup.object().shape({
+//----------------------CUSTOMER-ADDITIONAL-DATA----------------------
+export const validationSchemaAddresses = Yup.object().shape({
+  address: Yup.string().required('Địa chỉ không được để trống'),
+  province: Yup.string().required('Vui lòng chọn Tỉnh/Thành phố')
+})
+
+//----------------------USER----------------------
+export const validationSchemaUserCreate = Yup.object().shape({
   name: Yup.string().required('Tên khách hàng không được để trống'),
   phone: Yup.string().matches(phoneRegExp, 'Số điện thoại không hợp lệ').required('Số điện thoại không được để trống'),
   address: Yup.string().required('Địa chỉ không được để trống'),
@@ -52,7 +61,8 @@ export const validationSchemaStaff = Yup.object().shape({
   )
 })
 
-export const validationProperty = Yup.object().shape({
+//----------------------PRODUCT----------------------
+export const validationSchemaProperty = Yup.object().shape({
   property1: Yup.string()
     .required('Tên thuộc tính không được để trống')
     .matches(/^[a-zA-ZÀ-Ỹà-ỹ\s]+$/, 'Chỉ được nhập chữ vào tên thuộc tính'),
