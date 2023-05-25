@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { Row, Col, Form, Button } from 'react-bootstrap'
 import Select from 'react-select'
-import services from '~/services/api'
+import { services } from '~/services/api'
 import { Link } from 'react-router-dom'
 import Error from '~/views/Errors'
 import PageLoader from '~/components/Loader/PageLoader'

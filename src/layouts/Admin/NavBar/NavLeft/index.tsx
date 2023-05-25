@@ -5,13 +5,13 @@ import { Link } from 'react-router-dom'
 import useWindowSize from '~/hooks/useWindowSize'
 import { ConfigContext } from '../../../../contexts/ConfigContext'
 import NavSearch from './NavSearch'
-import services from '~/services/api'
+import { getBranchesList } from '~/services/api'
 
 const NavLeft = () => {
   const [dataBranch, setDataBranch] = useState([])
 
   useEffect(() => {
-    services.get('/agency-branch/get-all').then((res) => {
+    getBranchesList().then((res) => {
       setDataBranch(res.data.data)
     })
   }, [])

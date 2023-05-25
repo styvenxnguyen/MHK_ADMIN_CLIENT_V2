@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Row, Col, Card, Form, Button, FormLabel, Badge, Tabs, Tab, Tooltip, OverlayTrigger } from 'react-bootstrap'
-import services from '~/services/api'
+import { services } from '~/services/api'
 import Swal from 'sweetalert2'
 import { Link, useHistory, useParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
@@ -44,10 +44,10 @@ const CustomerDetail = () => {
 
   const handleEditProfile = (e: any) => {
     e.preventDefault()
-    history.push(`/app/customers/${id}/edit`)
+    history.push(`/app/customers/detail/${id}/edit`)
   }
 
-  const handleDeleteBtn = () => {
+  const handleDelete = () => {
     handleAlertConfirm({
       title: 'Xoá khách hàng',
       html: `Bạn có chắc chắn muốn xoá khách hàng <b>${customerData.customer_name}</b> ? Thao tác này không thể khôi phục`,
@@ -102,7 +102,7 @@ const CustomerDetail = () => {
       </Helmet>
       <div className='d-flex justify-content-between'>
         <BackPreviousPage path='/app/customers' text='Quay lại danh sách khách hàng' />
-        <Button onClick={handleDeleteBtn} type='submit' variant='outline-danger' className='m-0 mb-3'>
+        <Button onClick={handleDelete} type='submit' variant='outline-danger' className='m-0 mb-3'>
           <span style={{ fontWeight: 600 }}>
             <i className='feather icon-trash-2 mr-2'></i>
             Xoá khách hàng

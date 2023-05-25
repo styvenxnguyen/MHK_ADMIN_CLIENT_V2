@@ -93,12 +93,12 @@ const routes: any = [
       },
       {
         exact: true,
-        path: '/app/customers/:id',
+        path: '/app/customers/detail/:id',
         component: lazy(() => import('./views/Customers/Detail'))
       },
       {
         exact: true,
-        path: '/app/customers/:id/edit',
+        path: '/app/customers/detail/:id/edit',
         component: lazy(() => import('./views/Customers/Edit'))
       },
 
@@ -124,8 +124,34 @@ const routes: any = [
       },
       {
         exact: true,
-        path: '/app/configurations/users/:id',
+        path: '/app/configurations/users/create',
+        component: lazy(() => import('./views/Configurations/Users/Create'))
+      },
+      {
+        exact: true,
+        path: '/app/configurations/users/detail/:id',
         component: lazy(() => import('./views/Configurations/Users/Detail'))
+      },
+
+      //-------------------CONFIGURATIONS: USERS - TENANT ROLES---------------------------
+      {
+        exact: true,
+        path: '/app/configurations/users/roles',
+        component: lazy(() => import('./views/Configurations/Users/Roles'))
+      },
+
+      //-------------------CONFIGURATIONS: BRANCHES---------------------------
+      {
+        exact: true,
+        path: '/app/configurations/branches',
+        component: lazy(() => import('./views/Configurations/Branches'))
+      },
+
+      //-------------------CONFIGURATIONS: PRICE POLICIES---------------------------
+      {
+        exact: true,
+        path: '/app/configurations/price-policies',
+        component: lazy(() => import('./views/Configurations/PricePolicies'))
       }
     ]
   }

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Row, Col, Card, Button } from 'react-bootstrap'
 import { Helmet } from 'react-helmet'
-import services from '~/services/api'
+import { services } from '~/services/api'
 import moment from 'moment'
 import { useHistory } from 'react-router-dom'
 import CustomTable from '~/components/Table/CustomTable'
@@ -16,7 +16,7 @@ function CustomersList() {
 
   const handleRowClick = (row: any) => {
     const id = row.values.id
-    history.push(`/app/customers/${id}`)
+    history.push(`/app/customers/detail/${id}`)
   }
 
   useEffect(() => {
@@ -90,7 +90,7 @@ function CustomersList() {
           <Card>
             <Card.Header className='flex-between'>
               <Card.Title as='h5'>Danh sách khách hàng</Card.Title>
-              <Button style={{ marginRight: 0 }} onClick={() => history.push('/app/customers/create')}>
+              <Button className='mb-0' onClick={() => history.push('/app/customers/create')}>
                 <i className='feather icon-plus-circle mr-2'></i>
                 Thêm khách hàng
               </Button>

@@ -2,13 +2,12 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { useEffect, useState } from 'react'
 import { Row, Col, Card, Form, Button, FormLabel, Badge, FormGroup, FormControl } from 'react-bootstrap'
-import services from '~/services/api'
+import { services } from '~/services/api'
 import Swal from 'sweetalert2'
 import { Link, useHistory, useParams } from 'react-router-dom'
 import { ButtonLoading } from '~/components/Button/LoadingButton'
 import { Helmet } from 'react-helmet'
 import moment from 'moment'
-import Positions from './Positions'
 import { Formik } from 'formik'
 import CustomModal from '~/components/Modal'
 import ProvinceDistrictSelect from '~/components/Select/ProvinceDistrict'
@@ -23,7 +22,7 @@ const UserDetail = () => {
   const history = useHistory()
   const { id }: any = useParams()
   const [userData, setUserData]: any = useState({})
-  // const [address, setAddress] = useState([])
+  const [address, setAddress] = useState([])
   const [allowShippingPrice, setAllowShippingPrice] = useState(false)
   const [allowSalePrice, setAllowSalePrice] = useState(false)
   const [dataGender, setDataGender] = useState(true)
@@ -50,10 +49,8 @@ const UserDetail = () => {
     services
       .get(`/staff/get-by-id/${id}`)
       .then((response) => {
-        setIsLoading(false)
-        setIsFetched(true)
-
         const resultUserData = response.data.data
+
         setUserData(resultUserData)
         setPositions(
           userData.staff_role.map((position: any) => {
@@ -73,16 +70,19 @@ const UserDetail = () => {
 
         setAllowSalePrice(resultUserData.isAllowViewImportNWholesalePrice)
         setAllowShippingPrice(resultUserData.isAllowViewShippingPrice)
-        // setAddress(
-        //   userData.addressList.map((address: any) => {
-        //     return `${address.user_specific_address}, ${address.user_district}, ${address.user_province}`
-        //   })
-        // )
+        setAddress(
+          userData.staff_address.map((address: any) => {
+            return `${address.user_specific_address}, ${address.user_district}, ${address.user_province}`
+          })
+        )
+
+        setIsLoading(false)
+        setIsFetched(true)
       })
       .catch(() => {
         setIsLoading(false)
       })
-  }, [id])
+  }, [id, userData.staff_address, userData.staff_gender, userData.staff_role])
 
   const handleSaveSubmit = () => {
     setShowLoader(true)
@@ -129,7 +129,7 @@ const UserDetail = () => {
   }
 
   const handleModalUpdateSubmit = (values: any) => {
-    setIsLoading(true)
+    setShowLoader(true)
     const keyMapping: any = {
       staff_name: 'user_name',
       staff_phone: 'user_phone',
@@ -169,7 +169,7 @@ const UserDetail = () => {
         .patch(`/staff/update-personal-by-id/${id}`, { ...updatedProfileWithApiKeys, staff_address_list: address_list })
         .then(() => {
           setTimeout(() => {
-            setIsLoading(false)
+            setShowLoader(false)
             Swal.fire({
               text: 'Cập nhật thông tin nhân viên thành công',
               showConfirmButton: true,
@@ -194,7 +194,7 @@ const UserDetail = () => {
             } else return `Mã NV: <b>${values.staff_code}</b> đã tồn tại`
           })
           setTimeout(() => {
-            setIsLoading(false)
+            setShowLoader(false)
             Swal.fire({
               title: 'Thất bại',
               text: 'Lỗi',
@@ -206,7 +206,7 @@ const UserDetail = () => {
         })
     } catch (error) {
       setTimeout(() => {
-        setIsLoading(false)
+        setShowLoader
         Swal.fire('', 'Đã xảy ra lỗi khi kết nối tới máy chủ', 'error')
       }, 1000)
     }
@@ -353,7 +353,7 @@ const UserDetail = () => {
                             <Form.Label column>Địa chỉ</Form.Label>
                             <Col sm={12} lg={9}>
                               <FormLabel className='text-normal' column>
-                                {/* : {address === null ? '---' : address} */}
+                                : {address === null ? '---' : address}
                               </FormLabel>
                             </Col>
                           </Form.Group>
@@ -380,7 +380,7 @@ const UserDetail = () => {
                 <Card.Body>
                   <Row>
                     <Col sm={12} lg={12}>
-                      <Positions positions={positions} setPositions={setPositions} />
+                      {/* <Positions positions={positions} setPositions={setPositions} /> */}
                     </Col>
                   </Row>
                 </Card.Body>
@@ -435,23 +435,23 @@ const UserDetail = () => {
         initialValues={{
           ...userData,
           gender: dataGender,
-          dob: moment(userData.staff_birthday).utcOffset(7).format('YYYY-MM-DD')
-          // address: userData.addressList.map((address: any) => address.user_specific_address).join(''),
-          // province: userData.addressList.map((address: any) => address.user_province).join(''),
-          // district: userData.addressList.map((address: any) => address.user_district).join('')
+          dob: moment(userData.staff_birthday).utcOffset(7).format('YYYY-MM-DD'),
+          address: userData.staff_address.map((address: any) => address.user_specific_address).join(''),
+          province: userData.staff_address.map((address: any) => address.user_province).join(''),
+          district: userData.staff_address.map((address: any) => address.user_district).join('')
         }}
         validationSchema={validationSchemaUserCreate}
       >
         {({ errors, dirty, setFieldValue, handleChange, handleSubmit, touched, values }: any) => (
-          <Form noValidate>
+          <Form noValidate onSubmit={handleSubmit}>
             <CustomModal
               show={showModalUpdateProfile}
               handleClose={handleCloseModal}
-              handleSubmit={handleSubmit}
+              handleSubmit={handleModalUpdateSubmit}
               title='Cập nhật thông tin nhân viên'
-              textSubmit={isLoading ? 'Đang lưu...' : 'Lưu'}
+              textSubmit={showLoader ? 'Đang lưu...' : 'Lưu'}
               size='lg'
-              disabled={!dirty || isLoading}
+              disabled={!dirty || showLoader}
               body={
                 <Form>
                   <Row>

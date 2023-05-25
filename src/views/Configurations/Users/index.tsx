@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { Row, Col, Card, Button } from 'react-bootstrap'
 import { useHistory } from 'react-router-dom'
-import services from '~/services/api'
+import { getStaffList } from '~/services/api'
 import { Helmet } from 'react-helmet'
 import moment from 'moment'
 import CustomTable from '~/components/Table/CustomTable'
 import Errors from '~/views/Errors'
 import PageLoader from '~/components/Loader/PageLoader'
 
-function ListUsers() {
+const UsersList = () => {
   const [listEmployees, setListEmployees] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [isFetched, setIsFetched] = useState(false)
@@ -17,25 +17,22 @@ function ListUsers() {
 
   const handleRowClick = (row: any) => {
     const id = row.values.id
-    history.push(`/app/configurations/users/${id}`)
+    history.push(`/app/configurations/users/detail/${id}`)
   }
 
   useEffect(() => {
-    ;(async () => {
-      await services
-        .get('/staff/get-all')
-        .then((response) => {
-          setListEmployees(response.data.data)
-          setIsLoading(false)
-          setIsFetched(true)
-        })
-        .catch((error) => {
-          setIsLoading(false)
-          if (error.response === 'You do not have permission!') {
-            setIsNoPermission(error)
-          }
-        })
-    })()
+    getStaffList()
+      .then((response) => {
+        setListEmployees(response.data.data)
+        setIsLoading(false)
+        setIsFetched(true)
+      })
+      .catch((error) => {
+        setIsLoading(false)
+        if (error.response === 'You do not have permission!') {
+          setIsNoPermission(error)
+        }
+      })
   }, [])
 
   const columns = React.useMemo(
@@ -47,10 +44,6 @@ function ListUsers() {
       {
         Header: 'Tên nhân viên',
         accessor: 'staff_name'
-      },
-      {
-        Header: 'Mã nhân viên',
-        accessor: 'staff_code'
       },
       {
         Header: 'Số điện thoại',
@@ -74,7 +67,7 @@ function ListUsers() {
     []
   )
 
-  if (isLoading) {
+  if (isLoading)
     return (
       <>
         <Helmet>
@@ -83,7 +76,6 @@ function ListUsers() {
         <PageLoader />
       </>
     )
-  }
 
   if (!isFetched) {
     return <Errors errorCode='500' />
@@ -103,7 +95,7 @@ function ListUsers() {
                 <Button
                   variant='outline-primary'
                   className='mr-3 m-0'
-                  onClick={() => history.push('/app/configurations/users/tenant_roles')}
+                  onClick={() => history.push('/app/configurations/users/roles')}
                 >
                   <i className='feather icon-git-commit mr-2'></i>
                   Phân quyền vai trò
@@ -130,4 +122,4 @@ function ListUsers() {
   )
 }
 
-export default ListUsers
+export default UsersList

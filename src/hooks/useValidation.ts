@@ -43,9 +43,9 @@ export const validationSchemaAddresses = Yup.object().shape({
   province: Yup.string().required('Vui lòng chọn Tỉnh/Thành phố')
 })
 
-//----------------------USER----------------------
+//----------------------STAFF or USER----------------------
 export const validationSchemaUserCreate = Yup.object().shape({
-  name: Yup.string().required('Tên khách hàng không được để trống'),
+  name: Yup.string().required('Tên nhân viên không được để trống'),
   phone: Yup.string().matches(phoneRegExp, 'Số điện thoại không hợp lệ').required('Số điện thoại không được để trống'),
   address: Yup.string().required('Địa chỉ không được để trống'),
   dob: Yup.date().required('Ngày sinh không được bỏ trống'),

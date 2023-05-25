@@ -1,7 +1,7 @@
 /* eslint-disable no-prototype-builtins */
 import { useEffect, useState } from 'react'
 import { Row, Col, Card, Form } from 'react-bootstrap'
-import services from '~/services/api'
+import { services } from '~/services/api'
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import { ButtonLoading } from '~/components/Button/LoadingButton'
@@ -221,7 +221,7 @@ const CustomerEdit = () => {
         {({ dirty, errors, handleBlur, handleChange, handleSubmit, touched, values, setFieldValue }: any) => (
           <Form noValidate onSubmit={handleSubmit}>
             <span className='flex-between'>
-              <BackPreviousPage path={`/app/customers/${id}`} text='Quay lại' />
+              <BackPreviousPage path={`/app/customers/detail/${id}`} text='Quay lại' />
               <ButtonLoading
                 text={'Cập nhật'}
                 onSubmit={handleSubmit}

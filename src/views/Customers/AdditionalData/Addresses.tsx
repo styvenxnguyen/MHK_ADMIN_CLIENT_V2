@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Row, Col, Button, Form } from 'react-bootstrap'
 import { useParams } from 'react-router-dom'
-import services from '~/services/api'
+import { services } from '~/services/api'
 import CustomModal from '~/components/Modal'
 import { Formik } from 'formik'
 import Swal from 'sweetalert2'

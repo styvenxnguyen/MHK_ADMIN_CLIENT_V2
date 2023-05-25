@@ -6,7 +6,7 @@ import useScriptRef from '../../../hooks/useScriptRef'
 import withReactContent from 'sweetalert2-react-content'
 import Swal from 'sweetalert2'
 import { Helmet } from 'react-helmet'
-import services from '~/services/api'
+import { services } from '~/services/api'
 import logo from '~/assets/images/auth/logo-full.png'
 import { validationSchemaRegister } from '~/hooks/useValidation'
 

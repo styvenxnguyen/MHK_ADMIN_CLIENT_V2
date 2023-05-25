@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import React, { useEffect, useState } from 'react'
 import { Row, Col, Card, Form } from 'react-bootstrap'
-import services from '~/services/api'
+import { services } from '~/services/api'
 import Swal from 'sweetalert2'
 import { ButtonLoading } from '~/components/Button/LoadingButton'
 import { useHistory } from 'react-router-dom'
@@ -90,7 +90,7 @@ const CustomerCreate = () => {
           }, 1000)
         })
         .catch((errors) => {
-          const errorResponses = errors.response.data.message
+          const errorResponses = errors.response.data.data
           const errorMessages = errorResponses.map((error: any) => {
             if (error.includes('name')) {
               return `Tên KH: <b>${values.name}</b> đã tồn tại`
@@ -101,7 +101,7 @@ const CustomerCreate = () => {
             } else return `Mã KH: <b>${values.code}</b> đã tồn tại`
           })
 
-          if (errorResponses) {
+          if (errorMessages) {
             setTimeout(() => {
               setShowLoader(false)
               Swal.fire({

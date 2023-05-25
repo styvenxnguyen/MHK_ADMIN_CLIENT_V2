@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { useTable, usePagination, useGlobalFilter, useRowSelect, useSortBy } from 'react-table'
 import { Row, Col, CloseButton, Dropdown, DropdownButton } from 'react-bootstrap'
 import BTable from 'react-bootstrap/Table'
-import services from '~/services/api'
+import { services } from '~/services/api'
 import Swal from 'sweetalert2'
 import CustomPagination from '../Pagination'
 import GlobalFilter from '../Filter/GlobalFilter'
@@ -17,7 +17,25 @@ type CustomInitialState = {
   sortBy: { id: string; desc: boolean }[]
 }
 
-function CustomTable({ columns, data, hiddenColumns = ['id'], handleRowClick, selectedTitle, object, ButtonAdd }: any) {
+interface TableProps {
+  columns: any
+  data: any
+  hiddenColumns?: any
+  handleRowClick: any
+  selectedTitle?: any
+  object?: any
+  ButtonAdd?: any
+}
+
+function CustomTable({
+  columns,
+  data,
+  hiddenColumns = ['id'],
+  handleRowClick,
+  selectedTitle,
+  object,
+  ButtonAdd
+}: TableProps) {
   const {
     getTableProps,
     getTableBodyProps,

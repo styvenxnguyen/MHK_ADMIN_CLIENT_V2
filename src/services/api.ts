@@ -2,11 +2,19 @@ import axios from 'axios'
 
 const token = localStorage.getItem('access_token')
 
-const services = axios.create({
+export const services = axios.create({
   baseURL: 'https://mhk-api-v2.onrender.com/cloud-api',
   headers: {
     token: `${token}`
   }
 })
 
-export default services
+export const getTagsList = () => services.get('/tag/get-all')
+
+export const getBrandsList = () => services.get('/brand/get-all')
+
+export const getStaffList = () => services.get('/staff/get-all')
+
+export const getRolesUser = () => services.get('/role/get-all')
+
+export const getBranchesList = () => services.get('/agency-branch/get-all')

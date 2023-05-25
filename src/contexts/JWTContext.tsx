@@ -5,7 +5,7 @@ import jwtDecode from 'jwt-decode'
 import { ACCOUNT_INITIALISE, LOGIN, LOGOUT } from '../store/actions'
 import accountReducer from '~/store/accountReducer'
 import Loader from '~/components/Loader/RouteLoad'
-import services from '~/services/api'
+import { services } from '~/services/api'
 
 const initialState = {
   isLoggedIn: false,

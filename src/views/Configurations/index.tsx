@@ -22,7 +22,7 @@ const configsMenu = [
         name: 'Chính sách giá',
         description: 'Tạo và quản lý chính sách giá cửa hàng',
         icon: 'feather icon-users',
-        url: '/app/configurations/price_lists'
+        url: '/app/configurations/price-policies'
       }
     ]
   }
