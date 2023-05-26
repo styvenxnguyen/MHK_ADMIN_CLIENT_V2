@@ -6,11 +6,29 @@ import PageLoader from '~/components/Loader/PageLoader'
 import CustomTable from '~/components/Table/CustomTable'
 import { getBranchesList } from '~/services/api'
 import Error from '~/views/Errors'
+import CreateModal from './CreateModal'
+import EditModal from './EditModal'
 
 const Branches = () => {
+  const [showModalCreate, setShowModalCreate] = useState(false)
+  const [showModalEdit, setShowModalEdit] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isFetched, setIsFetched] = useState(false)
   const [branchesList, setBranchesList] = useState([])
+  const [idBranch, setIdBranch] = useState('')
+  const [branchData, setBranchData] = useState({})
+
+  const handleRowClick = (row: any) => {
+    setIdBranch(row.values.id)
+    setBranchData({
+      name: row.values.agency_branch_name,
+      phone: row.values.agency_branch_phone,
+      address: row.values.agency_branch_address,
+      code: row.values.agency_branch_code,
+      isDefaultBranch: row.values.isDefaultCN
+    })
+    setShowModalEdit(true)
+  }
 
   useEffect(() => {
     getBranchesList()
@@ -84,18 +102,20 @@ const Branches = () => {
   if (!isFetched) return <Error errorCode='500' />
   return (
     <>
+      <CreateModal show={showModalCreate} close={() => setShowModalCreate(false)} />
+      <EditModal show={showModalEdit} close={() => setShowModalEdit(false)} data={branchData} idBranch={idBranch} />
       <Row>
         <Col>
           <Card>
             <Card.Header className='flex-between'>
               <Card.Title as='h5'>Danh sách chi nhánh</Card.Title>
-              <Button className='m-0'>
+              <Button className='m-0' onClick={() => setShowModalCreate(true)}>
                 <i className='feather icon-plus-circle mr-2'></i>
                 Thêm chi nhánh
               </Button>
             </Card.Header>
             <Card.Body>
-              <CustomTable columns={columns} data={branchesList} handleRowClick={{}}></CustomTable>
+              <CustomTable columns={columns} data={branchesList} handleRowClick={handleRowClick}></CustomTable>
             </Card.Body>
           </Card>
         </Col>

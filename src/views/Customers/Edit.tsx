@@ -123,7 +123,7 @@ const CustomerEdit = () => {
 
   const filteredOptionsTag = filterSelectedOptions(optionsTag, selectedTags)
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = (values: any) => {
     setShowLoader(true)
     //Vòng lặp for sẽ duyệt các giá trị trong values so sánh với các giá trị của Customer
     //Nếu trường nào có giá trị không thay đổi thì không được gửi lên server
@@ -152,7 +152,7 @@ const CustomerEdit = () => {
 
     try {
       //Cập nhật khách hàng
-      await services
+      services
         .patch(`/customer/update-personalInfo-by-id/${id}`, updateCustomer)
         .then(() => {
           setTimeout(() => {

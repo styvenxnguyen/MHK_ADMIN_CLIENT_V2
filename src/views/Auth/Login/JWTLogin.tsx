@@ -20,12 +20,16 @@ const JWTLogin = ({ className, ...rest }: any) => {
       } catch (error: any) {
         if (scriptedRef.current) {
           setStatus({ success: false })
-          const errorCode: number = error.response.status
-          if (errorCode === 404 || errorCode === 500) {
+          const errorCode = error.response.status
+          if (errorCode === 500) {
             setErrors({ submit: `Lỗi kết nối máy chủ (${errorCode})` })
             setSubmitting(false)
+          }
+          if (errorCode === 404) {
+            setErrors({ submit: 'Số điện thoại chưa được đăng ký' })
+            setSubmitting(false)
           } else {
-            setErrors({ submit: 'Tài khoản hoặc mật khẩu không chính xác' })
+            setErrors({ submit: 'Mật khẩu bạn vừa nhập không chính xác' })
             setSubmitting(false)
           }
         }

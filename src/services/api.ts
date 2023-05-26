@@ -18,3 +18,5 @@ export const getStaffList = () => services.get('/staff/get-all')
 export const getRolesUser = () => services.get('/role/get-all')
 
 export const getBranchesList = () => services.get('/agency-branch/get-all')
+
+export const getProductsList = () => services.get('/product/get-all')

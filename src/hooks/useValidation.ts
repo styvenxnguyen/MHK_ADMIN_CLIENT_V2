@@ -61,6 +61,14 @@ export const validationSchemaUserCreate = Yup.object().shape({
   )
 })
 
+//----------------------STAFF or USER----------------------
+export const validationSchemaBranch = Yup.object().shape({
+  name: Yup.string().required('Tên chi nhánh không được để trống'),
+  phone: Yup.string().matches(phoneRegExp, 'Số điện thoại không hợp lệ').required('Số điện thoại không được để trống'),
+  address: Yup.string().required('Địa chỉ không được để trống'),
+  code: Yup.string().required('Mã chi nhánh không được để trống')
+})
+
 //----------------------PRODUCT----------------------
 export const validationSchemaProperty = Yup.object().shape({
   property1: Yup.string()

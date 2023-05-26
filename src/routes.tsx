@@ -102,6 +102,13 @@ const routes: any = [
         component: lazy(() => import('./views/Customers/Edit'))
       },
 
+      //-------------------PRODUCTS---------------------------
+      {
+        exact: true,
+        path: '/app/products',
+        component: lazy(() => import('./views/Products'))
+      },
+
       //-------------------APPLICATIONS---------------------------
       {
         exact: true,

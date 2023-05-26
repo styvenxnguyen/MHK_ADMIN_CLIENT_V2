@@ -99,7 +99,7 @@ const Register = () => {
                         Họ và tên
                       </label>
                       <input
-                        className={errors.name ? 'form-control error-input' : 'form-control'}
+                        className='form-control'
                         id='name'
                         name='name'
                         onChange={handleChange}
@@ -113,7 +113,7 @@ const Register = () => {
                         Địa chỉ email
                       </label>
                       <input
-                        className={errors.email ? 'form-control error-input' : 'form-control'}
+                        className='form-control'
                         id='email'
                         name='email'
                         onChange={handleChange}
@@ -127,13 +127,13 @@ const Register = () => {
                         Số điện thoại
                       </label>
                       <input
-                        className={errors.phone ? 'form-control error-input' : 'form-control'}
+                        className='form-control'
                         id='phone'
                         name='phone'
                         onChange={handleChange}
                         type='text'
-                        inputMode='numeric'
                         value={values.phone}
+                        autoComplete='username'
                       />
                       {touched.phone && errors.phone && <small className='text-danger form-text'>{errors.phone}</small>}
                     </div>
@@ -142,12 +142,13 @@ const Register = () => {
                         Mật khẩu
                       </label>
                       <input
-                        className={errors.password ? 'form-control error-input' : 'form-control'}
+                        className='form-control'
                         id='password'
                         name='password'
                         onChange={handleChange}
                         type='password'
                         value={values.password}
+                        autoComplete='new-password'
                       />
                       {touched.password && errors.password && (
                         <small className='text-danger form-text'>{errors.password}</small>
@@ -158,12 +159,13 @@ const Register = () => {
                         Nhập lại mật khẩu
                       </label>
                       <input
-                        className={errors.repassword ? 'form-control error-input' : 'form-control'}
+                        className='form-control'
                         id='repassword'
                         name='repassword'
                         onChange={handleChange}
                         type='password'
                         value={values.repassword}
+                        autoComplete='new-password'
                       />
                       {touched.repassword && errors.repassword && (
                         <small className='text-danger form-text'>{errors.repassword}</small>

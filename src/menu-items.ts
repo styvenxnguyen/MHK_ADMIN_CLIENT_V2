@@ -108,7 +108,7 @@ const menuItems = {
               id: 'product-list',
               title: 'Danh sách sản phẩm',
               type: 'item',
-              url: '/app/sell-management/products'
+              url: '/app/products'
             },
             {
               id: 'product-inventory',
