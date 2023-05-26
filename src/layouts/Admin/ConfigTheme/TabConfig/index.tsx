@@ -8,10 +8,7 @@ import MenuOptions from './MenuOptions'
 import { ConfigContext } from '../../../../contexts/ConfigContext'
 
 const TabConfig = () => {
-  const configContext = useContext(ConfigContext)
-  if (configContext === null) {
-    return null
-  }
+  const configContext: any = useContext(ConfigContext)
   const { layout, subLayout }: any = configContext.state
 
   let layoutTab, colorTab

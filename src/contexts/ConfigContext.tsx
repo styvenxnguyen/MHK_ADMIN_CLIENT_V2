@@ -1,31 +1,13 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
-import React, { createContext, useReducer } from 'react'
+import { createContext, useReducer } from 'react'
 import * as actionType from '../store/actions'
 import { CONFIG } from '~/config/constants'
-
-interface ContextType {
-  state: {
-    layout: any
-    isOpen: any[] //for active default menu
-    isTrigger: any[] //for active default menu, set blank for horizontal
-  }
-  dispatch: React.Dispatch<{ type: string; value?: unknown; menu?: { id: any; type: any }; layout?: any }>
-}
 
 const initialState = {
   ...CONFIG,
   isOpen: [], //for active default menu
   isTrigger: [] //for active default menu, set blank for horizontal
 }
-
-const ConfigContext = createContext<ContextType>({
-  state: {
-    layout: null,
-    isOpen: [],
-    isTrigger: []
-  },
-  dispatch: () => {}
-})
+const ConfigContext = createContext(initialState)
 const { Provider }: any = ConfigContext
 
 const ConfigProvider = ({ children }: any) => {

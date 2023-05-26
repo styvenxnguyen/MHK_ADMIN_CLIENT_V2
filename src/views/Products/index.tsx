@@ -70,7 +70,7 @@ function ProductsList() {
     )
 
   if (!isFetched) {
-    return <Error errorCode='500'/>
+    return <Error errorCode='500' />
   }
 
   return (
@@ -80,7 +80,7 @@ function ProductsList() {
           <Card>
             <Card.Header className='flex-between'>
               <Card.Title as='h5'>Danh sách sản phẩm</Card.Title>
-              <Button style={{ marginRight: 0 }} onClick={() => history.push('/app/sell-management/products/create')}>
+              <Button className='m-0 mb-3' onClick={() => history.push('/app/products/create')}>
                 <i className='feather icon-plus-circle mr-2'></i>
                 Thêm sản phẩm
               </Button>{' '}

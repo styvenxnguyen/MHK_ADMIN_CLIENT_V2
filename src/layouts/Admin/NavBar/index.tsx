@@ -9,7 +9,7 @@ import * as actionType from '../../../store/actions'
 
 const NavBar = () => {
   //const [moreToggle, setMoreToggle] = useState(false);
-  const configContext = useContext(ConfigContext)
+  const configContext: any = useContext(ConfigContext)
   const { collapseMenu, headerBackColor, headerFixedLayout, layout, subLayout }: any = configContext.state
   const { dispatch } = configContext
 

@@ -109,77 +109,23 @@ const menuItems = {
               title: 'Danh sách sản phẩm',
               type: 'item',
               url: '/app/products'
-            },
-            {
-              id: 'product-inventory',
-              title: 'Quản lý kho',
-              type: 'item',
-              url: '/app/sell-management'
-            },
-            {
-              id: 'product-import-order',
-              title: 'Đặt hàng nhập',
-              type: 'item',
-              url: '/basic/alert'
-            },
-            {
-              id: 'product-import',
-              title: 'Nhập hàng',
-              type: 'item',
-              url: '/basic/alert'
-            },
-            {
-              id: 'product-check',
-              title: 'Kiểm hàng',
-              type: 'item',
-              url: '/basic/alert'
-            },
-            {
-              id: 'product-shipping',
-              title: 'Chuyển hàng',
-              type: 'item',
-              url: '/basic/alert'
-            },
-            {
-              id: 'product-supplier',
-              title: 'Nhà cung cấp',
-              type: 'item',
-              url: '/basic/alert'
-            },
-            {
-              id: 'product-price-adjust',
-              title: 'Điều chỉnh giá vốn',
-              type: 'item',
-              url: '/basic/alert'
             }
           ]
         },
-        {
-          id: 'cash-book',
-          title: 'Sổ quỹ',
-          type: 'collapse',
-          icon: 'feather icon-dollar-sign',
-          children: [
-            {
-              id: 'receipts-bill',
-              title: 'Phiếu thu',
-              type: 'item',
-              url: '/basic/alert'
-            },
-            {
-              id: 'payment-bill',
-              title: 'Phiếu chi',
-              type: 'item',
-              url: '/basic/alert'
-            },
-            {
-              id: 'cashbook',
-              title: 'Sổ quỹ',
-              type: 'item',
-              url: '/basic/alert'
-            }
-          ]
-        },
+        // {
+        //   id: 'cash-book',
+        //   title: 'Sổ quỹ',
+        //   type: 'collapse',
+        //   icon: 'feather icon-dollar-sign',
+        //   children: [
+        //     {
+        //       id: 'receipts-bill',
+        //       title: 'Phiếu thu',
+        //       type: 'item',
+        //       url: '/basic/alert'
+        //     }
+        //   ]
+        // },
         {
           id: 'customers',
           title: 'Khách hàng',

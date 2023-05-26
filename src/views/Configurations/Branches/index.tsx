@@ -16,7 +16,13 @@ const Branches = () => {
   const [isFetched, setIsFetched] = useState(false)
   const [branchesList, setBranchesList] = useState([])
   const [idBranch, setIdBranch] = useState('')
-  const [branchData, setBranchData] = useState({})
+  const [branchData, setBranchData] = useState({
+    code: '',
+    name: '',
+    phone: '',
+    address: '',
+    isDefaultBranch: false
+  })
 
   const handleRowClick = (row: any) => {
     setIdBranch(row.values.id)

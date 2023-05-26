@@ -15,48 +15,45 @@ import {
 } from './listColors'
 
 const ColorOptions = () => {
-  const configContext = useContext(ConfigContext)
-  if (configContext === null) {
-    return null
-  }
+  const configContext: any = useContext(ConfigContext)
   const { layout, subLayout, headerBackColor, navBrandColor, navBackImage, layout6Background, navBackColor }: any =
     configContext.state
   const { dispatch } = configContext
 
-  let colorOptions: JSX.Element = <></>
-  let colorOptionsWithoutHorizontal: JSX.Element = <></>
+  let colorOptions: any = ''
+  let colorOptionsWithoutHorizontal: any = ''
 
   const onChangeNavBrandColor = (brand: any) => {
-    dispatch({ type: actionType.NAV_BRAND_COLOR, value: brand })
+    dispatch({ type: actionType.NAV_BRAND_COLOR, navBrandColor: brand })
   }
 
   const onChangeNavBackImage = (image: any) => {
-    dispatch({ type: actionType.NAV_BACK_IMAGE, value: image })
+    dispatch({ type: actionType.NAV_BACK_IMAGE, navBackImage: image })
   }
 
   const onChangeLayout6Background = (backgound: any) => {
-    dispatch({ type: actionType.LAYOUT6_BACKGROUND, value: backgound })
+    dispatch({ type: actionType.LAYOUT6_BACKGROUND, layout6Background: backgound })
   }
 
   const onChangeHeaderBackColor = (backgound: any) => {
-    dispatch({ type: actionType.HEADER_BACK_COLOR, value: backgound })
+    dispatch({ type: actionType.HEADER_BACK_COLOR, headerBackColor: backgound })
   }
 
   const onChangeNavBackColor = (backgound: any) => {
-    dispatch({ type: actionType.NAV_BACK_COLOR, value: backgound })
+    dispatch({ type: actionType.NAV_BACK_COLOR, navBackColor: backgound })
   }
 
   if (subLayout !== 'layout-6' && layout !== 'horizontal') {
     colorOptionsWithoutHorizontal = (
       <div>
-        <h6>Menu Brand Color</h6>
+        <h6>Màu sắc thương hiệu trong menu</h6>
         <div className='theme-color brand-color'>
           {brandColor.map((brand: any, index: any) => (
             <Link
               key={`brand_${index}`}
               to='#'
               onClick={() => onChangeNavBrandColor(brand)}
-              className={navBrandColor === 'brand-default' ? 'active' : ''}
+              className={navBrandColor === brand ? 'active' : ''}
               data-value={brand}
             >
               <span />
@@ -64,7 +61,7 @@ const ColorOptions = () => {
             </Link>
           ))}
         </div>
-        <h6>Navbar Image</h6>
+        <h6>Hình nền thanh điều hướng</h6>
         <div className='theme-color navbar-images'>
           {navBgImages.map((image: any, index) => (
             <Link
@@ -143,7 +140,7 @@ const ColorOptions = () => {
   } else {
     colorOptions = (
       <div>
-        <h6>header background</h6>
+        <h6>Nền phần đầu trang</h6>
         <div className='theme-color header-color'>
           {headerColors.map((headerColor, index) => (
             <Link
@@ -158,7 +155,7 @@ const ColorOptions = () => {
             </Link>
           ))}
         </div>
-        <h6>Menu background</h6>
+        <h6>Nền menu</h6>
         <div className='theme-color navbar-color'>
           {navbarColors.map((navbarColor, index) => (
             <Link

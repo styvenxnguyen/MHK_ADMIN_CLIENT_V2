@@ -1,16 +1,13 @@
 import React, { useContext } from 'react'
 import { Link } from 'react-router-dom'
 
-import { ConfigContext } from '~/contexts/ConfigContext'
+import { ConfigContext } from '../../../../contexts/ConfigContext'
 import * as actionType from '../../../../store/actions'
 
 const Layout = () => {
-  const configContext = useContext(ConfigContext)
-  if (configContext === null) {
-    return null
-  }
-  const { layoutType }: any = configContext.state
-  const { dispatch }: any = configContext
+  const configContext: any = useContext(ConfigContext)
+  const { layoutType } = configContext.state
+  const { dispatch } = configContext
 
   return (
     <React.Fragment>

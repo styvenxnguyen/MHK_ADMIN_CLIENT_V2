@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Media } from 'react-bootstrap'
 
 const Messages = ({ message, photo, name }: any) => {
-  let image: JSX.Element = <></>
+  let image: any = ''
   if (message.type) {
     image = (
       <Link to='#' className='media-left photo-table'>

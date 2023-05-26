@@ -10,7 +10,7 @@ import * as actionType from '../../../store/actions'
 
 const ConfigTheme = () => {
   const [configOpen, setConfigOpen] = useState(false)
-  const configContext = useContext(ConfigContext)
+  const configContext: any = useContext(ConfigContext)
 
   const { navIconColor }: any = configContext.state
   const { dispatch }: any = configContext

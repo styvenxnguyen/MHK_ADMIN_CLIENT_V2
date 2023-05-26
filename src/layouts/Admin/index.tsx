@@ -12,7 +12,7 @@ import * as actionType from '../../store/actions'
 const AdminLayout = ({ children }: any) => {
   const windowSize = useWindowSize()
   const ref: any = useRef()
-  const configContext = useContext(ConfigContext)
+  const configContext: any = useContext(ConfigContext)
 
   const { collapseMenu, layout, subLayout, headerFixedLayout, configBlock }: any = configContext.state
   const { dispatch } = configContext

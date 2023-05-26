@@ -17,10 +17,8 @@ const NavLeft = () => {
   }, [])
 
   const windowSize = useWindowSize()
-  const configContext = useContext(ConfigContext)
-  if (configContext === null) {
-    return null
-  }
+  const configContext: any = useContext(ConfigContext)
+
   const { rtlLayout }: any = configContext.state
   let dropdownRightAlign = false
   if (rtlLayout) {

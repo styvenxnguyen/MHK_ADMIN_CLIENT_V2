@@ -7,35 +7,32 @@ import { ConfigContext } from '../../../../../contexts/ConfigContext'
 import * as actionType from '../../../../../store/actions'
 
 const MenuOptions = () => {
-  const configContext = useContext(ConfigContext)
-  if (configContext === null) {
-    return null
-  }
+  const configContext: any = useContext(ConfigContext)
   const { layout, navDropdownIcon, navListIcon, navActiveListColor, navListTitleColor, navListTitleHide }: any =
     configContext.state
   const { dispatch } = configContext
 
   const onChangeNavListTitleColor = (color: any) => {
-    dispatch({ type: actionType.NAV_LIST_TITLE_COLOR, value: color })
+    dispatch({ type: actionType.NAV_LIST_TITLE_COLOR, navListTitleColor: color })
   }
 
   const onChangeNavDropDownIcon = (icon: any) => {
-    dispatch({ type: actionType.NAV_DROPDOWN_ICON, value: icon })
+    dispatch({ type: actionType.NAV_DROPDOWN_ICON, navDropdownIcon: icon })
   }
 
   const onChangeNavListIcon = (icon: any) => {
-    dispatch({ type: actionType.NAV_LIST_ICON, value: icon })
+    dispatch({ type: actionType.NAV_LIST_ICON, navListIcon: icon })
   }
 
   const onChangeNavActiveListColor = (color: any) => {
-    dispatch({ type: actionType.NAV_ACTIVE_LIST_COLOR, value: color })
+    dispatch({ type: actionType.NAV_ACTIVE_LIST_COLOR, navActiveListColor: color })
   }
 
-  let menuOptions: JSX.Element = <></>
+  let menuOptions: any = ''
   if (layout !== 'horizontal') {
     menuOptions = (
       <div>
-        <h6>Menu Title Color</h6>
+        <h6>Màu sắc tiêu đề menu</h6>
         <div className='theme-color title-color small'>
           {titleColors.map((titleColor, index) => (
             <Link
@@ -60,7 +57,7 @@ const MenuOptions = () => {
             />
             <label htmlFor='caption-hide' className='cr' />
           </div>
-          <label>Menu Title Hide</label>
+          <label>Ẩn tiêu đề menu</label>
         </div>
       </div>
     )
@@ -69,7 +66,7 @@ const MenuOptions = () => {
   return (
     <React.Fragment>
       <div className='config-scroll'>
-        <h6>Menu Dropdown Icon</h6>
+        <h6>Icon menu thả xuống</h6>
         <div className='theme-color'>
           <div className='form-group d-inline'>
             <div className='radio radio-primary d-inline'>
@@ -114,7 +111,7 @@ const MenuOptions = () => {
             </div>
           </div>
         </div>
-        <h6>Menu List Icon</h6>
+        <h6>Icon danh sách menu</h6>
         <div className='theme-color'>
           <div className='form-group d-inline'>
             <div className='radio radio-primary d-inline'>
@@ -201,7 +198,7 @@ const MenuOptions = () => {
             </div>
           </div>
         </div>
-        <h6>Active Color</h6>
+        <h6>Màu sắc menu được chọn</h6>
         <div className='theme-color active-color small'>
           {activeColors.map((activeColor, index) => (
             <Link

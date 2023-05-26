@@ -15,7 +15,7 @@ import Swal from 'sweetalert2'
 
 const NavRight = () => {
   const [listOpen, setListOpen] = useState(false)
-  const configContext = useContext(ConfigContext)
+  const configContext: any = useContext(ConfigContext)
   const { logout } = useAuth()
 
   const { rtlLayout }: any = configContext.state

@@ -11,8 +11,7 @@ import { ConfigContext } from '../../../../../contexts/ConfigContext'
 import * as actionType from '../../../../../store/actions'
 
 const NavCollapse = ({ collapse, type }: any) => {
-  const configContext = useContext(ConfigContext)
-  
+  const configContext: any = useContext(ConfigContext)
   const { dispatch } = configContext
 
   const { layout, isOpen, isTrigger } = configContext.state
@@ -23,7 +22,7 @@ const NavCollapse = ({ collapse, type }: any) => {
       .split('/')
       .findIndex((id) => id === collapse.id)
     if (currentIndex > -1) {
-      dispatch({ type: actionType.COLLAPSE_TOGGLE, value: { id: collapse.id, type: type } })
+      dispatch({ type: actionType.COLLAPSE_TOGGLE, menu: { id: collapse.id, type: type } })
     }
   }, [collapse, dispatch, type])
 
@@ -51,7 +50,7 @@ const NavCollapse = ({ collapse, type }: any) => {
   let navLinkClass = ['nav-link']
 
   let navItemClass = ['nav-item', 'pcoded-hasmenu']
-  const openIndex = isOpen.findIndex((id) => id === collapse.id)
+  const openIndex = isOpen.findIndex((id: any) => id === collapse.id)
   if (openIndex > -1) {
     navItemClass = [...navItemClass, 'active']
     if (layout !== 'horizontal') {
@@ -59,7 +58,7 @@ const NavCollapse = ({ collapse, type }: any) => {
     }
   }
 
-  const triggerIndex = isTrigger.findIndex((id) => id === collapse.id)
+  const triggerIndex = isTrigger.findIndex((id: any) => id === collapse.id)
   if (triggerIndex > -1) {
     navItemClass = [...navItemClass, 'pcoded-trigger']
   }
@@ -92,7 +91,7 @@ const NavCollapse = ({ collapse, type }: any) => {
     </React.Fragment>
   )
 
-  let mainContent: JSX.Element = <></>
+  let mainContent: any = ''
   if (layout === 'horizontal') {
     mainContent = (
       <ListGroup.Item
