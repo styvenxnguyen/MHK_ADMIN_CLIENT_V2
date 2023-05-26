@@ -11,7 +11,7 @@ const NavContent = ({ navigation }: any) => {
   const [prevDisable, setPrevDisable] = useState(true)
   const [nextDisable, setNextDisable] = useState(false)
 
-  const configContext = useContext(ConfigContext)
+  const configContext: any = useContext(ConfigContext)
   const { dispatch } = configContext
 
   const { layout, rtlLayout }: any = configContext.state

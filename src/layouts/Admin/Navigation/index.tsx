@@ -14,7 +14,7 @@ import navImage4 from '../../../assets/images/nav-bg/navbar-img-4.jpg'
 import navImage5 from '../../../assets/images/nav-bg/navbar-img-5.jpg'
 
 const Navigation = () => {
-  const configContext = useContext(ConfigContext)
+  const configContext: any = useContext(ConfigContext)
   const {
     layout,
     layoutType,

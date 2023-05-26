@@ -5,8 +5,8 @@ import { ConfigContext } from '~/contexts/ConfigContext'
 import * as actionType from '~/store/actions'
 
 const NavLogo = () => {
-  const configContext = useContext(ConfigContext)
-  const { collapseMenu }: any = configContext.state
+  const configContext: any = useContext(ConfigContext)
+  const { collapseMenu } = configContext.state
   const { dispatch } = configContext
 
   let toggleClass = ['mobile-menu']
