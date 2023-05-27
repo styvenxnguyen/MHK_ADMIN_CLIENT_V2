@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import { Row, Col, Card, Form } from 'react-bootstrap'
 import { services } from '~/services/api'
 import Swal from 'sweetalert2'
-import withReactContent from 'sweetalert2-react-content'
 import { ButtonLoading } from '~/components/Button/LoadingButton'
 import { useHistory, useParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
@@ -157,8 +156,8 @@ const CustomerEdit = () => {
         .then(() => {
           setTimeout(() => {
             setShowLoader(false)
-            history.push(`/app/customers/${id}`)
-            sweetSuccessAlert()
+            history.push(`/app/customers/detail/${id}`)
+            Swal.fire('', `Cập nhật thông tin khách hàng thành công`, 'success')
           }, 1000)
         })
         .catch((errors) => {
@@ -188,11 +187,6 @@ const CustomerEdit = () => {
         Swal.fire('', 'Đã xảy ra lỗi khi kết nối tới máy chủ', 'error')
       }, 1000)
     }
-  }
-
-  const sweetSuccessAlert = () => {
-    const MySwal = withReactContent(Swal)
-    MySwal.fire('', `Cập nhật thông tin khách hàng thành công`, 'success')
   }
 
   if (isLoading) {

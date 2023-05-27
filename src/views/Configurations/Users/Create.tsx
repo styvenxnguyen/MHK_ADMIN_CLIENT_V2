@@ -301,7 +301,7 @@ const UserCreate = () => {
                     <Card>
                       <Card.Header className='flex-between'>
                         <Card.Title as='h5'>Vai trò nhân viên</Card.Title>
-                        <Link to='#'>Danh sách vai trò cửa hàng</Link>
+                        <Link to='/app/users/roles'>Danh sách vai trò cửa hàng</Link>
                       </Card.Header>
                       <Card.Body>
                         <Row>

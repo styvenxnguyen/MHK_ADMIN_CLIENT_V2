@@ -16,9 +16,14 @@ import Error from '~/views/Errors'
 import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import PageLoader from '~/components/Loader/PageLoader'
-import { validationSchemaUserCreate } from '~/hooks/useValidation'
+import { validationSchemaUserEdit } from '~/hooks/useValidation'
+import Positions from './Positions'
+import ToggleSwitch from '~/components/Toggle/Switch'
 
 const UserDetail = () => {
+  const [isLoading, setIsLoading] = useState(true)
+  const [showLoader, setShowLoader] = useState(false)
+  const [isFetched, setIsFetched] = useState(false)
   const history = useHistory()
   const { id }: any = useParams()
   const [userData, setUserData]: any = useState({})
@@ -27,9 +32,7 @@ const UserDetail = () => {
   const [allowSalePrice, setAllowSalePrice] = useState(false)
   const [dataGender, setDataGender] = useState(true)
   const [positions, setPositions] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [showLoader, setShowLoader] = useState(false)
-  const [isFetched, setIsFetched] = useState(false)
+
   const [showModalUpdateProfile, setShowModalUpdateProfile] = useState(false)
 
   const optionsGender = [
@@ -53,7 +56,7 @@ const UserDetail = () => {
 
         setUserData(resultUserData)
         setPositions(
-          userData.staff_role.map((position: any) => {
+          resultUserData.staff_role.map((position: any) => {
             return {
               role: { label: position.role_title, value: position.role_id },
               branches: position.agency_inCharges.map((branch: any) => ({
@@ -64,14 +67,14 @@ const UserDetail = () => {
           })
         )
 
-        if (userData.staff_gender === 'female') {
+        if (resultUserData.staff_gender === 'female') {
           setDataGender(false)
         }
 
         setAllowSalePrice(resultUserData.isAllowViewImportNWholesalePrice)
         setAllowShippingPrice(resultUserData.isAllowViewShippingPrice)
         setAddress(
-          userData.staff_address.map((address: any) => {
+          resultUserData.staff_address.map((address: any) => {
             return `${address.user_specific_address}, ${address.user_district}, ${address.user_province}`
           })
         )
@@ -82,7 +85,7 @@ const UserDetail = () => {
       .catch(() => {
         setIsLoading(false)
       })
-  }, [id, userData.staff_address, userData.staff_gender, userData.staff_role])
+  }, [id])
 
   const handleSaveSubmit = () => {
     setShowLoader(true)
@@ -94,7 +97,7 @@ const UserDetail = () => {
       roles: position
     }
     if (position[0].agencyBranches_inCharge_id_list.length === 0) {
-      setIsLoading(false)
+      setShowLoader(false)
       Swal.fire('', 'Vui lòng chọn chi nhánh cho nhân viên trước khi lưu', 'warning')
     } else {
       try {
@@ -105,8 +108,7 @@ const UserDetail = () => {
               setShowLoader(false)
               handleAlertConfirm({
                 text: 'Cập nhật vai trò nhân viên thành công',
-                icon: 'success',
-                showCancelButton: false
+                icon: 'success'
               })
             }, 1000)
           })
@@ -146,59 +148,50 @@ const UserDetail = () => {
       }
     ]
 
-    const updatedProfile: any = {}
+    const updatedFields: any = {}
     for (const key in values) {
       if (values.hasOwnProperty(key) && values[key] !== userData[key]) {
-        updatedProfile[key] = values[key]
+        updatedFields[key] = values[key]
       }
     }
 
-    const updatedProfileWithApiKeys: any = {}
-    for (const key in updatedProfile) {
-      if (updatedProfile.hasOwnProperty(key)) {
-        const newKey: any = keyMapping[key] || key
-        updatedProfileWithApiKeys[newKey] = updatedProfile[key]
+    const updatedFieldsWithApiKeys: any = {}
+    for (const key in updatedFields) {
+      if (updatedFields.hasOwnProperty(key)) {
+        const newKey = keyMapping[key] || key
+        updatedFieldsWithApiKeys[newKey] = updatedFields[key]
       }
     }
-    delete updatedProfileWithApiKeys.address
-    delete updatedProfileWithApiKeys.province
-    delete updatedProfileWithApiKeys.district
+    delete updatedFieldsWithApiKeys.address
+    delete updatedFieldsWithApiKeys.province
+    delete updatedFieldsWithApiKeys.district
 
     try {
       services
-        .patch(`/staff/update-personal-by-id/${id}`, { ...updatedProfileWithApiKeys, staff_address_list: address_list })
+        .patch(`/staff/update-personal-by-id/${id}`, { ...updatedFieldsWithApiKeys, staff_address_list: address_list })
         .then(() => {
           setTimeout(() => {
             setShowLoader(false)
-            Swal.fire({
-              text: 'Cập nhật thông tin nhân viên thành công',
-              showConfirmButton: true,
-              showCancelButton: false,
-              icon: 'success'
-            }).then((confirm) => {
-              if (confirm.isConfirmed) {
-                window.location.reload()
-              }
-            })
+            handleAlertConfirm({ text: 'Cập nhật thông tin nhân viên thành công', icon: 'success' })
           }, 1000)
         })
-        .catch((errors) => {
-          const errorResponses = errors.response.data
-          const errorMessages = errorResponses.map((error: any) => {
-            if (error.includes('name')) {
-              return `Tên NV: <b>${values.staff_email}</b> đã tồn tại`
-            } else if (error.includes('phone')) {
-              return `Số điện thoại NV: <b>${values.staff_phone}</b> đã tồn tại`
-            } else if (error.includes('email')) {
-              return `Email NV: <b>${values.staff_email}</b> đã tồn tại`
-            } else return `Mã NV: <b>${values.staff_code}</b> đã tồn tại`
-          })
+        .catch(() => {
+          // const errorResponses = errors.response.data.message
+          // const errorMessages = errorResponses.map((error: any) => {
+          //   if (error.includes('name')) {
+          //     return `Tên NV: <b>${values.staff_email}</b> đã tồn tại`
+          //   } else if (error.includes('phone')) {
+          //     return `Số điện thoại NV: <b>${values.staff_phone}</b> đã tồn tại`
+          //   } else if (error.includes('email')) {
+          //     return `Email NV: <b>${values.staff_email}</b> đã tồn tại`
+          //   } else return `Mã NV: <b>${values.staff_code}</b> đã tồn tại`
+          // })
           setTimeout(() => {
             setShowLoader(false)
             Swal.fire({
-              title: 'Thất bại',
-              text: 'Lỗi',
-              html: errorMessages.join('<br>'),
+              title: 'Lỗi',
+              text: 'Cập nhật thông tin nhân viên thất bại',
+              // html: errorMessages.join('<br>'),
               icon: 'warning',
               confirmButtonText: 'Xác nhận'
             })
@@ -206,7 +199,7 @@ const UserDetail = () => {
         })
     } catch (error) {
       setTimeout(() => {
-        setShowLoader
+        setShowLoader(false)
         Swal.fire('', 'Đã xảy ra lỗi khi kết nối tới máy chủ', 'error')
       }, 1000)
     }
@@ -380,7 +373,7 @@ const UserDetail = () => {
                 <Card.Body>
                   <Row>
                     <Col sm={12} lg={12}>
-                      {/* <Positions positions={positions} setPositions={setPositions} /> */}
+                      <Positions positions={positions} setPositions={setPositions} />
                     </Col>
                   </Row>
                 </Card.Body>
@@ -395,30 +388,22 @@ const UserDetail = () => {
                   <Row>
                     <Col sm={12} lg={6}>
                       <Form.Group>
-                        <div className='switch switch-primary d-inline m-r-10'>
-                          <input
-                            id='price_import'
-                            checked={allowSalePrice}
-                            onChange={() => setAllowSalePrice((prevState) => !prevState)}
-                            type='checkbox'
-                          />
-                          <label htmlFor='price_import' className='cr' />
-                        </div>
-                        <Form.Label>Cho phép nhân viên xem giá vốn, giá nhập</Form.Label>
+                        <ToggleSwitch
+                          id='price_import'
+                          value={allowSalePrice}
+                          setValue={setAllowSalePrice}
+                          label='Cho phép nhân viên xem giá vốn, giá nhập'
+                        />
                       </Form.Group>
                     </Col>
                     <Col sm={12} lg={6}>
                       <Form.Group>
-                        <div className='switch switch-primary d-inline m-r-10'>
-                          <input
-                            id='price_delievery'
-                            checked={allowShippingPrice}
-                            onChange={() => setAllowShippingPrice((prevState) => !prevState)}
-                            type='checkbox'
-                          />
-                          <label htmlFor='price_delievery' className='cr' />
-                        </div>
-                        <Form.Label>Cho phép nhân viên xem giá chuyển hàng</Form.Label>
+                        <ToggleSwitch
+                          id='price_delievery'
+                          value={allowShippingPrice}
+                          setValue={setAllowShippingPrice}
+                          label='Cho phép nhân viên xem giá chuyển hàng'
+                        />
                       </Form.Group>
                     </Col>
                   </Row>
@@ -440,9 +425,9 @@ const UserDetail = () => {
           province: userData.staff_address.map((address: any) => address.user_province).join(''),
           district: userData.staff_address.map((address: any) => address.user_district).join('')
         }}
-        validationSchema={validationSchemaUserCreate}
+        validationSchema={validationSchemaUserEdit}
       >
-        {({ errors, dirty, setFieldValue, handleChange, handleSubmit, touched, values }: any) => (
+        {({ dirty, setFieldValue, handleChange, handleSubmit, values }) => (
           <Form noValidate onSubmit={handleSubmit}>
             <CustomModal
               show={showModalUpdateProfile}
@@ -469,9 +454,6 @@ const UserDetail = () => {
                               placeholder='Nhập tên nhân viên'
                               disabled
                             />
-                            {touched.staff_name && errors.staff_name && (
-                              <small className='text-danger form-text'>{errors.staff_name}</small>
-                            )}
                           </Form.Group>
                         </Col>
                         <Col lg={6}>
@@ -495,9 +477,6 @@ const UserDetail = () => {
                               name='staff_phone'
                               placeholder='Nhập số điện thoại'
                             />
-                            {touched.staff_phone && errors.staff_phone && (
-                              <small className='text-danger form-text'>{errors.staff_phone}</small>
-                            )}
                           </Form.Group>
                         </Col>
                         <Col lg={4}>
@@ -509,9 +488,6 @@ const UserDetail = () => {
                               name='staff_email'
                               placeholder='Nhập địa chỉ email'
                             />
-                            {touched.staff_email && errors.staff_email && (
-                              <small className='text-danger form-text'>{errors.staff_email}</small>
-                            )}
                           </Form.Group>
                         </Col>
                         <Col lg={4}>
@@ -536,9 +512,6 @@ const UserDetail = () => {
                               name='address'
                               placeholder='Nhập địa chỉ cụ thể'
                             />
-                            {touched.address && errors.address && (
-                              <small className='text-danger form-text'>{errors.address}</small>
-                            )}
                           </Form.Group>
                         </Col>
                         <Col lg={12}>
@@ -550,9 +523,6 @@ const UserDetail = () => {
                                 setFieldValue('district', d)
                               }}
                             />
-                            {touched.province && errors.province && (
-                              <small className='text-danger form-text'>{errors.province}</small>
-                            )}
                           </Form.Group>
                         </Col>
                       </Row>

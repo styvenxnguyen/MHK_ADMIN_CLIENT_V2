@@ -61,7 +61,22 @@ export const validationSchemaUserCreate = Yup.object().shape({
   )
 })
 
-//----------------------STAFF or USER----------------------
+export const validationSchemaUserEdit = Yup.object().shape({
+  staff_name: Yup.string().required('Tên nhân viên không được để trống'),
+  staff_email: Yup.string().email('Email không hợp lệ').nullable(),
+  staff_phone: Yup.string()
+    .matches(phoneRegExp, 'Số điện thoại không hợp lệ')
+    .required('Số điện thoại không được để trống'),
+  address: Yup.string().required('Địa chỉ không được để trống'),
+  province: Yup.string().required('Vui lòng chọn Tỉnh/Thành phố và Quận/Huyện')
+})
+
+//----------------------ROLE----------------------
+export const validationSchemaUserRole = Yup.object().shape({
+  role_title: Yup.string().required('Tên vai trò không được để trống')
+})
+
+//----------------------BRANCH----------------------
 export const validationSchemaBranch = Yup.object().shape({
   name: Yup.string().required('Tên chi nhánh không được để trống'),
   phone: Yup.string().matches(phoneRegExp, 'Số điện thoại không hợp lệ').required('Số điện thoại không được để trống'),

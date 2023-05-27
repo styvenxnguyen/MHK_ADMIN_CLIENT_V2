@@ -9,10 +9,27 @@ interface CustomModalProps {
   disabled: boolean
   handleSubmit: any
   textSubmit: string
+  deleteBtn?: boolean
+  handleDelete?: any
+  textDelete?: any
+  isDelete?: boolean
 }
 
 function CustomModal(props: CustomModalProps) {
-  const { size, show, handleClose, handleSubmit, title, body, textSubmit, disabled } = props
+  const {
+    size,
+    show,
+    handleClose,
+    handleSubmit,
+    title,
+    body,
+    textSubmit,
+    disabled,
+    deleteBtn,
+    handleDelete,
+    textDelete,
+    isDelete
+  } = props
 
   return (
     <Modal size={size} show={show} onHide={handleClose}>
@@ -21,6 +38,11 @@ function CustomModal(props: CustomModalProps) {
       </Modal.Header>
       <Modal.Body>{body}</Modal.Body>
       <Modal.Footer>
+        {deleteBtn ? (
+          <Button disabled={isDelete} onClick={handleDelete} variant='danger'>
+            {textDelete}
+          </Button>
+        ) : null}
         <Button variant='secondary' onClick={handleClose}>
           Thoát
         </Button>

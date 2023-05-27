@@ -6,6 +6,7 @@ interface Props {
   text?: string
   icon?: any
   confirmText?: string
+  cancelText?: string
   handleConfirmed?: any
   showCancelButton?: boolean
   confirmButtonColor?: string
@@ -17,6 +18,7 @@ export const handleAlertConfirm = ({
   text,
   icon,
   confirmText,
+  cancelText,
   handleConfirmed,
   showCancelButton,
   confirmButtonColor
@@ -28,7 +30,8 @@ export const handleAlertConfirm = ({
     icon: icon,
     confirmButtonText: confirmText || 'Xác nhận',
     confirmButtonColor: confirmButtonColor || undefined,
-    showCancelButton: showCancelButton || false
+    showCancelButton: showCancelButton || false,
+    cancelButtonText: cancelText || 'Huỷ'
   }).then((isConfirm) => {
     if (isConfirm.isConfirmed) {
       if (handleConfirmed) {
