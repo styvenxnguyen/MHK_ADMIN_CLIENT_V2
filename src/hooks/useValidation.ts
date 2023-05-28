@@ -62,7 +62,7 @@ export const validationSchemaUserCreate = Yup.object().shape({
 })
 
 export const validationSchemaUserEdit = Yup.object().shape({
-  staff_name: Yup.string().required('Tên nhân viên không được để trống'),
+  staff_name: Yup.string().required('Tên nhân viên không được để trống')
   // staff_email: Yup.string().email('Email không hợp lệ').nullable(),
   // staff_phone: Yup.string()
   //   .matches(phoneRegExp, 'Số điện thoại không hợp lệ')

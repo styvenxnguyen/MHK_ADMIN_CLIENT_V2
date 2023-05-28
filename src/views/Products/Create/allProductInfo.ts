@@ -14,15 +14,25 @@ export const generalInfo = [
     sm: 12,
     name: 'product_code',
     placeholder: 'Nhập mã sản phẩm',
-    input: 'text'
+    inputType: 'text'
   },
   {
     label: 'Khối lượng',
     lg: 6,
     sm: 12,
     name: 'product_weight',
-    placeholder: 'Nhập khối lượng',
-    input: 'text'
+    inputType: 'group',
+    dir: true,
+    optionsSelect: [
+      {
+        label: 'g',
+        value: 'g'
+      },
+      {
+        label: 'kg',
+        value: 'kg'
+      }
+    ]
   },
   {
     label: 'Mã vạch/Barcode',
@@ -30,7 +40,7 @@ export const generalInfo = [
     sm: 12,
     name: 'product_barcode',
     placeholder: 'Nhập tay hoặc sử dụng quét vạch để quét mã vạch (3-15 kí tự)',
-    input: 'text'
+    inputType: 'text'
   },
   {
     label: 'Đơn vị tính',
@@ -38,7 +48,7 @@ export const generalInfo = [
     sm: 12,
     name: 'product_unit_price',
     placeholder: 'Nhập đơn vị tính',
-    input: 'text'
+    inputType: 'text'
   }
 ]
 
@@ -48,20 +58,29 @@ export const additionalInfo = [
     lg: 12,
     sm: 12,
     name: 'product_type',
-    input: 'select'
+    inputType: 'select',
+    optionsSelect: 'optionsType',
+    isMulti: false,
+    placeholder: 'Chọn loại sản phẩm'
   },
   {
-    label: 'Chọn nhãn hiệu',
+    label: 'Nhãn hiệu',
     lg: 12,
     sm: 12,
     name: 'product_brand',
-    input: 'select'
+    inputType: 'select',
+    optionsSelect: 'optionsBrand',
+    isMulti: false,
+    placeholder: 'Chọn nhãn hiệu'
   },
   {
     label: 'Tags',
     lg: 12,
     sm: 12,
     name: 'product_tags',
-    input: 'text'
+    inputType: 'select',
+    optionsSelect: 'optionsTag',
+    isMulti: true,
+    placeholder: 'Chọn tags'
   }
 ]

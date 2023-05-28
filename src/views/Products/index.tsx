@@ -20,7 +20,9 @@ function ProductsList() {
         const dataListProducts = response.data.data
         setListProducts(dataListProducts)
         setIsLoading(false)
-        setIsFetched(true)
+        if (dataListProducts) {
+          setIsFetched(true)
+        }
       })
       .catch(() => {
         setIsLoading(false)

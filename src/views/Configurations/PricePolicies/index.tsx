@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { services } from '~/services/api'
+import { getPricePoliciesList } from '~/services/api'
 import { Button, Card, Col, Row } from 'react-bootstrap'
 import { Helmet } from 'react-helmet'
 import PageLoader from '~/components/Loader/PageLoader'
@@ -25,8 +25,7 @@ const PricePolicies = () => {
   }
 
   useEffect(() => {
-    services
-      .get('/price/get-all')
+    getPricePoliciesList()
       .then((response) => {
         setPricePoliciesList(response.data.data)
         setIsLoading(false)

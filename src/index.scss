@@ -601,8 +601,10 @@ tbody {
   border: solid 1px ;
 }
 
-.error-input {
-  border: 1px solid red;
+.no-spin::-webkit-inner-spin-button,
+.no-spin::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 

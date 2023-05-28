@@ -13,6 +13,8 @@ export const getTagsList = () => services.get('/tag/get-all')
 
 export const getBrandsList = () => services.get('/brand/get-all')
 
+export const getTypesList = () => services.get('type/get-all')
+
 export const getStaffList = () => services.get('/staff/get-all')
 
 export const getRolesUser = () => services.get('/role/get-all')
@@ -20,3 +22,5 @@ export const getRolesUser = () => services.get('/role/get-all')
 export const getBranchesList = () => services.get('/agency-branch/get-all')
 
 export const getProductsList = () => services.get('/product/get-all')
+
+export const getPricePoliciesList = () => services.get('/price/get-all')

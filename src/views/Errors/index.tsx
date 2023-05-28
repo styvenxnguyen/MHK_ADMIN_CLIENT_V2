@@ -26,7 +26,7 @@ const Error = ({ errorCode }: errorProps) => {
         title: 'LỖI YÊU CẦU MÁY CHỦ',
         text: 'Đã xảy ra lỗi khi kết nối tới máy chủ, vui lòng liên hệ với quản trị viên Website để biết thêm thông tin',
         image: background500,
-        width: '65%'
+        width: '60%'
       })
     } else if (errorCode === '404') {
       setDataError({
