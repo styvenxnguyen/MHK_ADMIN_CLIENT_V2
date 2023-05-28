@@ -71,7 +71,7 @@ const CustomerEdit = () => {
         setSelectedTags(
           data.tags.map((tag: any) => ({
             label: tag.tag_title,
-            value: tag.tag_id
+            value: tag.id
           }))
         )
         setIsLoading(false)
@@ -114,6 +114,8 @@ const CustomerEdit = () => {
       })
   }, [])
 
+  console.log(selectedTags)
+
   const filterSelectedOptions = (options: any, selectedOptions: any) => {
     return options.filter(
       (option: any) => !selectedOptions.find((selectedOption: any) => selectedOption.value === option.value)
@@ -121,6 +123,8 @@ const CustomerEdit = () => {
   }
 
   const filteredOptionsTag = filterSelectedOptions(optionsTag, selectedTags)
+
+
 
   const handleSubmit = (values: any) => {
     setShowLoader(true)

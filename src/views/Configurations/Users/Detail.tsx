@@ -16,7 +16,6 @@ import Error from '~/views/Errors'
 import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import PageLoader from '~/components/Loader/PageLoader'
-import { validationSchemaUserEdit } from '~/hooks/useValidation'
 import Positions from './Positions'
 import ToggleSwitch from '~/components/Toggle/Switch'
 
@@ -132,6 +131,7 @@ const UserDetail = () => {
 
   const handleModalUpdateSubmit = (values: any) => {
     setShowLoader(true)
+    console.log(values)
     const keyMapping: any = {
       staff_name: 'user_name',
       staff_phone: 'user_phone',
@@ -175,23 +175,23 @@ const UserDetail = () => {
             handleAlertConfirm({ text: 'Cập nhật thông tin nhân viên thành công', icon: 'success' })
           }, 1000)
         })
-        .catch(() => {
-          // const errorResponses = errors.response.data.message
-          // const errorMessages = errorResponses.map((error: any) => {
-          //   if (error.includes('name')) {
-          //     return `Tên NV: <b>${values.staff_email}</b> đã tồn tại`
-          //   } else if (error.includes('phone')) {
-          //     return `Số điện thoại NV: <b>${values.staff_phone}</b> đã tồn tại`
-          //   } else if (error.includes('email')) {
-          //     return `Email NV: <b>${values.staff_email}</b> đã tồn tại`
-          //   } else return `Mã NV: <b>${values.staff_code}</b> đã tồn tại`
-          // })
+        .catch((errors) => {
+          const errorResponses = errors.response.data.message
+          const errorMessages = errorResponses.map((error: any) => {
+            if (error.includes('name')) {
+              return `Tên NV: <b>${values.staff_email}</b> đã tồn tại`
+            } else if (error.includes('phone')) {
+              return `Số điện thoại NV: <b>${values.staff_phone}</b> đã tồn tại`
+            } else if (error.includes('email')) {
+              return `Email NV: <b>${values.staff_email}</b> đã tồn tại`
+            } else return `Mã NV: <b>${values.staff_code}</b> đã tồn tại`
+          })
           setTimeout(() => {
             setShowLoader(false)
             Swal.fire({
               title: 'Lỗi',
               text: 'Cập nhật thông tin nhân viên thất bại',
-              // html: errorMessages.join('<br>'),
+              html: errorMessages.join('<br>'),
               icon: 'warning',
               confirmButtonText: 'Xác nhận'
             })
@@ -415,7 +415,7 @@ const UserDetail = () => {
       </Row>
 
       <Formik
-        enableReinitialize={true}
+        enableReinitialize
         onSubmit={handleModalUpdateSubmit}
         initialValues={{
           ...userData,
@@ -425,14 +425,14 @@ const UserDetail = () => {
           province: userData.staff_address.map((address: any) => address.user_province).join(''),
           district: userData.staff_address.map((address: any) => address.user_district).join('')
         }}
-        validationSchema={validationSchemaUserEdit}
+        // validationSchema={validationSchemaUserEdit}
       >
         {({ dirty, setFieldValue, handleChange, handleSubmit, values }) => (
-          <Form noValidate onSubmit={handleSubmit}>
+          <Form noValidate>
             <CustomModal
               show={showModalUpdateProfile}
               handleClose={handleCloseModal}
-              handleSubmit={handleModalUpdateSubmit}
+              handleSubmit={handleSubmit}
               title='Cập nhật thông tin nhân viên'
               textSubmit={showLoader ? 'Đang lưu...' : 'Lưu'}
               size='lg'
@@ -454,6 +454,9 @@ const UserDetail = () => {
                               placeholder='Nhập tên nhân viên'
                               disabled
                             />
+                            {/* {touched.staff_name && errors.staff_name && (
+                              <small className='text-c-red strong-title'>{errors.staff_name}</small>
+                            )} */}
                           </Form.Group>
                         </Col>
                         <Col lg={6}>

@@ -132,9 +132,7 @@ const RoleEditModal = ({ show, close, id, data }: Props) => {
                   </Col>
                   <Col lg={12}>
                     <Form.Group controlId='role_title'>
-                      <Form.Label>
-                        Mô tả <span className='text-c-red'>*</span>
-                      </Form.Label>
+                      <Form.Label>Mô tả</Form.Label>
                       <Form.Control
                         value={values.role_description}
                         onChange={handleChange}

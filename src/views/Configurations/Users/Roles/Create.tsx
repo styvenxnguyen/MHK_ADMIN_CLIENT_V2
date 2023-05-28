@@ -53,7 +53,7 @@ const RoleCreateModal = ({ show, close }: Props) => {
       initialValues={{ role_title: '', role_description: '' }}
       validationSchema={validationSchemaUserRole}
     >
-      {({ errors, handleChange, handleSubmit, touched, values, dirty }) => (
+      {({ errors, handleChange, handleSubmit, touched, values }) => (
         <Form noValidate>
           <CustomModal
             show={show}
@@ -62,7 +62,7 @@ const RoleCreateModal = ({ show, close }: Props) => {
             title='Thêm vai trò nhân viên'
             textSubmit={showLoader ? 'Đang thêm...' : 'Thêm'}
             size='lg'
-            disabled={!dirty || showLoader}
+            disabled={showLoader}
             body={
               <Form>
                 <Row>

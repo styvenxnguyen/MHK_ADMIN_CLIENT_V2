@@ -63,12 +63,12 @@ export const validationSchemaUserCreate = Yup.object().shape({
 
 export const validationSchemaUserEdit = Yup.object().shape({
   staff_name: Yup.string().required('Tên nhân viên không được để trống'),
-  staff_email: Yup.string().email('Email không hợp lệ').nullable(),
-  staff_phone: Yup.string()
-    .matches(phoneRegExp, 'Số điện thoại không hợp lệ')
-    .required('Số điện thoại không được để trống'),
-  address: Yup.string().required('Địa chỉ không được để trống'),
-  province: Yup.string().required('Vui lòng chọn Tỉnh/Thành phố và Quận/Huyện')
+  // staff_email: Yup.string().email('Email không hợp lệ').nullable(),
+  // staff_phone: Yup.string()
+  //   .matches(phoneRegExp, 'Số điện thoại không hợp lệ')
+  //   .required('Số điện thoại không được để trống'),
+  // address: Yup.string().required('Địa chỉ không được để trống'),
+  // province: Yup.string().required('Vui lòng chọn Tỉnh/Thành phố và Quận/Huyện')
 })
 
 //----------------------ROLE----------------------
