@@ -109,6 +109,12 @@ const menuItems = {
               title: 'Danh sách sản phẩm',
               type: 'item',
               url: '/app/products'
+            },
+            {
+              id: 'product-purchase-orders',
+              title: 'Nhập hàng',
+              type: 'item',
+              url: '/app/purchase_orders'
             }
           ]
         },

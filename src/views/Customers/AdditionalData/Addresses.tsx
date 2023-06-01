@@ -15,6 +15,7 @@ import { validationSchemaAddresses } from '~/hooks/useValidation'
 function Addresses() {
   const [isLoading, setIsLoading] = useState(true)
   const [showLoader, setShowLoader] = useState(false)
+  const [isDelete, setIsDelete] = useState(false)
   const [isFetched, setIsFetched] = useState(false)
   const [showModalAdd, setShowModalAdd] = useState(false)
   const [showModalUpdate, setShowModalUpdate] = useState(false)
@@ -139,6 +140,37 @@ function Addresses() {
     handleUpdateAddress()
   }
 
+  const handleDelete = () => {
+    handleAlertConfirm({
+      title: 'Xoá địa chỉ',
+      icon: 'question',
+      confirmText: 'Xoá',
+      confirmButtonColor: 'red',
+      showCancelButton: true,
+      html: `Bạn có chắc chắn muốn xoá địa chỉ tại khu vực </br>${
+        addressRow.district != '---'
+          ? `<b>${addressRow.district} - ${addressRow.province}</b>`
+          : `<b>${addressRow.province}</b>`
+      } ?`,
+      handleConfirmed: () => {
+        setIsDelete(true)
+        services
+          .delete(`/address/delete/${idAddress}`)
+          .then(() => {
+            setTimeout(() => {
+              handleAlertConfirm({ text: 'Xoá địa chỉ khách hàng thành công', icon: 'success' })
+            }, 1000)
+          })
+          .catch(() => {
+            setTimeout(() => {
+              setIsDelete(false)
+              Swal.fire('Thất bại', 'Đã xảy ra lỗi khi xoá địa chỉ khách hàng', 'warning')
+            }, 1000)
+          })
+      }
+    })
+  }
+
   const ButtonAdd = () => {
     return (
       <Button onClick={handleAddAddress} className='m-0 py-2' variant='primary'>
@@ -231,6 +263,10 @@ function Addresses() {
           <Form noValidate>
             <CustomModal
               show={showModalUpdate}
+              deleteBtn
+              isDelete={isDelete}
+              textDelete={isDelete ? 'Đang xoá' : 'Xoá'}
+              handleDelete={handleDelete}
               handleClose={handleCloseModal}
               handleSubmit={handleSubmit}
               title='Cập nhật địa chỉ khách hàng'

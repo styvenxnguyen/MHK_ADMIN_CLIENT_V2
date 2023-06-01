@@ -199,7 +199,7 @@ function CustomTable({
           ) : null}
         </Col>
       </Row>
-      <BTable striped bordered hover responsive {...getTableProps()}>
+      <BTable bordered hover responsive {...getTableProps()}>
         <thead>
           {headerGroups.map((headerGroup: any) => (
             <tr key={headerGroup.Header} {...headerGroup.getHeaderGroupProps()}>

@@ -41,11 +41,11 @@ function ProductsList() {
       },
       {
         Header: 'Loại',
-        accessor: 'productAdditionInformation.type.type_title'
+        accessor: 'type_title'
       },
       {
         Header: 'Nhãn hiệu',
-        accessor: 'productAdditionInformation.brand.brand_title'
+        accessor: 'brand_title'
       },
       {
         Header: 'Ngày khởi tạo',
