@@ -103,10 +103,10 @@ function PurchaseOrdersList() {
     []
   )
 
-  // const handleRowClick = (row: any) => {
-  //   const id = row.values.id
-  //   history.push(`/app/sell-management/products/${id}`)
-  // }
+  const handleRowClick = (row: any) => {
+    const id = row.values.id
+    history.push(`/app/purchase_orders/detail/${id}`)
+  }
 
   if (isLoading)
     return (
@@ -135,7 +135,7 @@ function PurchaseOrdersList() {
               </Button>{' '}
             </Card.Header>
             <Card.Body>
-              <CustomTable columns={columns} data={listPurchaseOrders} handleRowClick={{}} />
+              <CustomTable columns={columns} data={listPurchaseOrders} handleRowClick={handleRowClick} />
             </Card.Body>
           </Card>
         </Col>

@@ -34,32 +34,32 @@ const menuItems = {
       title: 'Quản lý bán hàng',
       type: 'group',
       children: [
-        {
-          id: 'orders',
-          title: 'Đơn hàng',
-          type: 'collapse',
-          icon: 'feather icon-clipboard',
-          children: [
-            {
-              id: 'orders-create',
-              title: 'Tạo đơn và giao hàng',
-              type: 'item',
-              url: '/app/sell-management/orders/create'
-            },
-            {
-              id: 'orders-list',
-              title: 'Danh sách đơn hàng',
-              type: 'item',
-              url: '/app/orders/'
-            },
-            // {
-            //   id: 'order-return',
-            //   title: 'Khách trả hàng',
-            //   type: 'item',
-            //   url: '/basic/alert'
-            // }
-          ]
-        },
+        // {
+        //   id: 'orders',
+        //   title: 'Đơn hàng',
+        //   type: 'collapse',
+        //   icon: 'feather icon-clipboard',
+        //   children: [
+        //     {
+        //       id: 'orders-create',
+        //       title: 'Tạo đơn và giao hàng',
+        //       type: 'item',
+        //       url: '/app/sell-management/orders/create'
+        //     },
+        //     {
+        //       id: 'orders-list',
+        //       title: 'Danh sách đơn hàng',
+        //       type: 'item',
+        //       url: '/app/orders/'
+        //     }
+        //     // {
+        //     //   id: 'order-return',
+        //     //   title: 'Khách trả hàng',
+        //     //   type: 'item',
+        //     //   url: '/basic/alert'
+        //     // }
+        //   ]
+        // },
         // {
         //   id: 'delievery',
         //   title: 'Vận chuyển',
