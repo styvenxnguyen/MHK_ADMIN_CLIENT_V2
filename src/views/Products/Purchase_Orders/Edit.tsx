@@ -1,21 +1,24 @@
 import moment from 'moment'
 import React, { useEffect, useState } from 'react'
-import { Badge, Button, Card, Col, Row } from 'react-bootstrap'
+import { Button, Card, Col, FormControl, Row } from 'react-bootstrap'
 import { Helmet } from 'react-helmet'
 import { Link, useHistory, useParams } from 'react-router-dom'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import PageLoader from '~/components/Loader/PageLoader'
 import CustomTable from '~/components/Table/CustomTable'
-import { services } from '~/services/api'
+import Select from 'react-select'
+import { getTagsList, services } from '~/services/api'
 import Error from '~/views/Errors'
 
-const PurchaseOrderDetail = () => {
+const PurchaseOrderEdit = () => {
   const { id }: any = useParams()
   const history = useHistory()
   const [dataDetail, setdataDetail] = useState<any>([])
   const [dataProduct, setDataProduct] = useState<any>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isFetched, setIsFetched] = useState(false)
+  const [optionsTag, setOptionsTag] = useState([])
+  const noOptionsMessage = () => 'Đã hết lựa chọn'
 
   const formatCurrency = (value: number) => {
     const intValue = Math.floor(value) // Chuyển đổi số thành số nguyên
@@ -129,14 +132,20 @@ const PurchaseOrderDetail = () => {
     {
       data: 'Ngày nhập',
       value: moment().utcOffset(7).format('DD/MM/YYYY - HH:mm:ss') || '---'
-    },
-    {
-      data: 'Tham chiếu',
-      value: '---'
     }
   ]
 
   useEffect(() => {
+    getTagsList().then((response) => {
+      const tagsList = response.data.data
+      setOptionsTag(
+        tagsList.map((tag: any) => ({
+          label: tag.tag_title,
+          value: tag.id
+        }))
+      )
+    })
+
     services
       .get(`/order/import/get-by-id/${id}`)
       .then((response: any) => {
@@ -175,9 +184,10 @@ const PurchaseOrderDetail = () => {
   return (
     <>
       <span className='flex-between'>
-        <BackPreviousPage path='/app/purchase_orders' text='Quay lại danh sách đơn hàng nhập' />
+        <BackPreviousPage path={`/app/purchase_orders/detail/${id}`} text='Quay lại chi tiết đơn hàng nhập' />
         <Button onClick={() => history.push(`/app/purchase_orders/detail/${id}/edit`)} className='m-0 mb-3'>
-          Sửa đơn nhập
+          <i className='feather icon-save' />
+          Lưu
         </Button>
       </span>
       <Row className='text-normal'>
@@ -237,6 +247,9 @@ const PurchaseOrderDetail = () => {
                   <span className='ml-2'>{data.value}</span>
                 </span>
               ))}
+              <span className='d-flex align-items-center'>
+                Tham chiếu: <FormControl className='w-50 ml-3' placeholder='Nhập tham chiếu' />
+              </span>
             </Card.Body>
           </Card>
         </Col>
@@ -253,23 +266,23 @@ const PurchaseOrderDetail = () => {
 
               <hr className='dashed-top' />
               <Row className='justify-content-between'>
-                <Col lg={9}>
+                <Col lg={3}>
                   <p className='font-weight-bold'>Ghi chú đơn</p>
-                  <p>{dataDetail.order_note}</p>
-                  <p className='font-weight-bold'>Tags</p>
-                  <p>
-                    {dataDetail.order_tags.map((tag: any, index: any) => (
-                      <Badge className='p-2 mr-2' key={`tagsProduct_${index}`} variant='warning'>
-                        {tag.Tag.tag_title}
-                      </Badge>
-                    ))}
-                  </p>
+                  <FormControl as='textarea' rows={3} className='my-textarea'/>
+                  <p className='font-weight-bold mt-2'>Tags</p>
+                  <Select
+                    options={optionsTag}
+                    isMulti
+                    placeholder='Chọn tags'
+                    noOptionsMessage={noOptionsMessage}
+                    menuPlacement='top'
+                  />
                 </Col>
                 <Col lg={3}>
                   {totalProduct.map((total, index) => (
                     <span
                       key={`debtSupplier_${index}`}
-                      className={total.bold ? 'font-weight-bold flex-between mb-3' : 'flex-between mb-3'}
+                      className={total.bold ? 'font-weight-bold flex-between m-3' : 'flex-between m-3'}
                     >
                       <span>{total.data}</span>
                       <span>{total.value}</span>
@@ -285,4 +298,4 @@ const PurchaseOrderDetail = () => {
   )
 }
 
-export default PurchaseOrderDetail
+export default PurchaseOrderEdit

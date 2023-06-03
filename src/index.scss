@@ -500,7 +500,11 @@ small {
   border-bottom: 1px dashed #ccc;
 }
 
-.dashed-r {
+.dashed-top {
+  border-top: 1px dashed #ccc;
+}
+
+.dashed-right {
   border-right: 1px dashed #ccc;
 }
 
@@ -603,6 +607,10 @@ tbody {
 .no-spin::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+.my-textarea {
+  resize: none;
 }
 
 
