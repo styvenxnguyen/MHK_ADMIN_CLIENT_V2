@@ -613,4 +613,17 @@ tbody {
   resize: none;
 }
 
+.react-datepicker__input-container input {
+  width: 100%;
+  padding-left: 10px;
+  padding: 6px;
+  border-radius: 3px;
+  border: 1px solid gray;
+}
+
+.react-datepicker__input-container input:focus {
+  outline: 2px solid #04a9f5;
+  border: none;
+}
+
 

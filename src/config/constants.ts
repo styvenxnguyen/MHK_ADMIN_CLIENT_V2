@@ -2,6 +2,8 @@ export const BASENAME = '/' // don't add '/' at end off BASENAME
 export const BASE_URL = '/app/dashboard/sell'
 export const BASE_TITLE = 'MHK ADMIN'
 
+export const BASE_URL_CONFIG = 'https://mhk-api-v2.onrender.com/cloud-api'
+
 export const CONFIG = {
   layout: 'vertical', // vertical, horizontal
   subLayout: '', // null, layout-2, layout-2-2, layout-3, layout-4, layout-4-2, layout-6, layout-8

@@ -176,9 +176,14 @@ const PurchaseOrderDetail = () => {
     <>
       <span className='flex-between'>
         <BackPreviousPage path='/app/purchase_orders' text='Quay lại danh sách đơn hàng nhập' />
-        <Button onClick={() => history.push(`/app/purchase_orders/detail/${id}/edit`)} className='m-0 mb-3'>
-          Sửa đơn nhập
-        </Button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <Button onClick={() => history.push(`/app/purchase_orders/detail/${id}/edit`)} className='m-0 mb-3'>
+            Sửa đơn nhập
+          </Button>
+          <Button onClick={() => history.push(`/app/purchase_orders/detail/${id}/editproduct`)} className='m-0 mb-3'>
+            Sửa đơn
+          </Button>
+        </div>
       </span>
       <Row className='text-normal'>
         <Col lg={7}>

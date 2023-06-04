@@ -268,7 +268,7 @@ const PurchaseOrderEdit = () => {
               <Row className='justify-content-between'>
                 <Col lg={3}>
                   <p className='font-weight-bold'>Ghi chú đơn</p>
-                  <FormControl as='textarea' rows={3} className='my-textarea'/>
+                  <FormControl as='textarea' rows={3} className='my-textarea' />
                   <p className='font-weight-bold mt-2'>Tags</p>
                   <Select
                     options={optionsTag}
