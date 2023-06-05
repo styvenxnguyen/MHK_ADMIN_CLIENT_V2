@@ -105,7 +105,7 @@ function PurchaseOrdersList() {
 
   const handleRowClick = (row: any) => {
     const id = row.values.id
-    history.push(`/app/purchase_orders/detail/${id}`)
+    history.push(`/app/purchase_orders/${id}`)
   }
 
   if (isLoading)
@@ -129,7 +129,7 @@ function PurchaseOrdersList() {
           <Card>
             <Card.Header className='flex-between'>
               <Card.Title as='h5'>Danh sách đơn nhập hàng</Card.Title>
-              <Button className='m-0' onClick={() => history.push('/app/products/create')}>
+              <Button className='m-0' onClick={() => history.push('/app/purchase_orders/create')}>
                 <i className='feather icon-plus-circle mr-2'></i>
                 Tạo đơn nhập hàng
               </Button>{' '}
