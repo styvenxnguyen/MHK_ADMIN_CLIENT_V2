@@ -110,11 +110,18 @@ const menuItems = {
               type: 'item',
               url: '/app/products'
             },
+
             {
               id: 'product-purchase-orders',
               title: 'Nhập hàng',
               type: 'item',
               url: '/app/purchase_orders'
+            },
+            {
+              id: 'product-suppliers',
+              title: 'Nhà cung cấp',
+              type: 'item',
+              url: '/app/suppliers'
             }
           ]
         },

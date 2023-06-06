@@ -1,31 +1,27 @@
 import moment from 'moment'
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Badge, Button, Card, Col, Row } from 'react-bootstrap'
 import { Helmet } from 'react-helmet'
 import { Link, useHistory, useParams } from 'react-router-dom'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import PageLoader from '~/components/Loader/PageLoader'
 import CustomTable from '~/components/Table/CustomTable'
-import { services } from '~/services/api'
+import OrderService from '~/services/order.service'
+import { OrderProduct } from '~/types/OrderProduct.type'
+import { PurchaseOrder } from '~/types/PurchaseOrder.type'
+import { formatCurrency } from '~/utils/common'
 import Error from '~/views/Errors'
 
 const PurchaseOrderDetail = () => {
-  const { id }: any = useParams()
+  const params: { id: string } = useParams()
   const history = useHistory()
-  const [dataDetail, setdataDetail] = useState<any>([])
-  const [dataProduct, setDataProduct] = useState<any>([])
+  const [purchaseDetail, setPurchaseDetail] = useState<PurchaseOrder>()
+  const [productList, setProductList] = useState<OrderProduct[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isFetched, setIsFetched] = useState(false)
-
-  const formatCurrency = (value: number) => {
-    const intValue = Math.floor(value) // Chuyển đổi số thành số nguyên
-    const formattedValue = intValue.toLocaleString() // Phân giá trị tiền bằng dấu phẩy
-    return formattedValue
-  }
-
-  const totalQuantity = dataProduct.reduce((acc: any, item: any) => acc + item.product_amount, 0)
-  const totalAmount = dataProduct.reduce((acc: any, item: any) => acc + item.product_price, 0)
-  const totalDiscount = dataProduct.reduce((acc: any, item: any) => acc + item.product_discount, 0)
+  const totalQuantity = productList.reduce((acc: any, item: any) => acc + item.product_amount, 0)
+  const totalAmount = productList.reduce((acc: any, item: any) => acc + item.product_price, 0)
+  const totalDiscount = productList.reduce((acc: any, item: any) => acc + item.product_discount, 0)
   const totalPayment = totalAmount - totalDiscount
 
   const columns = React.useMemo(
@@ -44,7 +40,8 @@ const PurchaseOrderDetail = () => {
       },
       {
         Header: 'Số lượng',
-        accessor: 'product_amount'
+        accessor: 'product_amount',
+        Cell: ({ value }: { value: number }) => <div>{value}</div>
       },
       {
         Header: 'Giá sản phẩm',
@@ -112,7 +109,7 @@ const PurchaseOrderDetail = () => {
   const dataPurchaseOrders = [
     {
       data: 'Chi nhánh',
-      value: dataDetail && dataDetail.agency_branch ? dataDetail.agency_branch.name : '---'
+      value: purchaseDetail && purchaseDetail.agency_branch ? purchaseDetail.agency_branch.name : '---'
     },
     {
       data: 'Chính sách giá',
@@ -120,7 +117,7 @@ const PurchaseOrderDetail = () => {
     },
     {
       data: 'Nhân viên phụ trách',
-      value: dataDetail && dataDetail.staff ? dataDetail.staff.name : '---'
+      value: purchaseDetail && purchaseDetail.staff ? purchaseDetail.staff.name : '---'
     },
     {
       data: 'Ngày hẹn giao',
@@ -137,36 +134,33 @@ const PurchaseOrderDetail = () => {
   ]
 
   useEffect(() => {
-    services
-      .get(`/order/import/get-by-id/${id}`)
-      .then((response: any) => {
+    OrderService.getPurchaseOrderDetail(params.id)
+      .then((response) => {
         const data = response.data.data
-        setdataDetail(data)
-        setDataProduct(
-          data.order_product_list.map((product: any, index: any) => {
-            return { ...product, index: data.order_product_list.length - index }
+        setPurchaseDetail(data)
+        setProductList(
+          data.order_product_list.map((purchase: PurchaseOrder, index: number) => {
+            return { ...purchase, index: data.order_product_list.length - index }
           })
         )
+
         setIsLoading(false)
-        if (data) {
-          setIsFetched(true)
-        }
+        setIsFetched(true)
       })
       .catch(() => {
-        setIsLoading(false)
+        setIsFetched(false)
       })
-  }, [id])
+  }, [params.id])
 
-  if (isLoading) {
+  if (isLoading)
     return (
       <>
         <Helmet>
-          <title>Chi tiết đơn nhập</title>
+          <title>Chi tiết đơn nhập hàng</title>
         </Helmet>
         <PageLoader />
       </>
     )
-  }
 
   if (!isFetched) {
     return <Error errorCode='500' />
@@ -175,18 +169,15 @@ const PurchaseOrderDetail = () => {
   return (
     <>
       <span className='flex-between'>
-        <BackPreviousPage path='/app/purchase_orders' text='Quay lại danh sách đơn hàng nhập' />
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <Button onClick={() => history.push(`/app/purchase_orders/detail/${id}/edit`)} className='m-0 mb-3'>
-            Sửa đơn nhập
-          </Button>
-          <Button onClick={() => history.push(`/app/purchase_orders/detail/${id}/editproduct`)} className='m-0 mb-3'>
-            Sửa đơn
-          </Button>
-        </div>
+        <BackPreviousPage path='/app/purchase_orders' text='Quay lại danh sách đơn nhập hàng' />
+        <Button className='m-0 mb-3' onClick={() => history.push(`/app/purchase_orders/detail/${params.id}/edit`)}>
+          <i className='feather icon-edit'></i>
+          Sửa đơn nhập
+        </Button>
       </span>
+
       <Row className='text-normal'>
-        <Col lg={7}>
+        <Col lg={8}>
           <Card style={{ height: '90%' }}>
             <Card.Header>
               <h5>
@@ -199,14 +190,15 @@ const PurchaseOrderDetail = () => {
                 <Col lg={6}>
                   <div className='font-weight-bold'>
                     <p>
-                      <Link to='#'>{dataDetail.supplier.name}</Link>
+                      <Link to='#'>{purchaseDetail?.supplier && purchaseDetail.supplier.name}</Link>
                     </p>
-                    <p>Số điện thoại : {dataDetail.supplier.phone}</p>
+                    <p>Số điện thoại : {purchaseDetail?.supplier && purchaseDetail.supplier.phone}</p>
 
-                    {dataDetail.supplier.addresses
-                      ? dataDetail.supplier.addresses.map((address: any, index: any) => (
+                    {purchaseDetail?.supplier && purchaseDetail.supplier.addresses
+                      ? purchaseDetail.supplier.addresses.map((address: any, index: any) => (
                           <p key={`addressSupplier_${index}`}>
-                            Địa chỉ {index + 1}: {address.user_specific_address}
+                            Địa chỉ {index + 1}:{' '}
+                            <span style={{ fontWeight: '500' }}>{address.user_specific_address}</span>
                           </p>
                         ))
                       : 'Chưa cập nhật địa chỉ'}
@@ -227,7 +219,7 @@ const PurchaseOrderDetail = () => {
             </Card.Body>
           </Card>
         </Col>
-        <Col lg={5}>
+        <Col lg={4}>
           <Card style={{ height: '90%' }}>
             <Card.Header>
               <h5>
@@ -236,7 +228,7 @@ const PurchaseOrderDetail = () => {
               </h5>
             </Card.Header>
             <Card.Body>
-              {dataPurchaseOrders.map((data, index) => (
+              {dataPurchaseOrders.map((data: any, index) => (
                 <span key={`dataPurchaseOrders_${index}`} className='d-flex mb-3'>
                   <span>{data.data} : </span>
                   <span className='ml-2'>{data.value}</span>
@@ -254,27 +246,29 @@ const PurchaseOrderDetail = () => {
               </h5>
             </Card.Header>
             <Card.Body>
-              <CustomTable columns={columns} data={dataProduct} handleRowClick={{}} hiddenColumns={['selection']} />
+              <CustomTable columns={columns} data={productList} handleRowClick={{}} hiddenColumns={['selection']} />
 
               <hr className='dashed-top' />
               <Row className='justify-content-between'>
-                <Col lg={9}>
+                <Col lg={3}>
                   <p className='font-weight-bold'>Ghi chú đơn</p>
-                  <p>{dataDetail.order_note}</p>
-                  <p className='font-weight-bold'>Tags</p>
+                  <p>{purchaseDetail?.order_note && purchaseDetail.order_note}</p>
+                  <p className='font-weight-bold mt-2'>Tags</p>
                   <p>
-                    {dataDetail.order_tags.map((tag: any, index: any) => (
-                      <Badge className='p-2 mr-2' key={`tagsProduct_${index}`} variant='warning'>
-                        {tag.Tag.tag_title}
-                      </Badge>
-                    ))}
+                    {purchaseDetail?.order_tags &&
+                      purchaseDetail.order_tags.map((tag: any, index: number) => (
+                        <Badge className='p-2 mr-2 mb-2' key={`tagsProduct_${index}`} variant='warning'>
+                          {tag.Tag.tag_title}
+                        </Badge>
+                      ))}
                   </p>
                 </Col>
                 <Col lg={3}>
                   {totalProduct.map((total, index) => (
                     <span
                       key={`debtSupplier_${index}`}
-                      className={total.bold ? 'font-weight-bold flex-between mb-3' : 'flex-between mb-3'}
+                      className={total.bold ? 'font-weight-bold flex-between m-3' : 'flex-between m-3'}
+                      style={total.bold ? { borderTop: '1px solid gray', paddingTop: '10px' } : {}}
                     >
                       <span>{total.data}</span>
                       <span>{total.value}</span>

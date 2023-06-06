@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { Badge, Button, Card, Col, FormControl, Row } from 'react-bootstrap'
+import { Button, Card, Col, FormControl, Row } from 'react-bootstrap'
 import { Link, useParams } from 'react-router-dom'
 import Select from 'react-select'
-import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
@@ -19,23 +18,29 @@ import { OrderProduct } from '~/types/OrderProduct.type'
 import { Staff } from '~/types/Staff.type'
 import SupplierService from '~/services/supplier.service'
 import { SupplierRes } from '~/types/Supplier.type'
+import { Helmet } from 'react-helmet'
+import PageLoader from '~/components/Loader/PageLoader'
+import Error from '~/views/Errors'
 
-const EditProduct = () => {
+const CEPurchaseOrder = () => {
   const params: { id: string } = useParams()
   const [purchaseDetail, setPurchaseDetail] = useState<PurchaseOrder>()
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  // const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isFetched, setIsFetched] = useState(false)
+  const [isLoadingSupplier, setIsLoadingSupplier] = useState(false)
   const [productList, setProductList] = useState<OrderProduct[]>([])
   const [optionsStaff, setOptionsStaff] = useState([])
   const [optionsTag, setOptionsTag] = useState([])
   const [optionsBranch, setOptionsBranch] = useState([])
   const [optionsSupplier, setOptionsSupplier] = useState([])
   const [selectedSupplier, setSelectedSupplier] = useState<SupplierRes>()
+  const loadingMessage = () => 'Đang tải dữ liệu...'
 
-  const noOptionsMessage = () => 'Đã hết lựa chọn'
+  // const handleDateChange = (date: Date | null) => {
+  //   setSelectedDate(date)
+  // }
 
-  const handleDateChange = (date: Date | null) => {
-    setSelectedDate(date)
-  }
   const totalQuantity = productList.reduce((acc: any, item: any) => acc + item.product_amount, 0)
   const totalAmount = productList.reduce((acc: any, item: any) => acc + item.product_price, 0)
   const totalDiscount = productList.reduce((acc: any, item: any) => acc + item.product_discount, 0)
@@ -161,11 +166,13 @@ const EditProduct = () => {
   }, [])
 
   const getSupplierDetail = useCallback(async (id: string) => {
+    setIsLoadingSupplier(true)
     try {
       const res = await SupplierService.getDetailSupplier(id)
       setSelectedSupplier(res.data.data)
+      setIsLoadingSupplier(false)
     } catch (error) {
-      console.log(error)
+      setIsLoadingSupplier(false)
     }
   }, [])
 
@@ -186,25 +193,38 @@ const EditProduct = () => {
   const getPurchaseOrderDetail = useCallback(async () => {
     try {
       const res = await OrderService.getPurchaseOrderDetail(params.id)
-      setPurchaseDetail(res.data.data)
-      setProductList(res.data.data.order_product_list)
+      const data = res.data.data
+      setPurchaseDetail(data)
+      setProductList(
+        data.order_product_list.map((purchase: PurchaseOrder, index: number) => {
+          return { ...purchase, index: data.order_product_list.length - index }
+        })
+      )
+      setIsLoading(false)
+      setIsFetched(true)
     } catch (error) {
-      console.log(error)
+      setIsLoading(false)
     }
   }, [params.id])
 
   const updatedPurchaseOrder = useCallback(async () => {
     try {
       const data: PurchaseOrder = {}
-      await OrderService.updatedPurchaseOrderDetail(params.id, data)
+      console.log(data)
+      // await OrderService.updatedPurchaseOrderDetail(params.id, data)
     } catch (error) {
       console.log(error)
     }
-  }, [params.id])
+  }, [])
 
   useEffect(() => {
     if (params.id) {
       getPurchaseOrderDetail()
+    } else {
+      setTimeout(() => {
+        setIsLoading(false)
+        setIsFetched(true)
+      }, 1000)
     }
     getStaffList()
     getAgencyBranch()
@@ -223,11 +243,28 @@ const EditProduct = () => {
     })
   }, [])
 
+  if (isLoading)
+    return (
+      <>
+        <Helmet>
+          <title>{params.id ? 'Sửa đơn nhập hàng' : 'Tạo đơn nhập hàng'}</title>
+        </Helmet>
+        <PageLoader />
+      </>
+    )
+
+  if (!isFetched) {
+    return <Error errorCode='500' />
+  }
+
   return (
     <div>
       <div className='flex-between'>
-        <BackPreviousPage path={`/app/purchase_orders`} text='Quay lại chi tiết đơn hàng nhập' />
-        <Button className='m-0 mb-3'>
+        <BackPreviousPage
+          path={params.id ? `/app/purchase_orders/detail/${params.id}` : '/app/purchase_orders/'}
+          text={params.id ? 'Quay lại chi tiết đơn hàng nhập' : 'Quay lại danh sách đơn hàng nhập'}
+        />
+        <Button className='m-0 mb-3' onClick={updatedPurchaseOrder}>
           <i className='feather icon-save' />
           Lưu
         </Button>
@@ -275,49 +312,59 @@ const EditProduct = () => {
                 </Row>
               ) : (
                 <>
+                  <Select
+                    className='mb-4'
+                    options={optionsSupplier}
+                    onChange={(e: any) => {
+                      getSupplierDetail(e.value)
+                    }}
+                    placeholder={customPlaceholder()}
+                  />
                   {selectedSupplier ? (
-                    <Row>
-                      <Col lg={6}>
-                        <div className='font-weight-bold'>
-                          <p>
-                            <Link to='#'>{selectedSupplier.customer_name}</Link>
-                          </p>
-                          <p>Số điện thoại : {selectedSupplier.customer_phone}</p>
-
-                          {selectedSupplier.address_list.length > 0
-                            ? selectedSupplier.address_list.map((address: any, index: any) => (
-                                <p key={`addressSupplier_${index}`}>
-                                  Địa chỉ {index + 1}:{' '}
-                                  <span style={{ fontWeight: '500' }}>{address.user_specific_address}</span>
-                                </p>
-                              ))
-                            : 'Chưa cập nhật địa chỉ'}
+                    <>
+                      {isLoadingSupplier ? (
+                        <div>
+                          <PageLoader option='100%' className='d-flex' />
                         </div>
-                      </Col>
+                      ) : (
+                        <Row>
+                          <Col lg={6}>
+                            <div className='font-weight-bold'>
+                              <p>
+                                <Link to='#'>{selectedSupplier.customer_name}</Link>
+                              </p>
+                              <p>Số điện thoại : {selectedSupplier.customer_phone}</p>
 
-                      <Col>
-                        <div className='box-dash'>
-                          {dataDebtSupplier.map((debtSupplier, index) => (
-                            <span key={`debtSupplier_${index}`} className='flex-between m-2'>
-                              <span>{debtSupplier.data}</span>
-                              <span className='text-c-blue font-weight-bold'>{debtSupplier.value}</span>
-                            </span>
-                          ))}
-                        </div>
-                      </Col>
-                    </Row>
+                              {selectedSupplier.address_list.length > 0
+                                ? selectedSupplier.address_list.map((address: any, index: any) => (
+                                    <p key={`addressSupplier_${index}`}>
+                                      Địa chỉ {index + 1}:{' '}
+                                      <span style={{ fontWeight: '500' }}>{address.user_specific_address}</span>
+                                    </p>
+                                  ))
+                                : 'Chưa cập nhật địa chỉ'}
+                            </div>
+                          </Col>
+
+                          <Col>
+                            <div className='box-dash'>
+                              {dataDebtSupplier.map((debtSupplier, index) => (
+                                <span key={`debtSupplier_${index}`} className='flex-between m-2'>
+                                  <span>{debtSupplier.data}</span>
+                                  <span className='text-c-blue font-weight-bold'>{debtSupplier.value}</span>
+                                </span>
+                              ))}
+                            </div>
+                          </Col>
+                        </Row>
+                      )}
+                    </>
                   ) : (
                     <>
-                      <Select
-                        // value={}
-                        // noOptionsMessage={() => customNoOptionMessage(true)}
-                        options={optionsSupplier}
-                        onChange={(e: any) => {
-                          getSupplierDetail(e.value)
-                        }}
-                        placeholder={customPlaceholder()}
-                      />
-                      <p style={{ color: '#bfb2b2', textAlign: 'center', marginTop: '55px' }}>
+                      <p
+                        style={{ color: '#bfb2b2', height: '75%' }}
+                        className='d-flex justify-content-center align-items-center'
+                      >
                         Chưa có thông tin nhà cung cấp
                       </p>
                     </>
@@ -341,36 +388,42 @@ const EditProduct = () => {
                   <span>Chi nhánh:</span>
                   <div style={{ width: '65%' }}>
                     <Select
-                      placeholder={purchaseDetail?.staff ? purchaseDetail.staff.name : 'Chọn chi nhánh'}
-                      isMulti
+                      placeholder={
+                        purchaseDetail?.agency_branch?.name ? purchaseDetail.agency_branch?.name : 'Chọn chi nhánh'
+                      }
                       isDisabled={!!params.id}
                       options={optionsBranch}
-                      noOptionsMessage={() => 'Đã chọn hết chi nhánh'}
+                      loadingMessage={loadingMessage}
                     ></Select>
                   </div>
                 </div>
-                <div className='flex-between' style={{ display: 'flex' }}>
+                <div className='flex-between'>
                   <span>Nhân viên:</span>
                   <div style={{ width: '65%' }}>
                     <Select
                       name='staff'
                       options={optionsStaff}
+                      loadingMessage={loadingMessage}
                       placeholder={purchaseDetail?.staff ? purchaseDetail.staff.name : 'Chọn nhân viên'}
-                      isMulti
-                      // onChange={(s) => setFieldValue('staff', s)}
                     ></Select>
                   </div>
                 </div>
-                <div className='flex-between' style={{ display: 'flex' }}>
+                <div className='flex-between'>
                   <span>Ngày hẹn giao:</span>
                   <div style={{ width: '65%' }}>
-                    <DatePicker
-                      className='w-full'
-                      selected={selectedDate}
-                      onChange={handleDateChange}
-                      dateFormat='yyyy-MM-dd'
-                      placeholderText='Chọn ngày hẹn giao'
-                    />
+                    <FormControl type='date' />
+                  </div>
+                </div>
+                <div className='flex-between'>
+                  <span>Mã tham chiếu : </span>
+                  <div style={{ width: '65%' }}>
+                    <FormControl />
+                  </div>
+                </div>
+                <div className='flex-between'>
+                  <span>Mã đơn : </span>
+                  <div style={{ width: '65%' }}>
+                    <FormControl disabled />
                   </div>
                 </div>
               </div>
@@ -394,24 +447,15 @@ const EditProduct = () => {
                   <p className='font-weight-bold'>Ghi chú đơn</p>
                   <FormControl as='textarea' rows={3} className='my-textarea' placeholder='VD: Hàng tặng gói riêng' />
                   <p className='font-weight-bold mt-2'>Tags</p>
-                  {params.id ? (
-                    <div>
-                      {purchaseDetail?.order_tags &&
-                        purchaseDetail.order_tags.map((tag: any, index: number) => (
-                          <Badge className='p-2 mr-2 mb-2' key={`tagsProduct_${index}`} variant='warning'>
-                            {tag.Tag.tag_title}
-                          </Badge>
-                        ))}
-                    </div>
-                  ) : (
-                    <Select
-                      options={optionsTag}
-                      isMulti
-                      placeholder='Chọn tags'
-                      noOptionsMessage={noOptionsMessage}
-                      menuPlacement='top'
-                    />
-                  )}
+
+                  <Select
+                    options={optionsTag}
+                    isMulti
+                    placeholder='Chọn tags'
+                    noOptionsMessage={() => 'Đã chọn hết tags'}
+                    menuPlacement='top'
+                    loadingMessage={loadingMessage}
+                  />
                 </Col>
                 <Col lg={3}>
                   {totalProduct.map((total, index) => (
@@ -434,4 +478,4 @@ const EditProduct = () => {
   )
 }
 
-export default EditProduct
+export default CEPurchaseOrder

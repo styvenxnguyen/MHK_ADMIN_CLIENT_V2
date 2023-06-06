@@ -122,19 +122,25 @@ const routes: any = [
       },
       {
         path: '/app/purchase_orders/create',
-        component: lazy(() => import('./views/Products/Purchase_Orders/EditProduct'))
+        component: lazy(() => import('./views/Products/Purchase_Orders/Create_Edit'))
       },
       {
         exact: true,
-        path: '/app/purchase_orders/:id',
-        component: lazy(() => import('./views/Products/Purchase_Orders/EditProduct'))
+        path: '/app/purchase_orders/detail/:id',
+        component: lazy(() => import('./views/Products/Purchase_Orders/Detail'))
+      },
+      {
+        exact: true,
+        path: '/app/purchase_orders/detail/:id/edit',
+        component: lazy(() => import('./views/Products/Purchase_Orders/Create_Edit'))
       },
 
-      // {
-      //   exact: true,
-      //   path: '/app/purchase_orders/detail/:id/editproduct',
-      //   component: lazy(() => import('./views/Products/Purchase_Orders/EditProduct'))
-      // },
+      //-------------------PRODUCTS: PURCHASE ORDERS---------------------------
+      {
+        exact: true,
+        path: '/app/suppliers',
+        component: lazy(() => import('./views/Products/Suppliers'))
+      },
 
       //-------------------ORDERS---------------------------
       {

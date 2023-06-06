@@ -7,6 +7,7 @@ import moment from 'moment'
 import { Helmet } from 'react-helmet'
 import Error from '~/views/Errors'
 import PageLoader from '~/components/Loader/PageLoader'
+import { formatCurrency } from '~/utils/common'
 
 function PurchaseOrdersList() {
   const history = useHistory()
@@ -20,12 +21,6 @@ function PurchaseOrdersList() {
   //   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',') // Thêm dấu phẩy vào phần nguyên
   //   return parts.join('.') // Kết hợp lại phần nguyên và phần thập phân
   // }
-
-  const formatCurrency = (value: number) => {
-    const intValue = Math.floor(value)
-    const formattedValue = intValue.toLocaleString()
-    return formattedValue
-  }
 
   useEffect(() => {
     services
@@ -96,7 +91,7 @@ function PurchaseOrdersList() {
       },
       {
         Header: 'Giá trị đơn',
-        accessor: 'order_debt',
+        accessor: 'order_total',
         Cell: ({ value }) => formatCurrency(value)
       }
     ],
@@ -105,7 +100,7 @@ function PurchaseOrdersList() {
 
   const handleRowClick = (row: any) => {
     const id = row.values.id
-    history.push(`/app/purchase_orders/${id}`)
+    history.push(`/app/purchase_orders/detail/${id}`)
   }
 
   if (isLoading)
