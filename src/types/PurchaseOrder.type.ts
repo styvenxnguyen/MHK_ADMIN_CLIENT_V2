@@ -4,6 +4,7 @@ import { Supplier } from './Supplier.type'
 export interface PurchaseOrder {
   id?: string
   order_note?: string
+  order_code?: string
   agency_branch?: {
     id: string
     name: string

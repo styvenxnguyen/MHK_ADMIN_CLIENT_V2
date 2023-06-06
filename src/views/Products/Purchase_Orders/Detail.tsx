@@ -170,6 +170,9 @@ const PurchaseOrderDetail = () => {
     <>
       <span className='flex-between'>
         <BackPreviousPage path='/app/purchase_orders' text='Quay lại danh sách đơn nhập hàng' />
+        <h4>
+          Chi tiết đơn nhập <span className='font-weight-bold'>{purchaseDetail?.order_code}</span>
+        </h4>
         <Button className='m-0 mb-3' onClick={() => history.push(`/app/purchase_orders/detail/${params.id}/edit`)}>
           <i className='feather icon-edit'></i>
           Sửa đơn nhập

@@ -45,6 +45,10 @@ function PurchaseOrdersList() {
         accessor: 'id'
       },
       {
+        Header: 'Mã đơn nhập',
+        accessor: 'order_code'
+      },
+      {
         Header: 'Ngày nhập',
         accessor: 'createdAt',
         Cell: ({ value }: any) => moment(value).utcOffset(7).format('DD/MM/YYYY - HH:mm:ss')
@@ -107,7 +111,7 @@ function PurchaseOrdersList() {
     return (
       <>
         <Helmet>
-          <title>Danh sách đơn nhập hàng</title>
+          <title>Danh sách đơn nhập</title>
         </Helmet>
         <PageLoader />
       </>

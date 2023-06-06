@@ -264,14 +264,19 @@ const CEPurchaseOrder = () => {
           path={params.id ? `/app/purchase_orders/detail/${params.id}` : '/app/purchase_orders/'}
           text={params.id ? 'Quay lại chi tiết đơn hàng nhập' : 'Quay lại danh sách đơn hàng nhập'}
         />
+        {params.id && (
+          <h4>
+            Sửa đơn nhập <span className='font-weight-bold'>{purchaseDetail?.order_code}</span>
+          </h4>
+        )}
         <Button className='m-0 mb-3' onClick={updatedPurchaseOrder}>
-          <i className='feather icon-save' />
-          Lưu
+          <i className={params.id ? 'feather icon-save' : 'feather icon-plus-circle'} />
+          {params.id ? 'Lưu' : 'Tạo đơn hàng nhập'}
         </Button>
       </div>
       <Row className='text-normal'>
         <Col lg={8}>
-          <Card style={{ height: '90%' }}>
+          <Card style={{ height: '95%' }}>
             <Card.Header>
               <h5>
                 <i className='feather icon-user mr-2'></i>
@@ -375,7 +380,7 @@ const CEPurchaseOrder = () => {
           </Card>
         </Col>
         <Col lg={4}>
-          <Card style={{ height: '90%' }}>
+          <Card style={{ height: '95%' }}>
             <Card.Header>
               <h5>
                 <i className='feather icon-clipboard mr-2'></i>
