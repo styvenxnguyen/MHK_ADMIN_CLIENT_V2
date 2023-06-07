@@ -1,3 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 @import 'assets/scss/style.scss';
 
 .nav-outside.mob-backdrop {
@@ -626,4 +629,83 @@ tbody {
   border: none;
 }
 
+.button-add {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #04a9f5;
+  cursor: pointer;
+  font-weight: 600;
+  position: absolute;
+  top: 20px;
+  right: 25px;
+}
 
+.button-add:hover {
+  opacity: 0.6;
+  transition-duration: 300ms;
+}
+
+.button-add:active {
+  opacity: 1;
+}
+
+.button-showmore {
+  display: flex;
+  align-items: center;
+  bottom: 16px;
+  left: 0;
+  position: absolute;
+  gap: 5px;
+  color: #04a9f5;
+  cursor: pointer;
+  font-weight: 600;
+  border: none;
+  background-color: white;
+}
+
+.button-showmore:hover {
+  opacity: 0.6;
+  transition-duration: 300ms;
+}
+
+.button-showmore:active {
+  opacity: 1;
+}
+
+.style-field {
+  outline: 1px solid rgb(205, 205, 205);
+  transition-duration: 200ms;
+}
+.style-field:hover {
+  outline: 1px solid gray;
+  transition-duration: 200ms;
+}
+
+.style-field:focus {
+  outline: 1px solid #04a9f5;
+  border: none;
+}
+
+.error-field {
+  border: 1px solid red;
+}
+
+.style-height .css-13cymwt-control {
+  height: 40px !important;
+}
+
+.style-select {
+  outline: 1px solid rgb(205, 205, 205);
+  padding: 0 15px;
+}
+
+.style-select:hover {
+  outline: 1px solid gray;
+  transition-duration: 200ms;
+}
+
+.style-select:focus {
+  outline: 1px solid #04a9f5;
+  border: none;
+}
