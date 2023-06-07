@@ -277,12 +277,17 @@ const ProductCreate = () => {
       </span>
       <Formik initialValues={initialValues} validate={validate} onSubmit={handleSubmit}>
         <Form>
-          <div className='w-full flex gap-6'>
-            <div className='w-[65%]  h-96'>
-              <div className='flex flex-col gap-6'>
-                <div className='bg-white shadow-md'>
+          <div style={{ width: '100%', display: 'flex', gap: '25px' }}>
+            <div style={{ width: '65%' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+                <div
+                  style={{
+                    background: 'white',
+                    boxShadow: 'rgba(50, 50, 93, 0.25) 0px 1px 8px -3px, rgba(0, 0, 0, 0.3) 0px 3px 5px -3px'
+                  }}
+                >
                   <Title label='Hình thức quản lý' />
-                  <div className='px-8 py-4'>
+                  <div style={{ padding: '20px 30px' }}>
                     <FormBootstrap.Check
                       type='radio'
                       checked
@@ -292,54 +297,76 @@ const ProductCreate = () => {
                   </div>
                 </div>
 
-                <div className='bg-white shadow-md'>
+                <div
+                  className='bg-white'
+                  style={{ boxShadow: 'rgba(50, 50, 93, 0.25) 0px 1px 8px -3px, rgba(0, 0, 0, 0.3) 0px 3px 5px -3px' }}
+                >
                   <Title label='Thông tin chung' />
-                  <div className='px-7 py-4'>
-                    <div className='flex flex-col'>
+                  <div style={{ padding: '16px 28px', paddingBottom: '40px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
                       <Field
                         id='product_name'
                         name='product_name'
                         render={({ field, form }: FieldProps<FormValues['product_name']>) => (
-                          <div className='flex flex-col pb-2'>
-                            <label className='mb-[4px]' htmlFor='product_name'>
-                              Tên sản phẩm <span className='text-red-500'>*</span>
+                          <div
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              position: 'relative',
+                              marginBottom: '25px'
+                            }}
+                          >
+                            <label
+                              style={{ marginBottom: '4px', color: '#46515F', fontSize: '14px' }}
+                              htmlFor='product_name'
+                            >
+                              Tên sản phẩm <span style={{ color: 'red' }}>*</span>
                             </label>
                             <input
                               type='text'
                               id='product_name'
                               {...field}
-                              className={`rounded-sm px-2.5 py-2.5 ${
+                              className={` ${
                                 form.touched.product_name && form.errors.product_name ? 'error-field' : 'style-field'
                               }`}
+                              style={{ borderRadius: '4px', padding: '10px' }}
                               placeholder='Nhập tên sản phẩm'
                             />
-                            <ErrorMessage
-                              className='text-red-500 text-sm ml-2 mt-0.5'
-                              name='product_name'
-                              component='div'
-                            />
+                            <ErrorMessage className='error-text' name='product_name' component='div' />
                           </div>
                         )}
                         type='text'
                       />
 
-                      <div className='grid grid-cols-2 w-full gap-x-5 gap-y-4'>
+                      <div
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                          width: '100%',
+                          columnGap: '20px',
+                          rowGap: '20px'
+                        }}
+                      >
                         {DataFields.map((item, index) => (
                           <Field
                             key={index}
                             id={item.id}
                             name={item.label}
                             render={({ field, form }: FieldProps<any>) => (
-                              <div className='flex flex-col'>
-                                <label className='text-start mb-[4px]' htmlFor={item.id}>
+                              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <label
+                                  style={{ marginBottom: '4px', color: '#46515F', fontSize: '14px' }}
+                                  htmlFor={item.id}
+                                >
                                   {item.label}
                                 </label>
-                                <div className={`${index === 1 && 'flex flex-row'}`}>
+                                <div className={`${index === 1 && 'd-flex'}`}>
                                   <input
                                     type={item.type}
                                     id={item.id}
                                     {...field}
-                                    className={`rounded-sm px-2.5 py-2.5 style-field w-full`}
+                                    className='style-field'
+                                    style={{ borderRadius: '4px', padding: '10px', width: '100%' }}
                                   />
                                   {index === 1 && (
                                     <select className='w-[25%] style-select rounded-r-sm'>
@@ -361,25 +388,47 @@ const ProductCreate = () => {
                   </div>
                 </div>
 
-                <div className='bg-white shadow-md relative'>
+                <div
+                  className='bg-white shadow-md relative'
+                  style={{
+                    backgroundColor: 'white',
+                    position: 'relative',
+                    boxShadow: 'rgba(50, 50, 93, 0.25) 0px 1px 8px -3px, rgba(0, 0, 0, 0.3) 0px 3px 5px -3px'
+                  }}
+                >
                   <Title label='Giá sản phẩm' />
-                  <div className='px-7 pt-3'>
-                    <div className='grid grid-cols-2 gap-x-5 gap-y-4 relative'>
+                  <div style={{ paddingTop: '12px', padding: '0 9px', paddingBottom: '40px' }}>
+                    <div
+                      style={{
+                        position: 'relative',
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                        columnGap: '20px',
+                        rowGap: '20px',
+                        width: '100%',
+                        padding: '20px',
+                        paddingBottom: '40px'
+                      }}
+                    >
                       {optionPricePolicy.map((item: any, index) => (
                         <Field
                           key={index}
                           id={item}
                           name='product_name'
                           render={({ field, form }: FieldProps<FormValues['product_name']>) => (
-                            <div className='flex flex-col'>
-                              <label className='text-start mb-[4px]' htmlFor='product_name'>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                              <label
+                                style={{ marginBottom: '4px', color: '#46515F', fontSize: '14px' }}
+                                htmlFor='product_name'
+                              >
                                 {item.label}
                               </label>
                               <input
                                 type='number'
                                 id='product_name'
                                 {...field}
-                                className={`rounded-sm px-2.5 py-2.5 style-field w-full`}
+                                className={`style-field`}
+                                style={{ borderRadius: '4px', padding: '10px', width: '100%' }}
                                 placeholder=''
                               />
                             </div>
@@ -395,22 +444,27 @@ const ProductCreate = () => {
                       )}
                     </div>
                   </div>
-                  <button className='text-blue font-bold flex gap-1 absolute top-4 right-4 hover:opacity-60 duration-200 active:opacity-100'>
+                  <button className='button-addPrice'>
                     <i className='feather icon-plus-circle'></i>
                     Thêm chính sách giá
                   </button>
                 </div>
 
                 <div
-                  className={`bg-white shadow-md relative overflow-hidden duration-200  ${
-                    value ? 'h-[250px]' : 'h-[102px]'
-                  }`}
+                  style={{
+                    backgroundColor: 'white',
+                    boxShadow: 'rgba(50, 50, 93, 0.25) 0px 1px 8px -3px, rgba(0, 0, 0, 0.3) 0px 3px 5px -3px',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    transitionDuration: '200ms',
+                    height: value ? '250px' : '95px'
+                  }}
                 >
                   <Title
                     subTitle='Thêm mới thuộc tính giúp sản phẩm có nhiều lựa chọn, như kích cỡ hay màu sắc'
                     label='Thuộc tính'
                   />
-                  <div className='absolute top-[7px] left-36'>
+                  <div style={{ position: 'absolute', top: '7px', left: '140px' }}>
                     <div className='switch switch-primary d-inline m-r-10'>
                       <input
                         id='toggleCheck'
@@ -424,21 +478,28 @@ const ProductCreate = () => {
                     </div>
                   </div>
 
-                  <div className='px-7 pt-3'>
-                    <div className='flex gap-5'>
+                  <div style={{ padding: '0 28px', paddingTop: '20px' }}>
+                    <div style={{ display: 'flex', gap: '20px' }}>
                       <Field
                         id='properties'
                         name='properties'
                         render={({ field, form }: FieldProps<FormValues['product_name']>) => (
-                          <div className='flex flex-col w-[35%]'>
-                            <label className='text-start mb-[4px] font-semibold text-black' htmlFor='product_name'>
+                          <div
+                            className='flex flex-col w-[35%]'
+                            style={{ display: 'flex', flexDirection: 'column', width: '35%' }}
+                          >
+                            <label
+                              style={{ marginBottom: '4px', color: '#46515F', fontSize: '14px' }}
+                              htmlFor='product_name'
+                            >
                               Tên thuộc tính
                             </label>
                             <input
                               type='text'
                               id='product_name'
                               {...field}
-                              className={`rounded-sm px-2.5 py-2.5 style-field w-full`}
+                              className={`style-field`}
+                              style={{ borderRadius: '4px', padding: '10px', width: '100%' }}
                               placeholder=''
                             />
                           </div>
@@ -450,15 +511,19 @@ const ProductCreate = () => {
                         id='properties'
                         name='properties'
                         render={({ field, form }: FieldProps<FormValues['product_name']>) => (
-                          <div className='flex flex-col flex-1'>
-                            <label className='text-start mb-[4px] font-semibold text-black' htmlFor='product_name'>
+                          <div style={{ display: 'flex', flexDirection: 'column', flex: '1' }}>
+                            <label
+                              style={{ marginBottom: '4px', color: '#46515F', fontSize: '14px' }}
+                              htmlFor='product_name'
+                            >
                               Giá trị
                             </label>
                             <input
                               type='text'
                               id='product_name'
                               {...field}
-                              className={`rounded-sm px-2.5 py-2.5 style-field w-full`}
+                              className={`style-field`}
+                              style={{ borderRadius: '4px', padding: '10px', width: '100%' }}
                               placeholder=''
                             />
                           </div>
@@ -467,7 +532,7 @@ const ProductCreate = () => {
                       />
                     </div>
                     {value && (
-                      <button className='text-blue font-bold flex gap-1 absolute bottom-4 left-6 hover:opacity-60 duration-200 active:opacity-100'>
+                      <button className='button-addProperty'>
                         <i className='feather icon-plus-circle'></i>
                         Thêm thuôc tính khác
                       </button>
@@ -479,7 +544,14 @@ const ProductCreate = () => {
               </div>
             </div>
 
-            <div className='w-[35%] bg-white'>
+            <div
+              style={{
+                width: '35%',
+                backgroundColor: 'white',
+                boxShadow: 'rgba(50, 50, 93, 0.25) 0px 1px 8px -3px, rgba(0, 0, 0, 0.3) 0px 3px 5px -3px',
+                height: 'fit-content'
+              }}
+            >
               <Title label='Thông tin bổ sung' />
               <div className='mt-3 px-2.5'>
                 {additionalInfo.map((info, index) => (

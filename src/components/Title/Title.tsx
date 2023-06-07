@@ -7,9 +7,9 @@ interface TitleProps {
 
 const Title: React.FC<TitleProps> = ({ label, subTitle }) => {
   return (
-    <div className='px-7 py-2.5 border-b border-gray-300'>
-      <h4 className='text-[17px] font-semibold mt-2'>{label}</h4>
-      {subTitle && <p className='mt-3 text-black'>{subTitle}</p>}
+    <div style={{ padding: '10px 28px', borderBottom: '1px solid #e5e5e5' }}>
+      <h4 style={{ fontSize: '16px', fontWeight: '600', marginTop: '8px' }}>{label}</h4>
+      {subTitle && <p style={{ marginTop: '12px', color: 'black', fontSize: '14px' }}>{subTitle}</p>}
     </div>
   )
 }
