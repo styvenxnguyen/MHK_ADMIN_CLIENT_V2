@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react'
 import { Row, Col, Card, Button, Badge } from 'react-bootstrap'
 import CustomTable from '~/components/Table/CustomTable'
 import { useHistory } from 'react-router-dom'
-import { services } from '~/services/api'
 import moment from 'moment'
 import { Helmet } from 'react-helmet'
 import Error from '~/views/Errors'
 import PageLoader from '~/components/Loader/PageLoader'
 import { formatCurrency } from '~/utils/common'
+import OrderService from '~/services/order.service'
 
 function PurchaseOrdersList() {
   const history = useHistory()
@@ -23,8 +23,7 @@ function PurchaseOrdersList() {
   // }
 
   useEffect(() => {
-    services
-      .get('/order/import/get-all')
+    OrderService.getAllPurchaseOrder()
       .then((response: any) => {
         const dataListProducts = response.data.data
         setListPurchaseOrders(dataListProducts)

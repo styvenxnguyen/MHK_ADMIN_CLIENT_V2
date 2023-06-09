@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Button, Card, Col, FormControl, Row } from 'react-bootstrap'
 import { Link, useParams } from 'react-router-dom'
 import Select from 'react-select'
-import 'react-datepicker/dist/react-datepicker.css'
 
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import CustomTable from '~/components/Table/CustomTable'
