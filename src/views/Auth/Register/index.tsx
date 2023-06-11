@@ -6,9 +6,9 @@ import useScriptRef from '../../../hooks/useScriptRef'
 import withReactContent from 'sweetalert2-react-content'
 import Swal from 'sweetalert2'
 import { Helmet } from 'react-helmet'
-import { services } from '~/services/api'
 import logo from '~/assets/images/auth/logo-full.png'
 import { validationSchemaRegister } from '~/hooks/useValidation'
+import { axiosConfig } from '~/utils/configAxios'
 
 const Register = () => {
   const history = useHistory()
@@ -39,7 +39,7 @@ const Register = () => {
           email: values.email,
           password: values.password
         }
-        await services.post('/auth/register', newUserData)
+        await axiosConfig.post('/auth/register', newUserData)
 
         if (scriptedRef.current) {
           setStatus({ success: true })

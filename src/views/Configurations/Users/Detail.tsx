@@ -2,7 +2,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { useEffect, useState } from 'react'
 import { Row, Col, Card, Form, Button, FormLabel, Badge, FormGroup, FormControl } from 'react-bootstrap'
-import { services } from '~/services/api'
 import Swal from 'sweetalert2'
 import { Link, useHistory, useParams } from 'react-router-dom'
 import { ButtonLoading } from '~/components/Button/LoadingButton'
@@ -18,6 +17,8 @@ import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import PageLoader from '~/components/Loader/PageLoader'
 import Positions from './Positions'
 import ToggleSwitch from '~/components/Toggle/Switch'
+import StaffService from '~/services/staff.service'
+import { axiosConfig } from '~/utils/configAxios'
 
 const UserDetail = () => {
   const [isLoading, setIsLoading] = useState(true)
@@ -48,8 +49,7 @@ const UserDetail = () => {
   }
 
   useEffect(() => {
-    services
-      .get(`/staff/get-by-id/${id}`)
+    StaffService.getDetailStaff(id)
       .then((response) => {
         const resultUserData = response.data.data
 
@@ -100,7 +100,7 @@ const UserDetail = () => {
       Swal.fire('', 'Vui lòng chọn chi nhánh cho nhân viên trước khi lưu', 'warning')
     } else {
       try {
-        services
+        axiosConfig
           .patch(`/staff/update-role-by-id/${id}`, newPosition)
           .then(() => {
             setTimeout(() => {
@@ -167,7 +167,7 @@ const UserDetail = () => {
     delete updatedFieldsWithApiKeys.district
 
     try {
-      services
+      axiosConfig
         .patch(`/staff/update-personal-by-id/${id}`, { ...updatedFieldsWithApiKeys, staff_address_list: address_list })
         .then(() => {
           setTimeout(() => {
@@ -213,7 +213,7 @@ const UserDetail = () => {
       confirmText: 'Xoá',
       showCancelButton: true,
       handleConfirmed: () =>
-        services
+        axiosConfig
           .delete(`/staff/delete-by-id/${id}`)
           .then(() => {
             history.push('/app/configurations/users')

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Row, Col, Card, Form, Button, FormLabel, Badge, Tabs, Tab, Tooltip, OverlayTrigger } from 'react-bootstrap'
-import { services } from '~/services/api'
 import Swal from 'sweetalert2'
+import { axiosConfig } from '~/utils/configAxios'
 import { Link, useHistory, useParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
 import Error from '~/views/Errors'
@@ -26,7 +26,7 @@ const CustomerDetail = () => {
   const [customerData, setCustomerData]: any = useState({})
 
   useEffect(() => {
-    services
+    axiosConfig
       .get(`/customer/get-by-id/${id}`)
       .then((response) => {
         const result = response.data.data
@@ -55,7 +55,7 @@ const CustomerDetail = () => {
       showCancelButton: true,
       confirmButtonColor: 'red',
       handleConfirmed: () =>
-        services
+        axiosConfig
           .delete(`/customer/delete-by-id/${id}`)
           .then(() => {
             {

@@ -5,8 +5,7 @@ import Swal from 'sweetalert2'
 import CustomModal from '~/components/Modal'
 import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 import { validationSchemaUserRole } from '~/hooks/useValidation'
-import { services } from '~/services/api'
-
+import { axiosConfig } from '~/utils/configAxios'
 interface Props {
   show: boolean
   close: () => void
@@ -18,7 +17,7 @@ const RoleCreateModal = ({ show, close }: Props) => {
   const handleSubmit = (values: any) => {
     setShowLoader(true)
     try {
-      services
+      axiosConfig
         .post('/role/create', values)
         .then(() => {
           setTimeout(() => {

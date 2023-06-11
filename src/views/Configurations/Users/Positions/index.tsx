@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-daxiosConfigsisable @typescript-eslint/no-empty-function */
 import { useEffect, useState } from 'react'
 import { Row, Col, Form, Button } from 'react-bootstrap'
 import Select from 'react-select'
-import { services } from '~/services/api'
+import { axiosConfig } from '~/utils/configAxios'
 import { Link } from 'react-router-dom'
 import Error from '~/views/Errors'
 import PageLoader from '~/components/Loader/PageLoader'
@@ -16,7 +16,7 @@ const Positions = ({ positions, setPositions }: any) => {
   const [optionsRole, setOptionsRole] = useState([])
 
   useEffect(() => {
-    services
+    axiosConfig
       .get('/agency-branch/get-all')
       .then((res) => {
         const result = res.data.data
@@ -26,11 +26,13 @@ const Positions = ({ positions, setPositions }: any) => {
         }))
         setOptionsBranch(options)
       })
-      .catch(() => {})
+      .catch((error) => {
+        console.log(error)
+      })
   }, [])
 
   useEffect(() => {
-    services
+    axiosConfig
       .get('/role/get-all')
       .then((res) => {
         const result = res.data.data

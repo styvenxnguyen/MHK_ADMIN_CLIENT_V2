@@ -1,7 +1,7 @@
 /* eslint-disable no-prototype-builtins */
 import { useEffect, useState } from 'react'
 import { Row, Col, Card, Form } from 'react-bootstrap'
-import { services } from '~/services/api'
+import { axiosConfig } from '~/utils/configAxios'
 import Swal from 'sweetalert2'
 import { ButtonLoading } from '~/components/Button/LoadingButton'
 import { useHistory, useParams } from 'react-router-dom'
@@ -51,7 +51,7 @@ const CustomerEdit = () => {
   }
 
   useEffect(() => {
-    services
+    axiosConfig
       .get(`/customer/get-by-id/${id}`)
       .then((response) => {
         const data = response.data.data
@@ -83,7 +83,7 @@ const CustomerEdit = () => {
   }, [id])
 
   useEffect(() => {
-    services
+    axiosConfig
       .get('/staff/get-all')
       .then((res) => {
         const result = res.data.data
@@ -99,7 +99,7 @@ const CustomerEdit = () => {
   }, [])
 
   useEffect(() => {
-    services
+    axiosConfig
       .get('/tag/get-all')
       .then((res) => {
         const result = res.data.data
@@ -155,7 +155,7 @@ const CustomerEdit = () => {
 
     try {
       //Cập nhật khách hàng
-      services
+      axiosConfig
         .patch(`/customer/update-personalInfo-by-id/${id}`, updateCustomer)
         .then(() => {
           setTimeout(() => {

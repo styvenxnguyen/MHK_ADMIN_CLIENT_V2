@@ -6,11 +6,19 @@ import Swal from 'sweetalert2'
 import CustomModal from '~/components/Modal'
 import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 import { validationSchemaBranch } from '~/hooks/useValidation'
-import { services } from '~/services/api'
+import AgencyBranchService from '~/services/agencybranch.service'
 
 interface Props {
   show: boolean
   close: any
+}
+
+interface Values {
+  code: string
+  name: string
+  phone: string
+  address: string
+  isDefaultBranch: boolean
 }
 
 const CreateBranchModal = ({ show, close }: Props) => {
@@ -24,7 +32,7 @@ const CreateBranchModal = ({ show, close }: Props) => {
     isDefaultBranch: false
   }
 
-  const handleSubmit = (values: any) => {
+  const handleSubmit = (values: Values) => {
     setShowLoader(true)
     const newBranch = {
       agency_branch_code: values.code,
@@ -36,8 +44,7 @@ const CreateBranchModal = ({ show, close }: Props) => {
       isDefaultCN: values.isDefaultBranch
     }
     try {
-      services
-        .post('/agency-branch/create', newBranch)
+      AgencyBranchService.createAgencyBranch(newBranch)
         .then(() => {
           setTimeout(() => {
             handleAlertConfirm({

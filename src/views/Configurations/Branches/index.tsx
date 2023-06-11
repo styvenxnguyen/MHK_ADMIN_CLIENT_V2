@@ -4,10 +4,10 @@ import { Button, Card, Col, Row } from 'react-bootstrap'
 import { Helmet } from 'react-helmet'
 import PageLoader from '~/components/Loader/PageLoader'
 import CustomTable from '~/components/Table/CustomTable'
-import { getBranchesList } from '~/services/api'
 import Error from '~/views/Errors'
 import CreateModal from './CreateModal'
 import EditModal from './EditModal'
+import AgencyBranchService from '~/services/agencybranch.service'
 
 const Branches = () => {
   const [showModalCreate, setShowModalCreate] = useState(false)
@@ -37,7 +37,7 @@ const Branches = () => {
   }
 
   useEffect(() => {
-    getBranchesList()
+    AgencyBranchService.getListAgencyBranch()
       .then((response) => {
         setBranchesList(response.data.data)
         setIsLoading(false)

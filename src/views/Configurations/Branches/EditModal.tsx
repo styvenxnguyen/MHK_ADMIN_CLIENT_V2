@@ -6,7 +6,7 @@ import Swal from 'sweetalert2'
 import CustomModal from '~/components/Modal'
 import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 import { validationSchemaBranch } from '~/hooks/useValidation'
-import { services } from '~/services/api'
+import AgencyBranchService from '~/services/agencybranch.service'
 
 interface Props {
   show: boolean
@@ -56,8 +56,7 @@ const EditModal = ({ show, close, idBranch, data }: Props) => {
     }
 
     try {
-      services
-        .patch(`/agency-branch/update-by-id/${idBranch}`, updatedFieldsWithApiKeys)
+      AgencyBranchService.updateAgencyBranch(idBranch, updatedFieldsWithApiKeys)
         .then(() => {
           setTimeout(() => {
             handleAlertConfirm({

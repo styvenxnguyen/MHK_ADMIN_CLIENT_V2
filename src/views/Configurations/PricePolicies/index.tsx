@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react'
-import { getPricePoliciesList } from '~/services/api'
 import { Button, Card, Col, Row } from 'react-bootstrap'
 import { Helmet } from 'react-helmet'
 import PageLoader from '~/components/Loader/PageLoader'
 import Error from '~/views/Errors'
 import moment from 'moment'
 import CustomTable from '~/components/Table/CustomTable'
+import { PricePolicyService } from '~/services/pricepolicy.service'
 
 const PricePolicies = () => {
   const [isLoading, setIsLoading] = useState(true)
@@ -25,7 +25,7 @@ const PricePolicies = () => {
   }
 
   useEffect(() => {
-    getPricePoliciesList()
+    PricePolicyService.getListPrice()
       .then((response) => {
         setPricePoliciesList(response.data.data)
         setIsLoading(false)

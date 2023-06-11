@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import React, { useEffect, useState } from 'react'
 import { Row, Col, Card, Form } from 'react-bootstrap'
-import { services } from '~/services/api'
+import { axiosConfig } from '~/utils/configAxios'
 import Swal from 'sweetalert2'
 import { ButtonLoading } from '~/components/Button/LoadingButton'
 import { useHistory } from 'react-router-dom'
@@ -22,7 +22,7 @@ const CustomerCreate = () => {
   const noOptionMessage = () => 'Đang tải dữ liệu ...'
 
   useEffect(() => {
-    services
+    axiosConfig
       .get('/staff/get-all')
       .then((res) => {
         const result = res.data.data
@@ -36,7 +36,7 @@ const CustomerCreate = () => {
   }, [])
 
   useEffect(() => {
-    services
+    axiosConfig
       .get('/tag/get-all')
       .then((res) => {
         const result = res.data.data
@@ -74,7 +74,7 @@ const CustomerCreate = () => {
     }
 
     try {
-      services
+      axiosConfig
         .post('/customer/create', newCustomer)
         .then(() => {
           setShowLoader(true)

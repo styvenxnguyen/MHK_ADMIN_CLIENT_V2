@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { Row, Col, Card, Button } from 'react-bootstrap'
 import { useHistory } from 'react-router-dom'
-import { getStaffList } from '~/services/api'
 import { Helmet } from 'react-helmet'
 import moment from 'moment'
 import CustomTable from '~/components/Table/CustomTable'
 import Errors from '~/views/Errors'
 import PageLoader from '~/components/Loader/PageLoader'
+import StaffService from '~/services/staff.service'
 
 const UsersList = () => {
   const [listEmployees, setListEmployees] = useState([])
@@ -21,7 +21,7 @@ const UsersList = () => {
   }
 
   useEffect(() => {
-    getStaffList()
+    StaffService.getListStaff()
       .then((response) => {
         setListEmployees(response.data.data)
         setIsLoading(false)

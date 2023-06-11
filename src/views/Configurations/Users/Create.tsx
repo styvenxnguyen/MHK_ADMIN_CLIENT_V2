@@ -7,12 +7,12 @@ import { Helmet } from 'react-helmet'
 import Select from 'react-select'
 import { Formik } from 'formik'
 import ProvinceDistrictSelect from '~/components/Select/ProvinceDistrict'
-import { services } from '~/services/api'
 import Swal from 'sweetalert2'
 import Positions from '~/views/Configurations/Users/Positions'
 import { validationSchemaUserCreate } from '~/hooks/useValidation'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import ToggleSwitch from '~/components/Toggle/Switch'
+import { axiosConfig } from '~/utils/configAxios'
 
 const UserCreate = () => {
   const [showLoader, setShowLoader] = useState(false)
@@ -55,7 +55,7 @@ const UserCreate = () => {
     }
 
     try {
-      services
+      axiosConfig
         .post('/staff/create', newStaff)
         .then(() => {
           setTimeout(() => {
