@@ -180,7 +180,6 @@ const ProductCreate = () => {
   }
 
   const handleSubmit = async (values: FormValues) => {
-    console.log('submit')
     try {
       const dataSubmit = {
         product_name: values.product_name,
@@ -191,9 +190,8 @@ const ProductCreate = () => {
         brand_id: valueBrand,
         tagIDList: valueTags,
         properties: listProperty,
-        product_variant_prices: listVariantPrice
+        product_variant_prices: listVariantPrice.filter((item) => item.price_value !== '')
       }
-      console.log(dataSubmit)
       await ProductService.createProduct(dataSubmit)
       sweetSuccessAlert()
     } catch (error) {
