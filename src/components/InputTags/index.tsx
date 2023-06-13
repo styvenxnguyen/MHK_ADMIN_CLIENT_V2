@@ -62,7 +62,8 @@ const InputTags: React.FC<SelectProps> = ({ onChange, id, name, placeholder, ind
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          style={{ padding: '10px', width: selectedOptions.length > 0 ? '' : '300px' }}
+          className='p-10'
+          style={{ width: selectedOptions.length > 0 ? '' : '300px' }}
         />
       </div>
     </div>
