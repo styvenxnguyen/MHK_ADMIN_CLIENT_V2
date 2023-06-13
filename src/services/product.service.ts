@@ -13,7 +13,7 @@ const ProductService = {
   getListProductType: () => axiosConfig.get(PRODUCT.GET_ALL_TYPE),
   getListProductBrand: () => axiosConfig.get(PRODUCT.GET_ALL_BRAND),
   createProduct: (body: any) => axiosConfig.post(PRODUCT.CREATE_PRODUCT, body),
-  getDetailProduct: (id: string) => axiosConfig.post(PRODUCT.GET_DETAIL(id))
+  getDetailProduct: (id: string) => axiosConfig.get(PRODUCT.GET_DETAIL(id))
 }
 
 export default ProductService

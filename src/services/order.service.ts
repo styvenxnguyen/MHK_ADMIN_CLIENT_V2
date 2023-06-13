@@ -3,8 +3,8 @@ import { axiosConfig } from '~/utils/configAxios'
 
 const ORDER = {
   GET_ALL: (params: string) => `/order/get-all?order_type=${params}`,
-  PURCHASEORDER_DETAIL: (id: string) => `/order/import/get-by-id/${id}`,
-  UPDATED_PURCHASEORDER: (id: string) => `/order/import/update-detail-by-id/${id}`
+  PURCHASEORDER_DETAIL: (id: string) => `/order/get-by-id?id=${id}&order_type=Đơn nhập`,
+  UPDATED_PURCHASEORDER: (id: string) => `/order/update-detail-by-id/${id}`
 }
 
 const OrderService = {

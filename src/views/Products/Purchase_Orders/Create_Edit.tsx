@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Button, Card, Col, FormControl, Row } from 'react-bootstrap'
 import { Link, useParams } from 'react-router-dom'
 import Select from 'react-select'
+import { TbPackage } from 'react-icons/tb'
 
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import CustomTable from '~/components/Table/CustomTable'
@@ -20,29 +21,29 @@ import { Helmet } from 'react-helmet'
 import PageLoader from '~/components/Loader/PageLoader'
 import Error from '~/views/Errors'
 import { TagService } from '~/services/tag.service'
+import ProductService from '~/services/product.service'
+import { Product, ProductVariant } from '~/types/Product.type'
 
 const CEPurchaseOrder = () => {
   const params: { id: string } = useParams()
   const [purchaseDetail, setPurchaseDetail] = useState<PurchaseOrder>()
-  // const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isFetched, setIsFetched] = useState(false)
   const [isLoadingSupplier, setIsLoadingSupplier] = useState(false)
   const [productList, setProductList] = useState<OrderProduct[]>([])
   const [optionsStaff, setOptionsStaff] = useState([])
   const [optionsTag, setOptionsTag] = useState([])
+  const [optionsProduct, setOptionsProduct] = useState([])
   const [optionsBranch, setOptionsBranch] = useState([])
   const [optionsSupplier, setOptionsSupplier] = useState([])
+  const [selectedProduct, setSelectedProduct] = useState<Product>()
+  const [optionsProductVariant, setOptionsProductVariant] = useState([])
   const [selectedSupplier, setSelectedSupplier] = useState<SupplierRes>()
   const loadingMessage = () => 'Đang tải dữ liệu...'
 
-  // const handleDateChange = (date: Date | null) => {
-  //   setSelectedDate(date)
-  // }
-
-  const totalQuantity = productList.reduce((acc: any, item: any) => acc + item.product_amount, 0)
-  const totalAmount = productList.reduce((acc: any, item: any) => acc + item.product_price, 0)
-  const totalDiscount = productList.reduce((acc: any, item: any) => acc + item.product_discount, 0)
+  const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
+  const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
+  const totalDiscount = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_discount), 0)
   const totalPayment = totalAmount - totalDiscount
 
   const dataDebtSupplier = [
@@ -80,11 +81,23 @@ const CEPurchaseOrder = () => {
     }
   ]
 
-  const columns = React.useMemo(
-    () => [
+  const columns = React.useMemo(() => {
+    const handleProductTable = (rowIndex: number, columnId: string, value: any) => {
+      const updatedData: any = [...productList]
+      updatedData[rowIndex][columnId] = value
+      setProductList(updatedData)
+    }
+
+    const handleDeleteRow = (rowIndex: number) => {
+      const newData = [...productList]
+      newData.splice(rowIndex, 1)
+      setProductList(newData)
+    }
+
+    return [
       {
         Header: 'STT',
-        accessor: 'index'
+        Cell: ({ row }: any) => productList.length - row.index
       },
       {
         Header: 'Mã SKU',
@@ -97,40 +110,75 @@ const CEPurchaseOrder = () => {
       {
         Header: 'Số lượng',
         accessor: 'product_amount',
-        Cell: ({ value }: { value: number }) => <div>{value}</div>
+        Cell: ({ row, value }: any) => (
+          <FormControl
+            className='text-center'
+            type='number'
+            min={1}
+            value={value}
+            onChange={(e) => handleProductTable(row.index, 'product_amount', e.target.value)}
+          />
+        )
       },
       {
         Header: 'Giá sản phẩm',
         accessor: 'product_price',
-        Cell: ({ value }: any) => formatCurrency(value)
+        Cell: ({ row, value }: any) => (
+          <FormControl
+            value={value}
+            className='text-center'
+            onChange={(e) => handleProductTable(row.index, 'product_price', e.target.value)}
+          />
+        )
       },
       {
         Header: 'Chiết khấu',
-        accessor: 'product_discount'
+        accessor: 'product_discount',
+        Cell: ({ row, value }: any) => (
+          <FormControl
+            value={value}
+            className='text-center'
+            onChange={(e) => handleProductTable(row.index, 'product_discount', e.target.value)}
+          />
+        )
       },
       {
         Header: 'Đơn vị',
-        accessor: 'product_unit'
+        accessor: 'product_unit',
+        Cell: ({ row, value }: any) => (
+          <FormControl
+            value={value}
+            className='text-center'
+            onChange={(e) => handleProductTable(row.index, 'product_unit', e.target.value)}
+          />
+        )
       },
       {
         Header: 'Thành tiền',
         Cell: ({ row }: any) => {
           const amount = row.values.product_amount
           const price = row.values.product_price
-
           const totalPrice = formatCurrency(amount * price)
-
           return totalPrice
         }
+      },
+      {
+        Header: 'Chức năng',
+        Cell: ({ row }: any) => (
+          <Button className='' variant='outline-danger' onClick={() => handleDeleteRow(row.index)}>
+            <i className='feather icon-trash-2' />
+            Xoá
+          </Button>
+        )
       }
-    ],
-    []
-  )
+    ]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productList.length])
 
-  const customPlaceholder = () => {
+  const customPlaceholder = (value: string) => {
     return (
       <span className='flex-between'>
-        <span>Tìm theo tên, SĐT, mã nhà cung cấp...(F4)</span>
+        <span>{value === 'Supplier' ? 'Tìm theo tên, SĐT, mã nhà cung cấp...(F4)' : 'Tìm theo tên sản phẩm'} </span>
         <i className='feather icon-search'></i>
       </span>
     )
@@ -175,6 +223,35 @@ const CEPurchaseOrder = () => {
     }
   }, [])
 
+  const getProductList = useCallback(async () => {
+    try {
+      const res = await ProductService.getListProduct()
+      const result = res.data.data
+      const options = result.map((product: Product) => ({
+        label: product.product_name,
+        value: product.id
+      }))
+      setOptionsProduct(options)
+    } catch (error) {
+      console.log(error)
+    }
+  }, [])
+
+  const getProductDetail = useCallback(async (id: string) => {
+    try {
+      const res = await ProductService.getDetailProduct(id)
+      const dataProduct: any = res.data.data
+      setSelectedProduct(dataProduct)
+      const options = dataProduct.productVariants.map((variant: ProductVariant) => ({
+        label: variant.product_variant_name,
+        value: variant.id
+      }))
+      setOptionsProductVariant(options)
+    } catch (error) {
+      console.log(error)
+    }
+  }, [])
+
   const getAgencyBranch = useCallback(async () => {
     try {
       const res = await AgencyBranchService.getListAgencyBranch()
@@ -195,8 +272,8 @@ const CEPurchaseOrder = () => {
       const data = res.data.data
       setPurchaseDetail(data)
       setProductList(
-        data.order_product_list.map((purchase: PurchaseOrder, index: number) => {
-          return { ...purchase, index: data.order_product_list.length - index }
+        data.order_product_list.map((purchase: PurchaseOrder) => {
+          return { ...purchase }
         })
       )
       setIsLoading(false)
@@ -228,7 +305,8 @@ const CEPurchaseOrder = () => {
     getStaffList()
     getAgencyBranch()
     getSupplierList()
-  }, [getPurchaseOrderDetail, getStaffList, getAgencyBranch, getSupplierList, params.id])
+    getProductList()
+  }, [getPurchaseOrderDetail, getStaffList, getAgencyBranch, getSupplierList, getProductList, params.id])
 
   useEffect(() => {
     TagService.getListTag().then((response) => {
@@ -322,7 +400,7 @@ const CEPurchaseOrder = () => {
                     onChange={(e: any) => {
                       getSupplierDetail(e.value)
                     }}
-                    placeholder={customPlaceholder()}
+                    placeholder={customPlaceholder('Supplier')}
                   />
                   {selectedSupplier ? (
                     <>
@@ -441,9 +519,37 @@ const CEPurchaseOrder = () => {
                 <i className='feather icon-archive mr-2'></i>
                 Thông tin sản phẩm
               </h5>
+              <Select
+                className='mt-4'
+                options={optionsProduct}
+                onChange={(e: any) => {
+                  getProductDetail(e.value)
+                }}
+                placeholder={customPlaceholder('Product')}
+              />
+              {selectedProduct && (
+                <Select
+                  className='mt-4'
+                  options={optionsProductVariant}
+                  onChange={(e: any) => {
+                    console.log('Hello' + e.value)
+                  }}
+                  placeholder='Chọn phiên bản sản phẩm'
+                />
+              )}
             </Card.Header>
             <Card.Body>
-              <CustomTable columns={columns} data={productList} handleRowClick={{}} hiddenColumns={['selection']} />
+              {productList.length === 0 ? (
+                <div
+                  style={{ color: '#9d9d9d' }}
+                  className='d-flex justify-content-center align-items-center py-5 flex-column'
+                >
+                  <TbPackage size={80} />
+                  <span className='mt-3'>Đơn hàng chưa có sản phẩm nào</span>
+                </div>
+              ) : (
+                <CustomTable columns={columns} data={productList} handleRowClick={{}} hiddenColumns={['selection']} />
+              )}
 
               <hr className='dashed-top' />
               <Row className='justify-content-between'>
