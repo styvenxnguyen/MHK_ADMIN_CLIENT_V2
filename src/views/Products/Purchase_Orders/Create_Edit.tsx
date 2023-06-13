@@ -8,7 +8,6 @@ import CustomTable from '~/components/Table/CustomTable'
 import { formatCurrency } from '~/utils/common'
 
 import OrderService from '~/services/order.service'
-import { getTagsList } from '~/services/api'
 import StaffService from '~/services/staff.service'
 import AgencyBranchService from '~/services/agencybranch.service'
 import { AgencyBranch } from '~/types/AgencyBranch.type'
@@ -20,6 +19,7 @@ import { SupplierRes } from '~/types/Supplier.type'
 import { Helmet } from 'react-helmet'
 import PageLoader from '~/components/Loader/PageLoader'
 import Error from '~/views/Errors'
+import { TagService } from '~/services/tag.service'
 
 const CEPurchaseOrder = () => {
   const params: { id: string } = useParams()
@@ -138,7 +138,7 @@ const CEPurchaseOrder = () => {
 
   const getStaffList = useCallback(async () => {
     try {
-      const res = await StaffService.getAllStaff()
+      const res = await StaffService.getListStaff()
       const result = res.data.data
       const options = result.map((staff: Staff) => ({
         label: staff.staff_name,
@@ -177,7 +177,7 @@ const CEPurchaseOrder = () => {
 
   const getAgencyBranch = useCallback(async () => {
     try {
-      const res = await AgencyBranchService.getAllAgencyBranch()
+      const res = await AgencyBranchService.getListAgencyBranch()
       const result = res.data.data
       const options = result.map((branch: AgencyBranch) => ({
         label: branch.agency_branch_name,
@@ -231,7 +231,7 @@ const CEPurchaseOrder = () => {
   }, [getPurchaseOrderDetail, getStaffList, getAgencyBranch, getSupplierList, params.id])
 
   useEffect(() => {
-    getTagsList().then((response) => {
+    TagService.getListTag().then((response) => {
       const tagsList = response.data.data
       setOptionsTag(
         tagsList.map((tag: any) => ({

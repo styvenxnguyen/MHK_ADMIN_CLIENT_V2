@@ -1,13 +1,13 @@
-import Swal from 'sweetalert2'
+import Swal, { SweetAlertIcon } from 'sweetalert2'
 
 interface Props {
   title?: string
   html?: string
   text?: string
-  icon?: any
+  icon?: SweetAlertIcon
   confirmText?: string
   cancelText?: string
-  handleConfirmed?: any
+  handleConfirmed?: () => void
   showCancelButton?: boolean
   confirmButtonColor?: string
 }

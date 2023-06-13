@@ -1,19 +1,19 @@
 import { axiosConfig } from '~/utils/configAxios'
 
 const PRODUCT = {
+  GET_ALL: '/product/get-all',
   CREATE_PRODUCT: '/product/create',
-  GET_ALL_TAG: '/tag/get-all',
   GET_ALL_BRAND: '/brand/get-all',
   GET_ALL_TYPE: '/type/get-all',
-  GET_ALL_POLICIES: '/price/get-all'
+  GET_DETAIL: (id: string) => `/product/get-by-id/${id}`
 }
 
 const ProductService = {
-  getListPricePolicies: () => axiosConfig.get(PRODUCT.GET_ALL_POLICIES),
+  getListProduct: () => axiosConfig.get(PRODUCT.GET_ALL),
   getListProductType: () => axiosConfig.get(PRODUCT.GET_ALL_TYPE),
   getListProductBrand: () => axiosConfig.get(PRODUCT.GET_ALL_BRAND),
-  getListProductTag: () => axiosConfig.get(PRODUCT.GET_ALL_TAG),
-  createProduct: (body: any) => axiosConfig.post(PRODUCT.CREATE_PRODUCT, body)
+  createProduct: (body: any) => axiosConfig.post(PRODUCT.CREATE_PRODUCT, body),
+  getDetailProduct: (id: string) => axiosConfig.post(PRODUCT.GET_DETAIL(id))
 }
 
 export default ProductService

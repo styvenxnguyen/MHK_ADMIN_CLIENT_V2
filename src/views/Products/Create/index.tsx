@@ -12,6 +12,8 @@ import ProductService from '~/services/product.service'
 import Title from '~/components/Title/Title'
 import { formatCurrency } from '~/utils/common'
 import InputTags from '~/components/InputTags'
+import { PricePolicyService } from '~/services/pricepolicy.service'
+import { TagService } from '~/services/tag.service'
 
 interface FormValues {
   product_name: string
@@ -290,7 +292,7 @@ const ProductCreate = () => {
 
   const getListPricePolicies = useCallback(async () => {
     try {
-      const res = await ProductService.getListPricePolicies()
+      const res = await PricePolicyService.getListPrice()
       setOptionPricePolicy(
         res.data.data.map((item: VariantPrice) => ({
           label: item.price_type,
@@ -316,7 +318,7 @@ const ProductCreate = () => {
 
   const getListTag = useCallback(async () => {
     try {
-      const res = await ProductService.getListProductTag()
+      const res = await TagService.getListTag()
       setOptionsTag(res.data.data)
     } catch (error) {
       console.log(error)

@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { Row, Col, Card, Button } from 'react-bootstrap'
 import CustomTable from '~/components/Table/CustomTable'
 import { useHistory } from 'react-router-dom'
-import { getProductsList } from '~/services/api'
 import moment from 'moment'
 import { Helmet } from 'react-helmet'
 import Error from '~/views/Errors'
 import PageLoader from '~/components/Loader/PageLoader'
+import ProductService from '~/services/product.service'
 
 function ProductsList() {
   const history = useHistory()
@@ -15,7 +15,7 @@ function ProductsList() {
   const [isFetched, setIsFetched] = useState(false)
 
   useEffect(() => {
-    getProductsList()
+    ProductService.getListProduct()
       .then((response: any) => {
         const dataListProducts = response.data.data
         setListProducts(dataListProducts)

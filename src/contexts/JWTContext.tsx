@@ -5,7 +5,7 @@ import jwtDecode from 'jwt-decode'
 import { ACCOUNT_INITIALISE, LOGIN, LOGOUT } from '../store/actions'
 import accountReducer from '~/store/accountReducer'
 import Loader from '~/components/Loader/RouteLoad'
-import { services } from '~/services/api'
+import { axiosConfig } from '~/utils/configAxios'
 
 const initialState = {
   isLoggedIn: false,
@@ -45,7 +45,7 @@ export const JWTProvider = ({ children }: any) => {
   const [state, dispatch] = useReducer(accountReducer, initialState)
 
   const login = async (phone: number, password: string) => {
-    const response = await services.post('/auth/login', { phone, password })
+    const response = await axiosConfig.post('/auth/login', { phone, password })
     const { data, user } = response.data
     const accessToken = data
     setSession(accessToken)

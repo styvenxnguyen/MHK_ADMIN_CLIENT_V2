@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { Row, Col, Card, Button } from 'react-bootstrap'
 import { Helmet } from 'react-helmet'
-import { services } from '~/services/api'
 import moment from 'moment'
 import { useHistory } from 'react-router-dom'
 import CustomTable from '~/components/Table/CustomTable'
 import Error from '../Errors'
 import PageLoader from '~/components/Loader/PageLoader'
+import CustomerService from '~/services/customer.service'
 
 function CustomersList() {
   const history = useHistory()
@@ -20,8 +20,7 @@ function CustomersList() {
   }
 
   useEffect(() => {
-    services
-      .get('/customer/get-all')
+    CustomerService.getListCustomer()
       .then((response) => {
         const filteredData = response.data.data.filter((user: any) => user !== null)
         setListCustomer(filteredData)
@@ -90,7 +89,7 @@ function CustomersList() {
           <Card>
             <Card.Header className='flex-between'>
               <Card.Title as='h5'>Danh sách khách hàng</Card.Title>
-              <Button className='mb-0' onClick={() => history.push('/app/customers/create')}>
+              <Button className='m-0' onClick={() => history.push('/app/customers/create')}>
                 <i className='feather icon-plus-circle mr-2'></i>
                 Thêm khách hàng
               </Button>

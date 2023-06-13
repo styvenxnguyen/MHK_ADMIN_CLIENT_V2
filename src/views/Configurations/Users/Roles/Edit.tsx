@@ -4,7 +4,7 @@ import { Col, Form, Row } from 'react-bootstrap'
 import Swal from 'sweetalert2'
 import CustomModal from '~/components/Modal'
 import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
-import { services } from '~/services/api'
+import { axiosConfig } from '~/utils/configAxios'
 
 interface Props {
   show: boolean
@@ -28,7 +28,7 @@ const RoleEditModal = ({ show, close, id, data }: Props) => {
   const handleSubmit = (values: any) => {
     setShowLoader(true)
     try {
-      services
+      axiosConfig
         .patch(`/role/update-by-id/${id}`, values)
         .then(() => {
           setTimeout(() => {
@@ -68,7 +68,7 @@ const RoleEditModal = ({ show, close, id, data }: Props) => {
       html: `Bạn có chắc chắc muốn xoá vai trò <b>${roleData.role_title}</b>? Thao tác này không thể khôi phục`,
       handleConfirmed: () => {
         setIsDelete(true)
-        services
+        axiosConfig
           .delete(`/role/delete-by-id/${id}`)
           .then(() => {
             setTimeout(() => {

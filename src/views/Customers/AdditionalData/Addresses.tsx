@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { Row, Col, Button, Form } from 'react-bootstrap'
-import { useParams } from 'react-router-dom'
-import { services } from '~/services/api'
+import { Link, useParams } from 'react-router-dom'
 import CustomModal from '~/components/Modal'
+import { axiosConfig } from '~/utils/configAxios'
 import { Formik } from 'formik'
 import Swal from 'sweetalert2'
 import ProvinceDistrictSelect from '~/components/Select/ProvinceDistrict'
@@ -52,7 +52,7 @@ function Addresses() {
   )
 
   useEffect(() => {
-    services
+    axiosConfig
       .get(`/customer/get-by-id/${id}`)
       .then((response) => {
         const customerData = response.data.data
@@ -85,7 +85,7 @@ function Addresses() {
       user_district: values.district
     }
     try {
-      await services
+      await axiosConfig
         .post(`/address/add/${id}`, newAddress)
         .then(() => {
           setTimeout(() => {
@@ -110,7 +110,7 @@ function Addresses() {
         user_province: values.province,
         user_district: values.district
       }
-      services
+      axiosConfig
         .patch(`/address/update/${idAddress}`, updateAddress)
         .then(() => {
           setTimeout(() => {
@@ -154,7 +154,7 @@ function Addresses() {
       } ?`,
       handleConfirmed: () => {
         setIsDelete(true)
-        services
+        axiosConfig
           .delete(`/address/delete/${idAddress}`)
           .then(() => {
             setTimeout(() => {
@@ -184,10 +184,6 @@ function Addresses() {
 
   if (!isFetched) {
     return <Error errorCode='500' />
-  }
-
-  if (addressList.length === 0) {
-    return <div className='text-center'>Khách hàng chưa cập nhật địa chỉ</div>
   }
 
   return (
@@ -265,7 +261,7 @@ function Addresses() {
               show={showModalUpdate}
               deleteBtn
               isDelete={isDelete}
-              textDelete={isDelete ? 'Đang xoá' : 'Xoá'}
+              textDelete={isDelete ? 'Đang xoá...' : 'Xoá'}
               handleDelete={handleDelete}
               handleClose={handleCloseModal}
               handleSubmit={handleSubmit}
@@ -317,7 +313,18 @@ function Addresses() {
         )}
       </Formik>
 
-      <CustomTable columns={columns} data={addressList} handleRowClick={handleRowClick} ButtonAdd={ButtonAdd} />
+      {addressList.length === 0 ? (
+        <div className='text-center font-weight-bold text-normal'>
+          Khách hàng chưa cập nhật địa chỉ
+          <p className='mt-2'>
+            <Link to='#' onClick={handleAddAddress}>
+              Nhấn vào đây để thêm ngay
+            </Link>
+          </p>
+        </div>
+      ) : (
+        <CustomTable columns={columns} data={addressList} handleRowClick={handleRowClick} ButtonAdd={ButtonAdd} />
+      )}
     </>
   )
 }

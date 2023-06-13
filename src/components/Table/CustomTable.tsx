@@ -6,10 +6,10 @@ import { useEffect, useState } from 'react'
 import { useTable, usePagination, useGlobalFilter, useRowSelect, useSortBy } from 'react-table'
 import { Row, Col, CloseButton, Dropdown, DropdownButton } from 'react-bootstrap'
 import BTable from 'react-bootstrap/Table'
-import { services } from '~/services/api'
 import Swal from 'sweetalert2'
 import CustomPagination from '../Pagination'
 import GlobalFilter from '../Filter/GlobalFilter'
+import { axiosConfig } from '~/utils/configAxios'
 
 type CustomInitialState = {
   pageIndex: number
@@ -89,7 +89,9 @@ function CustomTable({
   const selectedRows = selectedFlatRows.map((row: any) => row.original)
   const selectedCount = selectedFlatRows.length
 
-  const promises = selectedRows.map((row: any) => services.delete(`/${object}/delete-by-id/${row.id}`, { data: row }))
+  const promises = selectedRows.map((row: any) =>
+    axiosConfig.delete(`/${object}/delete-by-id/${row.id}`, { data: row })
+  )
 
   const handlePageChange = (newPage: any) => {
     setCurrentPage(newPage)

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { Button, Card } from 'react-bootstrap'
-import { getRolesUser } from '~/services/api'
 import CustomTable from '../../../../components/Table/CustomTable'
 import { Helmet } from 'react-helmet'
 import Error from '~/views/Errors'
@@ -8,6 +7,7 @@ import PageLoader from '~/components/Loader/PageLoader'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import RoleCreateModal from './Create'
 import RoleEditModal from './Edit'
+import StaffService from '~/services/staff.service'
 
 function RolesList() {
   const [isLoading, setIsLoading] = useState(true)
@@ -37,7 +37,7 @@ function RolesList() {
   )
 
   useEffect(() => {
-    getRolesUser()
+    StaffService.getListRole()
       .then((response) => {
         setListRoles(response.data.data)
         setIsLoading(false)
