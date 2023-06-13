@@ -38,6 +38,7 @@ module.exports = {
   },
   rules: {
     // Tắt rule yêu cầu import React trong file jsx
+    'click-events-have-key-events': 'off',
     'react/react-in-jsx-scope': 'off',
     // Cảnh báo khi thẻ <a target='_blank'> mà không có rel="noreferrer"
     'react/jsx-no-target-blank': 'warn',

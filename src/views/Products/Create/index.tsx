@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback, ChangeEvent } from 'react'
-import { Col, Button, Form as FormBootstrap, FormControl, FormGroup } from 'react-bootstrap'
+import { useState, useEffect, useCallback, ChangeEvent, KeyboardEvent } from 'react'
+import { Col, Button, Form as FormBootstrap, FormGroup } from 'react-bootstrap'
 import { HiChevronDoubleDown } from 'react-icons/hi'
+import { HiXMark } from 'react-icons/hi2'
 import Select from 'react-select'
 import { Formik, Field, Form, ErrorMessage, FieldProps } from 'formik'
 import withReactContent from 'sweetalert2-react-content'
@@ -9,6 +10,8 @@ import Swal from 'sweetalert2'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import ProductService from '~/services/product.service'
 import Title from '~/components/Title/Title'
+import { formatCurrency } from '~/utils/common'
+import InputTags from '~/components/InputTags'
 
 interface FormValues {
   product_name: string
@@ -47,36 +50,59 @@ interface ProductType {
   type_title: string
 }
 
+const optionUnitWeight = [
+  { label: 'g', weight: 'g' },
+  { label: 'kg', weight: 'kg' }
+]
+
+const DataFields = [
+  {
+    id: 'product_code',
+    name: 'product_code',
+    label: 'Mã sản phẩm/SKU',
+    type: 'text'
+  },
+  {
+    id: 'product_weight',
+    name: 'product_weight',
+    label: 'Khối lượng',
+    type: 'number'
+  },
+  {
+    id: 'product_barcode',
+    name: 'product_barcode',
+    label: 'Mã vạch/Barcode',
+    type: 'text'
+  },
+  {
+    id: 'product_unit_price',
+    name: 'product_unit_price',
+    label: 'Đơn vị tính',
+    type: 'number'
+  }
+]
+
 const ProductCreate = () => {
   const [optionsTag, setOptionsTag] = useState<TypeResponse[]>([])
   const [optionsType, setOptionsType] = useState<ProductType[]>([])
   const [optionsBrand, setOptionsBrand] = useState<ProductType[]>([])
   const [optionPricePolicy, setOptionPricePolicy] = useState([])
-  const [showProperty, setShowProperty] = useState(false)
   const [showMore, setShowMore] = useState<boolean>(false)
   const [value, setValue] = useState<boolean>(false)
   const [valueBrand, setValueBrand] = useState()
   const [valueType, setValueType] = useState()
   const [valueTags, setValueTags] = useState([])
-  const [dataProduct, setDataProduct]: any = useState({
-    product_name: '',
-    product_code: '',
-    product_weight: '',
-    product_barcode: '',
-    product_unit_price: '',
-    product_type: '',
-    product_brand: '',
-    product_tags: '',
-    price_retail: '',
-    price_wholesales: '',
-    price_import: ''
-  })
   const [listVariantPrice, setListVariantPrice] = useState<{ price_id: string; price_value: string }[]>([
     { price_id: '', price_value: '' }
   ])
+  const [showProperty, setShowProperty] = useState<{ valueName: string; value: []; key: number }[]>([])
+  const [openToggle, setOpenToggle] = useState<boolean>(false)
+  const [inputSize, setInputSize] = useState('Kích thước')
+  const [inputColor, setInputColor] = useState('Màu sắc')
+  const [inputMaterial, setInputMaterial] = useState('Chất liệu')
   const [listProperty, setListProperty] = useState<{ key: string; values: string[] }[]>([
     {
-      key: '',
+      key: inputSize,
       values: ['']
     }
   ])
@@ -85,45 +111,13 @@ const ProductCreate = () => {
     const MySwal = withReactContent(Swal)
     MySwal.fire({
       title: 'Tạo sản phẩm thành công',
-      text: 'Chào mừng bạn đến với MHK, nhấn vào nút dưới đây để đăng nhập và trải nghiệm dịch vụ của chúng tôi',
+      text: 'Chúc mừng bạn đã tạo sản phẩm thành công',
       icon: 'success',
       confirmButtonText: 'Xác nhận',
       confirmButtonColor: 'success',
       showCancelButton: false
     })
   }
-
-  const optionUnitWeight = [
-    { label: 'g', weight: 'g' },
-    { label: 'kg', weight: 'kg' }
-  ]
-
-  const DataFields = [
-    {
-      id: 'product_code',
-      name: 'product_code',
-      label: 'Mã sản phẩm/SKU',
-      type: 'text'
-    },
-    {
-      id: 'product_weight',
-      name: 'product_weight',
-      label: 'Khối lượng',
-      type: 'number'
-    },
-    {
-      id: 'product_barcode',
-      name: 'product_barcode',
-      label: 'Mã vạch/Barcode',
-      type: 'text'
-    },
-    {
-      id: 'product_unit_price',
-      name: 'product_unit_price',
-      label: 'Đơn vị tính',
-      type: 'number'
-    }
-  ]
 
   const DataAdditionalInformation = [
     {
@@ -162,7 +156,7 @@ const ProductCreate = () => {
     product_name: '',
     product_classify: '',
     product_weight: 0,
-    product_weight_calculator_unit: '',
+    product_weight_calculator_unit: 'g',
     type_id: '',
     brand_id: '',
     tagIDList: [],
@@ -206,7 +200,7 @@ const ProductCreate = () => {
         if (i.price_id === item.value)
           return {
             ...i,
-            price_value: value
+            price_value: formatCurrency(parseInt(value))
           }
         return i
       })
@@ -215,19 +209,40 @@ const ProductCreate = () => {
     [listVariantPrice]
   )
 
-  const handleChangeProperty = useCallback(
-    (value: ChangeEvent<HTMLInputElement>, index: number) => {
-      const newList: any = [...listProperty]
-      if (value.target.name === 'values') {
-        newList[index][value.target.name] = [value.target.value]
-      } else {
-        newList[index][value.target.name] = value.target.value
-      }
+  const handleChangPropertyValue = (v: any, index: number, option: string[]) => {
+    const newList: any = [...listProperty]
+    switch (v) {
+      case '11':
+        newList[index].values = option
+        break
+      case '12':
+        newList[index].values = option
+        break
+      case '13':
+        newList[index].values = option
+        break
+    }
+    setListProperty(newList)
+  }
 
-      setListProperty(newList)
-    },
-    [listProperty]
-  )
+  const handleChangPropertyName = (v: any, index: number) => {
+    const newList: any = [...listProperty]
+    switch (v.target.name) {
+      case '1':
+        setInputSize(v.target.value)
+        newList[index].key = v.target.value
+        break
+      case '2':
+        setInputColor(v.target.value)
+        newList[index].key = v.target.value
+        break
+      case '3':
+        setInputMaterial(v.target.value)
+        newList[index].key = v.target.value
+        break
+    }
+    setListProperty(newList)
+  }
 
   const handleChangeSelect = useCallback((e: any, option: any) => {
     switch (option.name) {
@@ -246,9 +261,32 @@ const ProductCreate = () => {
     }
   }, [])
 
-  const handleAddProperty = useCallback(() => {
-    setListProperty([...listProperty, { key: '', values: [''] }])
-  }, [listProperty])
+  const handleAdd = () => {
+    if (showProperty.length === 1) {
+      setShowProperty([...showProperty, { valueName: 'Màu sắc', value: [], key: 2 }])
+      setListProperty([...listProperty, { key: inputColor, values: [] }])
+    } else if (showProperty.length === 2) {
+      if (showProperty.some((item) => item.key === 3)) {
+        setShowProperty([...showProperty, { valueName: 'Màu sắc', value: [], key: 2 }])
+        setListProperty([...listProperty, { key: inputColor, values: [] }])
+      } else {
+        setShowProperty([...showProperty, { valueName: 'Chất liệu', value: [], key: 3 }])
+        setListProperty([...listProperty, { key: inputMaterial, values: [] }])
+      }
+    }
+  }
+
+  const deletedRowProperty = (key: number, index: number) => {
+    setShowProperty(showProperty.filter((item) => item.key !== key))
+    setListProperty(listProperty.filter((_, i) => i !== index))
+    switch (key) {
+      case 2:
+        setInputColor('Màu sắc')
+        break
+      case 3:
+        setInputMaterial('Chất liệu')
+    }
+  }
 
   const getListPricePolicies = useCallback(async () => {
     try {
@@ -269,6 +307,12 @@ const ProductCreate = () => {
       console.log(error)
     }
   }, [])
+
+  const handleKeyPress = (e: KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+    }
+  }
 
   const getListTag = useCallback(async () => {
     try {
@@ -304,110 +348,10 @@ const ProductCreate = () => {
     getListType()
   }, [getListPricePolicies, getListBrand, getListTag, getListType])
 
-  // const cardInfo = [
-  //   {
-  //     title: 'Hình thức quản lý',
-  //     lg: 8,
-  //     body: (
-  //       <Col>
-  //         <Form.Check type='radio' checked className='text-normal' label='Sản phẩm thường'></Form.Check>
-  //       </Col>
-  //     )
-  //   },
-  //   {
-  //     title: 'Thông tin bổ sung',
-  //     lg: 4,
-  //     body: additionalInfo.map((info, index) => (
-  // <InputProductForm
-  //   key={`generalInfo_${index}`}
-  //   sm={info.sm}
-  //   lg={info.lg}
-  //   label={info.label}
-  //   placeholder={info.placeholder}
-  //   optionsSelect={
-  //     info.optionsSelect === 'optionsTag'
-  //       ? optionsTag
-  //       : info.optionsSelect === 'optionsBrand'
-  //       ? optionsBrand
-  //       : optionsType
-  //   }
-  //   name={info.name}
-  //   value={dataProduct[info.name]}
-  //   inputType={info.inputType}
-  //   onChange={handleChange}
-  //   isMulti={info.isMulti}
-  // />
-  //     ))
-  //   },
-  //   {
-  //     title: 'Thông tin chung',
-  //     lg: 8,
-  //     body: generalInfo.map((info, index) => (
-  //       <InputProductForm
-  //         key={`generalInfo_${index}`}
-  //         sm={info.sm}
-  //         lg={info.lg}
-  //         label={info.label}
-  //         dir={info.dir}
-  //         optionsSelect={info.optionsSelect}
-  //         placeholder={info.placeholder}
-  //         name={info.name}
-  //         value={dataProduct[info.name]}
-  //         inputType={info.inputType}
-  //         require={info.require}
-  //         onChange={handleChange}
-  //       />
-  //     ))
-  //   },
-  //   {
-  //     title: 'Giá sản phẩm',
-  //     lg: 8,
-  //     body: (
-  //       <div className='relative' style={{ width: '100%' }}>
-  //         <div style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)' }}>
-  //           {optionPricePolicy.map((price: any, index: number) => (
-  //             <InputProductForm
-  //               key={`pricePolicies_${index}`}
-  //               sm={12}
-  //               lg={12}
-  //               label={price.label}
-  //               name={price.name}
-  //               onChange={handleChange}
-  //               inputType='text'
-  //               value={dataProduct[price.name]}
-  //             />
-  //           ))}
-  //         </div>
-  // <button className='text-blue font-bold flex gap-1 absolute -top-16 right-4 hover:opacity-60 duration-200 active:opacity-100'>
-  //   <i className='feather icon-plus-circle'></i>
-  //   Thêm chính sách giá
-  // </button>
-  //         {showMore ? (
-  //           <></>
-  //         ) : (
-  // <button className='button-showmore' onClick={() => setShowMore(true)}>
-  //   <HiChevronDoubleDown />
-  //   <span>Hiển thị thêm chính sách giá</span>
-  // </button>
-  //         )}
-  //       </div>
-  //     )
-  //   },
-  //   {
-  //     title: 'Thuộc tính',
-  //     lg: 8,
-  //     toggle: true,
-  //     toggleValue: showProperty,
-  //     setToggleValue: setShowProperty,
-  //     toggleLabel: '',
-  //     body: <></>
-  //   }
-  // ]
-
   return (
     <>
       <Formik initialValues={initialValues} validate={validate} onSubmit={handleSubmit}>
-        <Form>
+        <Form onKeyDown={handleKeyPress}>
           <span className='flex-between'>
             <BackPreviousPage path='/app/products' text='Quay lại danh sách sản phẩm' />
             <Button type='submit' className='m-0 mb-3'>
@@ -577,8 +521,13 @@ const ProductCreate = () => {
                                   onChange={(value) => {
                                     handleChangeInput(value, item)
                                   }}
+                                  // value={test}
                                   className={`style-field`}
-                                  style={{ borderRadius: '4px', padding: '10px', width: '100%' }}
+                                  style={{
+                                    borderRadius: '4px',
+                                    padding: '10px',
+                                    width: '100%'
+                                  }}
                                   placeholder=''
                                 />
                               </div>
@@ -587,12 +536,10 @@ const ProductCreate = () => {
                           />
                         )
                       )}
-                      {!showMore && (
-                        <button className='button-showmore' onClick={() => setShowMore(true)}>
-                          <HiChevronDoubleDown />
-                          <span>Hiển thị thêm chính sách giá</span>
-                        </button>
-                      )}
+                      <div className='button-showmore' onClick={() => setShowMore(!showMore)} aria-hidden='true'>
+                        <HiChevronDoubleDown className={`${showMore && 'rotate-180'}`} />
+                        <span>Hiển thị thêm chính sách giá</span>
+                      </div>
                     </div>
                   </div>
                   <button className='button-addPrice'>
@@ -608,7 +555,7 @@ const ProductCreate = () => {
                     position: 'relative',
                     overflow: 'hidden',
                     transitionDuration: '200ms',
-                    height: value ? `${listProperty.length * 76 + 180}px` : '95px'
+                    height: value ? `${showProperty.length * 84 + 160}px` : '95px'
                   }}
                 >
                   <Title
@@ -622,12 +569,14 @@ const ProductCreate = () => {
                         checked={value}
                         onChange={() => {
                           setValue((prevState: any) => !prevState)
-                          setListProperty([
+                          setShowProperty([
                             {
-                              key: '',
-                              values: []
+                              valueName: 'Kích thước',
+                              value: [],
+                              key: 1
                             }
                           ])
+                          setOpenToggle(!openToggle)
                         }}
                         type='checkbox'
                       />
@@ -637,86 +586,27 @@ const ProductCreate = () => {
                     </div>
                   </div>
 
-                  {/* <div style={{ padding: '0 28px', paddingTop: '20px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', rowGap: '16px' }}>
-                      {listProperty.map((item, index: number) => (
-                        <div style={{ display: 'flex', gap: '20px' }} key={index}>
-                          <Field
-                            id='properties'
-                            name='properties'
-                            render={({ field, form }: FieldProps<FormValues['product_name']>) => (
-                              <div
-                                className='flex flex-col w-[35%]'
-                                style={{ display: 'flex', flexDirection: 'column', width: '35%' }}
-                              >
-                                <label
-                                  style={{ marginBottom: '4px', color: '#46515F', fontSize: '14px' }}
-                                  htmlFor='product_name'
-                                >
-                                  Tên thuộc tính
-                                </label>
-                                <input
-                                  type='text'
-                                  id='product_name'
-                                  {...field}
-                                  className={`style-field`}
-                                  style={{ borderRadius: '4px', padding: '10px', width: '100%' }}
-                                  placeholder=''
-                                />
-                              </div>
-                            )}
-                            type='text'
-                          />
-
-                          <Field
-                            id='properties'
-                            name='properties'
-                            render={({ field, form }: FieldProps<FormValues['product_name']>) => (
-                              <div style={{ display: 'flex', flexDirection: 'column', flex: '1' }}>
-                                <label
-                                  style={{ marginBottom: '4px', color: '#46515F', fontSize: '14px' }}
-                                  htmlFor='product_name'
-                                >
-                                  Giá trị
-                                </label>
-                                <input
-                                  type='text'
-                                  id='product_name'
-                                  {...field}
-                                  className={`style-field`}
-                                  style={{ borderRadius: '4px', padding: '10px', width: '100%' }}
-                                  placeholder=''
-                                />
-                              </div>
-                            )}
-                            type='text'
-                          />
-                        </div>
-                      ))}
-                    </div> */}
-
                   <div style={{ padding: '0 28px', paddingTop: '20px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', rowGap: '16px' }}>
-                      {listProperty.map((item, index: number) => (
+                    <div style={{ display: 'flex', flexDirection: 'column', rowGap: '2px' }}>
+                      {showProperty.map((item, index: number) => (
                         <FormGroup key={index}>
-                          <div style={{ display: 'flex', gap: '20px' }}>
+                          <div style={{ display: 'flex', gap: '20px', position: 'relative' }}>
                             <div
                               className='flex flex-col w-[35%]'
                               style={{ display: 'flex', flexDirection: 'column', width: '35%' }}
                             >
                               <label
-                                style={{ marginBottom: '4px', color: '#46515F', fontSize: '14px' }}
+                                style={{ marginBottom: '4px', color: '#46515F', fontSize: '14px', fontWeight: '600' }}
                                 htmlFor={`${index + 1}`}
                               >
                                 Tên thuộc tính
                               </label>
                               <input
                                 type='text'
-                                name='key'
+                                name={`${item.key}`}
+                                value={item.key === 1 ? inputSize : item.key === 2 ? inputColor : inputMaterial}
                                 id={`${index + 1}`}
-                                onChange={(v) => {
-                                  handleChangeProperty(v, index)
-                                }}
+                                onChange={(v) => handleChangPropertyName(v, index)}
                                 className={`style-field`}
                                 style={{ borderRadius: '4px', padding: '10px', width: '100%' }}
                                 placeholder=''
@@ -725,33 +615,57 @@ const ProductCreate = () => {
 
                             <div style={{ display: 'flex', flexDirection: 'column', flex: '1' }}>
                               <label
-                                style={{ marginBottom: '4px', color: '#46515F', fontSize: '14px' }}
+                                style={{ marginBottom: '4px', color: '#46515F', fontSize: '14px', fontWeight: '600' }}
                                 htmlFor={`${index + 1}`}
                               >
                                 Giá trị
                               </label>
-                              <input
+                              <InputTags
+                                id={`${index + 1}`}
+                                name={`${item.key + 10}`}
+                                index={index}
+                                // onChange={onABC}
+                                onChange={handleChangPropertyValue}
+                                list={listProperty}
+                                placeholder='Gõ ký tự và ấn Enter để thêm thuộc tính'
+                              />
+                              {/* <input
                                 type='text'
                                 id={`${index + 1}`}
-                                name='values'
+                                name={`${item.key + 10}`}
                                 onChange={(v) => {
-                                  handleChangeProperty(v, index)
+                                  handleChangPropertyValue(v, index)
                                 }}
                                 className={`style-field`}
-                                style={{ borderRadius: '4px', padding: '10px', width: '100%' }}
+                                style={{ borderRadius: '4px', padding: '10px', width: '95%' }}
                                 placeholder=''
-                              />
+                              /> */}
                             </div>
+                            {index > 0 && (
+                              <button
+                                onClick={() => deletedRowProperty(item.key, index)}
+                                style={{
+                                  position: 'absolute',
+                                  right: '-14px',
+                                  bottom: '11px',
+                                  cursor: 'pointer',
+                                  border: 'none',
+                                  background: 'white'
+                                }}
+                              >
+                                <HiXMark style={{ fontSize: '20px' }} />
+                              </button>
+                            )}
                           </div>
                         </FormGroup>
                       ))}
                     </div>
 
-                    {value && (
-                      <button onClick={handleAddProperty} className='button-addProperty'>
+                    {showProperty.length < 3 && openToggle && (
+                      <div onClick={handleAdd} className='button-addProperty' aria-hidden='true'>
                         <i className='feather icon-plus-circle'></i>
                         Thêm thuôc tính khác
-                      </button>
+                      </div>
                     )}
                   </div>
                 </div>
