@@ -523,7 +523,6 @@ const ProductCreate = () => {
                                   onChange={(value) => {
                                     handleChangeInput(value, item)
                                   }}
-                                  // value={test}
                                   className={`style-field`}
                                   style={{
                                     borderRadius: '4px',
@@ -557,7 +556,8 @@ const ProductCreate = () => {
                     position: 'relative',
                     overflow: 'hidden',
                     transitionDuration: '200ms',
-                    height: value ? `${showProperty.length * 84 + 160}px` : '95px'
+                    height: value ? `fit-content` : '95px',
+                    paddingBottom: value ? '40px' : '0px'
                   }}
                 >
                   <Title
@@ -626,22 +626,10 @@ const ProductCreate = () => {
                                 id={`${index + 1}`}
                                 name={`${item.key + 10}`}
                                 index={index}
-                                // onChange={onABC}
                                 onChange={handleChangPropertyValue}
                                 list={listProperty}
                                 placeholder='Gõ ký tự và ấn Enter để thêm thuộc tính'
                               />
-                              {/* <input
-                                type='text'
-                                id={`${index + 1}`}
-                                name={`${item.key + 10}`}
-                                onChange={(v) => {
-                                  handleChangPropertyValue(v, index)
-                                }}
-                                className={`style-field`}
-                                style={{ borderRadius: '4px', padding: '10px', width: '95%' }}
-                                placeholder=''
-                              /> */}
                             </div>
                             {index > 0 && (
                               <button
