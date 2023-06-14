@@ -11,6 +11,7 @@ import ProductService from '~/services/product.service'
 import { Product, ProductVariant } from '~/types/Product.type'
 import Select from 'react-select'
 import { formatCurrency } from '~/utils/common'
+import BackPreviousPage from '~/components/Button/BackPreviousPage'
 
 interface NewItem {
   id: string
@@ -19,6 +20,8 @@ interface NewItem {
 }
 
 const ProductDetails = () => {
+  const [isLoading, setIsLoading] = useState(true)
+  const [isFetched, setIsFetched] = useState(true)
   const [productDetail, setProductDetail] = useState<Product>()
   const [optionSelected, setOptionSelected] = useState([])
   const [selectedProduct, setSelectedProduct] = useState<ProductVariant>()
@@ -52,11 +55,17 @@ const ProductDetails = () => {
 
   useEffect(() => {
     getDetailProduct()
+      .then(() => {
+        setIsLoading(false)
+        setIsFetched(true)
+      })
+      .catch(() => {
+        setIsLoading(false)
+      })
   }, [getDetailProduct])
   // const showLoader = false
   // const [isSorting, setIsSorting] = useState(false)
-  // const [isLoading, setIsLoading] = useState(true)
-  // const [isFetched, setIsFetched] = useState(true)
+
   // const data: any = {}
   // const initialItems = JSON.parse(localStorage.getItem('items') ?? '[]')
   // const [items, setItems] = useState<NewItem[]>([])
@@ -123,38 +132,25 @@ const ProductDetails = () => {
   //   setItems(itemsCopy)
   // }
 
-  // if (isLoading) {
-  //   return (
-  //     <>
-  //       <Helmet>
-  //         <title>Thêm sản phẩm</title>
-  //       </Helmet>
-  //       <PageLoader />
-  //     </>
-  //   )
-  // }
+  if (isLoading) {
+    return (
+      <>
+        <Helmet>
+          <title>Chi tiết sản phẩm</title>
+        </Helmet>
+        <PageLoader />
+      </>
+    )
+  }
 
-  // if (!isFetched) {
-  //   return <Error errorCode='500' />
-  // }
-  console.log(productDetail)
+  if (!isFetched) {
+    return <Error errorCode='500' />
+  }
 
   return (
     <React.Fragment>
-      <Helmet>
-        <title>Chi tiết sản phẩm</title>
-      </Helmet>
-
       <div className='d-flex justify-content-between'>
-        <Button
-          className='mb-3'
-          onClick={() => history.push('/app/sell-management/products')}
-          variant='outline-primary'
-        >
-          <i className='feather icon-arrow-left'></i>
-          Quay lại danh sách sản phẩm
-        </Button>
-
+        <BackPreviousPage text='Quay lại danh sách sản phẩm' path='/app/products' />
         <ButtonLoading
           text={
             <span style={{ fontWeight: 600 }}>
@@ -169,6 +165,7 @@ const ProductDetails = () => {
           variant='outline-danger'
         ></ButtonLoading>
       </div>
+
       <Row>
         <Col sm={4} lg={4}>
           <div className='mb-3'>

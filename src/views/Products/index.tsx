@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Row, Col, Card, Button } from 'react-bootstrap'
 import CustomTable from '~/components/Table/CustomTable'
-import { Link, useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import moment from 'moment'
 import { Helmet } from 'react-helmet'
 import Error from '~/views/Errors'
@@ -37,12 +37,7 @@ function ProductsList() {
       },
       {
         Header: 'Tên sản phẩm',
-        accessor: 'product_name',
-        Cell: ({ row, value }: any) => (
-          <Link to={`/app/products/detail/${row.values.id}`} style={{ color: 'blue' }}>
-            {value}
-          </Link>
-        )
+        accessor: 'product_name'
       },
       {
         Header: 'Loại',
@@ -61,10 +56,10 @@ function ProductsList() {
     []
   )
 
-  // const handleRowClick = (row: any) => {
-  //   const id = row.values.id
-  //   history.push(`/app/sell-management/products/${id}`)
-  // }
+  const handleRowClick = (row: any) => {
+    const id = row.values.id
+    history.push(`/app/products/detail/${id}`)
+  }
 
   if (isLoading)
     return (
@@ -93,7 +88,7 @@ function ProductsList() {
               </Button>{' '}
             </Card.Header>
             <Card.Body>
-              <CustomTable columns={columns} data={listProducts} handleRowClick={{}} />
+              <CustomTable columns={columns} data={listProducts} handleRowClick={handleRowClick} />
             </Card.Body>
           </Card>
         </Col>
