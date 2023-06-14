@@ -45,15 +45,15 @@ const InputTags: React.FC<SelectProps> = ({ onChange, id, name, placeholder, ind
 
   return (
     <div className='select-container'>
-      <div className='tag-list'>
+      <span className='tag-list'>
         {selectedOptions.map((option) => (
           <span key={option} className='tag'>
             {option}
             <HiXMark onClick={() => handleRemove(option)} aria-hidden='true' />
           </span>
         ))}
-      </div>
-      <div className='input-container'>
+      </span>
+      <span className='input-container'>
         <input
           type='text'
           id={id}
@@ -62,10 +62,9 @@ const InputTags: React.FC<SelectProps> = ({ onChange, id, name, placeholder, ind
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className='p-10'
-          style={{ width: selectedOptions.length > 0 ? '' : '300px' }}
+          // style={{ width: selectedOptions.length > 0 ? '' : '300px' }}
         />
-      </div>
+      </span>
     </div>
   )
 }

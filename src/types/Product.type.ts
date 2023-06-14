@@ -31,4 +31,21 @@ export interface Product {
       updatedAt: string
     }
   ]
+  productAdditionInformation: {
+    brand: { brand_description: string; brand_id: string; brand_title: string }
+    createdAt: string
+    id: string
+    productTagList: {
+      tag_description: string
+      tag_id: string
+      tag_title: string
+      id: string
+    }[]
+    product_id: string
+    type: {
+      type_description: string
+      type_id: string
+      type_title: string
+    }
+  }
 }
