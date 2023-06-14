@@ -346,10 +346,16 @@ const CEPurchaseOrder = () => {
             Sửa đơn nhập <span className='font-weight-bold'>{purchaseDetail?.order_code}</span>
           </h4>
         )}
-        <Button className='m-0 mb-3' onClick={updatedPurchaseOrder}>
-          <i className={params.id ? 'feather icon-save' : 'feather icon-plus-circle'} />
-          {params.id ? 'Lưu' : 'Tạo đơn hàng nhập'}
-        </Button>
+        <span>
+          <Button className='m-0 mb-3 mr-2' variant='secondary' onClick={updatedPurchaseOrder}>
+            <i className={params.id ? 'feather icon-save' : 'feather icon-plus-circle'} />
+            {params.id ? 'Lưu' : 'Tạo đơn'}
+          </Button>
+          <Button className='m-0 mb-3'>
+            <i className={params.id ? 'feather icon-arrow-up-circle' : 'feather icon-upload'} />
+            {params.id ? 'Lưu và nhập đơn' : 'Tạo và nhập đơn'}
+          </Button>
+        </span>
       </div>
       <Row className='text-normal'>
         <Col lg={8}>
