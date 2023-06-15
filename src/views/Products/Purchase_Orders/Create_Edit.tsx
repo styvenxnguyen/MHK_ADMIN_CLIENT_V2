@@ -293,6 +293,29 @@ const CEPurchaseOrder = () => {
     }
   }, [])
 
+  const selectedProduct1 = useCallback(
+    (e: any) => {
+      const product = selectedProduct?.productVariants.find((item) => item.id === e.value)
+      console.log(product)
+      if (product) {
+        setProductList([
+          ...productList,
+          {
+            order_product_item_id: product?.id,
+            product_amount: 1,
+            product_discount: 0,
+            product_price: 0,
+            product_unit: 'Cái',
+            product_variant_detail_SKU: product?.product_variant_SKU,
+            product_variant_detail_id: product?.id,
+            product_variant_detail_name: product.product_variant_name
+          }
+        ])
+      }
+    },
+    [selectedProduct?.productVariants, productList]
+  )
+
   useEffect(() => {
     if (params.id) {
       getPurchaseOrderDetail()
@@ -538,7 +561,7 @@ const CEPurchaseOrder = () => {
                   className='mt-4'
                   options={optionsProductVariant}
                   onChange={(e: any) => {
-                    console.log('Hello' + e.value)
+                    selectedProduct1(e)
                   }}
                   placeholder='Chọn phiên bản sản phẩm'
                 />
