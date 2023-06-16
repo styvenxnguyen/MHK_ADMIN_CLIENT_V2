@@ -1,5 +1,15 @@
 import { Button } from 'react-bootstrap'
 
+interface BtnLoadingProps {
+  onSubmit?: any
+  text: any
+  loading?: boolean
+  disabled?: boolean
+  className?: string
+  variant?: string
+  type?: string
+}
+
 const Loader = () => {
   return (
     <span>
@@ -8,9 +18,9 @@ const Loader = () => {
   )
 }
 
-export const ButtonLoading = ({ onSubmit, text, loading, disabled, className, variant }: any) => {
+export const ButtonLoading = ({ onSubmit, text, loading, disabled, className, variant, type }: BtnLoadingProps) => {
   return (
-    <Button onClick={onSubmit} disabled={disabled} className={className} variant={variant}>
+    <Button onClick={onSubmit} type={type} disabled={disabled} className={className} variant={variant}>
       {!loading ? text : <Loader />}
     </Button>
   )

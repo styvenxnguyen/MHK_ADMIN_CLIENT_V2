@@ -48,16 +48,28 @@ function PurchaseOrdersList() {
       {
         Header: 'Trạng thái đơn hàng',
         accessor: 'order_status',
-        Cell: ({ value }: any) =>
-          value === 'Tạo đơn hàng' ? (
-            <Badge className='p-2' variant='info' style={{ fontSize: 12 }}>
-              Tạo đơn hàng
-            </Badge>
-          ) : (
-            <Badge className='p-2' variant='success' style={{ fontSize: 12 }}>
-              Đã hoàn thành
-            </Badge>
-          )
+        Cell: ({ value }: any) => {
+          switch (value) {
+            case 'Nhập hàng':
+              return (
+                <Badge className='p-2' variant='primary' style={{ fontSize: 12 }}>
+                  Nhập hàng
+                </Badge>
+              )
+            case 'Hoàn thành':
+              return (
+                <Badge className='p-2' variant='success' style={{ fontSize: 12 }}>
+                  Hoàn thành
+                </Badge>
+              )
+            default:
+              return (
+                <Badge className='p-2' variant='info' style={{ fontSize: 12 }}>
+                  Tạo đơn hàng
+                </Badge>
+              )
+          }
+        }
       },
       {
         Header: 'Trạng thái thanh toán',

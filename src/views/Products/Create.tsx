@@ -1,11 +1,9 @@
 import { useState, useEffect, useCallback, ChangeEvent, KeyboardEvent } from 'react'
-import { Col, Button, Form as FormBootstrap, FormGroup } from 'react-bootstrap'
+import { Col, Form as FormBootstrap, FormGroup } from 'react-bootstrap'
 import { HiChevronDoubleDown } from 'react-icons/hi'
 import { HiXMark } from 'react-icons/hi2'
 import Select from 'react-select'
 import { Formik, Field, Form, ErrorMessage, FieldProps } from 'formik'
-import withReactContent from 'sweetalert2-react-content'
-import Swal from 'sweetalert2'
 
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import ProductService from '~/services/product.service'
@@ -14,6 +12,11 @@ import { formatCurrency } from '~/utils/common'
 import InputTags from '~/components/InputTags'
 import { PricePolicyService } from '~/services/pricepolicy.service'
 import { TagService } from '~/services/tag.service'
+import { Helmet } from 'react-helmet'
+import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
+import { ButtonLoading } from '~/components/Button/LoadingButton'
+import { useHistory } from 'react-router-dom'
+import Swal from 'sweetalert2'
 
 interface FormValues {
   product_name: string
@@ -75,16 +78,18 @@ const DataFields = [
     name: 'product_barcode',
     label: 'Mã vạch/Barcode',
     type: 'text'
-  },
-  {
-    id: 'product_unit_price',
-    name: 'product_unit_price',
-    label: 'Đơn vị tính',
-    type: 'number'
   }
+  // {
+  //   id: 'product_unit_price',
+  //   name: 'product_unit_price',
+  //   label: 'Đơn vị tính',
+  //   type: 'number'
+  // }
 ]
 
 const ProductCreate = () => {
+  const history = useHistory()
+  const [showLoader, setShowLoader] = useState(false)
   const [optionsTag, setOptionsTag] = useState<TypeResponse[]>([])
   const [optionsType, setOptionsType] = useState<ProductType[]>([])
   const [optionsBrand, setOptionsBrand] = useState<ProductType[]>([])
@@ -108,18 +113,6 @@ const ProductCreate = () => {
       values: ['']
     }
   ])
-
-  const sweetSuccessAlert = () => {
-    const MySwal = withReactContent(Swal)
-    MySwal.fire({
-      title: 'Tạo sản phẩm thành công',
-      text: 'Chúc mừng bạn đã tạo sản phẩm thành công',
-      icon: 'success',
-      confirmButtonText: 'Xác nhận',
-      confirmButtonColor: 'success',
-      showCancelButton: false
-    })
-  }
 
   const DataAdditionalInformation = [
     {
@@ -175,7 +168,9 @@ const ProductCreate = () => {
     return errors
   }
 
-  const handleSubmit = async (values: FormValues) => {
+  const handleSubmit = (values: FormValues) => {
+    setShowLoader(true)
+
     try {
       const dataSubmit = {
         product_name: values.product_name,
@@ -188,10 +183,28 @@ const ProductCreate = () => {
         properties: listProperty,
         product_variant_prices: listVariantPrice.filter((item) => item.price_value !== '')
       }
-      await ProductService.createProduct(dataSubmit)
-      sweetSuccessAlert()
+      ProductService.createProduct(dataSubmit)
+        .then(() => {
+          setTimeout(() => {
+            setShowLoader(false)
+            handleAlertConfirm({
+              text: 'Thêm sản phẩm mới thành công',
+              icon: 'success',
+              handleConfirmed: () => history.replace('/app/products')
+            })
+          }, 1000)
+        })
+        .catch(() => {
+          setTimeout(() => {
+            setShowLoader(false)
+            handleAlertConfirm({
+              text: 'Thêm sản phẩm mới thất bại',
+              icon: 'error'
+            })
+          }, 1000)
+        })
     } catch (error) {
-      console.log(error)
+      Swal.fire('', 'Lỗi kết nối tới máy chủ', 'error')
     }
   }
 
@@ -352,14 +365,25 @@ const ProductCreate = () => {
 
   return (
     <>
+      <Helmet>
+        <title>Thêm sản phẩm</title>
+      </Helmet>
       <Formik initialValues={initialValues} validate={validate} onSubmit={handleSubmit}>
         <Form onKeyDown={handleKeyPress}>
           <span className='flex-between'>
             <BackPreviousPage path='/app/products' text='Quay lại danh sách sản phẩm' />
-            <Button type='submit' className='m-0 mb-3'>
-              <i className='feather icon-plus-circle'></i>
-              Lưu sản phẩm
-            </Button>
+            <ButtonLoading
+              type='submit'
+              loading={showLoader}
+              disabled={showLoader}
+              className='m-0 mb-3'
+              text={
+                <>
+                  <i className='feather icon-plus-circle'></i>
+                  Lưu sản phẩm
+                </>
+              }
+            />
           </span>
           <div style={{ width: '100%', display: 'flex', gap: '25px' }}>
             <div style={{ width: '65%' }}>

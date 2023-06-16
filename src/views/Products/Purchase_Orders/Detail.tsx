@@ -50,7 +50,8 @@ const PurchaseOrderDetail = () => {
       },
       {
         Header: 'Chiết khấu',
-        accessor: 'product_discount'
+        accessor: 'product_discount',
+        Cell: ({ value }: any) => formatCurrency(value)
       },
       {
         Header: 'Đơn vị',
@@ -97,7 +98,7 @@ const PurchaseOrderDetail = () => {
     },
     {
       data: 'Chiết khấu',
-      value: totalDiscount
+      value: formatCurrency(totalDiscount)
     },
     {
       data: 'Tiền cần trả',

@@ -1,11 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import moment from 'moment'
-import { Row, Col, Card, Form, Button, FormLabel, Badge, FormGroup, FormCheck } from 'react-bootstrap'
-import { useHistory, useParams } from 'react-router-dom'
+import { Row, Col, Card, Form, FormLabel, FormGroup, FormCheck } from 'react-bootstrap'
+import { useParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
 import PageLoader from '~/components/Loader/PageLoader'
 import Error from '../Errors'
-import { TagService } from '~/services/tag.service'
 import { ButtonLoading } from '~/components/Button/LoadingButton'
 import ProductService from '~/services/product.service'
 import { Product, ProductVariant } from '~/types/Product.type'
@@ -13,11 +12,11 @@ import Select from 'react-select'
 import { formatCurrency } from '~/utils/common'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 
-interface NewItem {
-  id: string
-  value: string
-  content: string
-}
+// interface NewItem {
+//   id: string
+//   value: string
+//   content: string
+// }
 
 const ProductDetails = () => {
   const [isLoading, setIsLoading] = useState(true)
@@ -25,7 +24,6 @@ const ProductDetails = () => {
   const [productDetail, setProductDetail] = useState<Product>()
   const [optionSelected, setOptionSelected] = useState([])
   const [selectedProduct, setSelectedProduct] = useState<ProductVariant>()
-  const history = useHistory()
   const params: { id: string } = useParams()
 
   const getDetailProduct = useCallback(async () => {

@@ -4,14 +4,19 @@ import { axiosConfig } from '~/utils/configAxios'
 const ORDER = {
   GET_ALL: (params: string) => `/order/get-all?order_type=${params}`,
   PURCHASEORDER_DETAIL: (id: string) => `/order/get-by-id?id=${id}&order_type=Đơn nhập`,
-  UPDATED_PURCHASEORDER: (id: string) => `/order/update-detail-by-id/${id}`
+  CREATE_PURCHASEORDER: '/order/import/create',
+  UPDATE_PURCHASEORDER: (id: string) => `/order/import/update-detail-by-id/${id}`,
+  UPDATE_PURCHASEORDER_STATUS: (id: string) => `/order/import/update-status-by-id/${id}`
 }
 
 const OrderService = {
   getAllPurchaseOrder: (params: string) => axiosConfig.get(ORDER.GET_ALL(params)),
   getPurchaseOrderDetail: (id: string) => axiosConfig.get(ORDER.PURCHASEORDER_DETAIL(id)),
-  updatedPurchaseOrderDetail: (id: string, data: PurchaseOrder) =>
-    axiosConfig.put(ORDER.UPDATED_PURCHASEORDER(id), data)
+  createPurchaseOrder: (data: PurchaseOrder) => axiosConfig.post(ORDER.CREATE_PURCHASEORDER, data),
+  updatePurchaseOrderDetail: (id: string, data: PurchaseOrder) =>
+    axiosConfig.patch(ORDER.UPDATE_PURCHASEORDER(id), data),
+  updatePurchaseOrderStatus: (id: string, data: object) =>
+    axiosConfig.patch(ORDER.UPDATE_PURCHASEORDER_STATUS(id), data)
 }
 
 export default OrderService

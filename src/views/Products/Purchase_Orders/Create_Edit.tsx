@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button, Card, Col, FormControl, Row } from 'react-bootstrap'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useHistory, useParams } from 'react-router-dom'
 import Select from 'react-select'
 import { TbPackage } from 'react-icons/tb'
 
@@ -23,14 +23,26 @@ import Error from '~/views/Errors'
 import { TagService } from '~/services/tag.service'
 import ProductService from '~/services/product.service'
 import { Product, ProductVariant } from '~/types/Product.type'
+import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
+import { ButtonLoading } from '~/components/Button/LoadingButton'
+import Swal from 'sweetalert2'
+
+interface SelectProps {
+  label: string
+  value: string
+}
 
 const CEPurchaseOrder = () => {
+  const history = useHistory()
   const params: { id: string } = useParams()
   const [purchaseDetail, setPurchaseDetail] = useState<PurchaseOrder>()
   const [isLoading, setIsLoading] = useState(true)
   const [isFetched, setIsFetched] = useState(false)
+  const [isLoadingSave, setIsLoadingSave] = useState(false)
+  const [isLoadingCreate, setIsLoadingCreate] = useState(false)
   const [isLoadingSupplier, setIsLoadingSupplier] = useState(false)
   const [productList, setProductList] = useState<OrderProduct[]>([])
+  const [dataSupplier, setDataSupplier] = useState<SupplierRes>()
   const [optionsStaff, setOptionsStaff] = useState([])
   const [optionsTag, setOptionsTag] = useState([])
   const [optionsProduct, setOptionsProduct] = useState([])
@@ -38,13 +50,37 @@ const CEPurchaseOrder = () => {
   const [optionsSupplier, setOptionsSupplier] = useState([])
   const [selectedProduct, setSelectedProduct] = useState<Product>()
   const [optionsProductVariant, setOptionsProductVariant] = useState([])
-  const [selectedSupplier, setSelectedSupplier] = useState<SupplierRes>()
+  const [idSelectedSupplier, setIdSelectedSupplier] = useState('')
+  const [selectedStaff, setSelectedStaff] = useState<SelectProps>()
+  const [selectedBranch, setSelectedBranch] = useState<SelectProps>()
+  const [deliveryDate, setDeliveryDate] = useState('')
+  const [note, setNote] = useState('')
+  const [canEdit, setCanEdit] = useState(false)
+  const [selectedTags, setSelectedTags] = useState<SelectProps[]>([])
   const loadingMessage = () => 'Đang tải dữ liệu...'
 
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
   const totalDiscount = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_discount), 0)
   const totalPayment = totalAmount - totalDiscount
+
+  const dataPurchaseOrder = {
+    supplier_id: idSelectedSupplier,
+    agency_branch_id: selectedBranch?.value || '',
+    shipper_id: '7cfb56ef-aa9e-468e-a7b2-874f046dfec8',
+    payment_id: '5f81f1a2-1144-43d1-a5c8-6caa6dbad03f',
+    staff_id: selectedStaff?.value || '',
+    order_delivery_date: deliveryDate,
+    order_note: note,
+    tags: selectedTags.map((tag: SelectProps) => tag.value),
+    products: productList.map((product) => ({
+      p_variant_id: product.product_variant_detail_id,
+      unit: product.product_unit,
+      amount: product.product_amount,
+      price: product.product_price,
+      discount: product.product_discount
+    }))
+  }
 
   const dataDebtSupplier = [
     {
@@ -72,7 +108,7 @@ const CEPurchaseOrder = () => {
     },
     {
       data: 'Chiết khấu',
-      value: totalDiscount
+      value: formatCurrency(totalDiscount)
     },
     {
       data: 'Tiền cần trả',
@@ -110,48 +146,62 @@ const CEPurchaseOrder = () => {
       {
         Header: 'Số lượng',
         accessor: 'product_amount',
-        Cell: ({ row, value }: any) => (
-          <FormControl
-            className='text-center'
-            type='number'
-            min={1}
-            value={value}
-            onChange={(e) => handleProductTable(row.index, 'product_amount', e.target.value)}
-          />
-        )
+        Cell: ({ row, value }: any) =>
+          canEdit ? (
+            <FormControl
+              className='text-center'
+              type='number'
+              min={1}
+              value={value}
+              onChange={(e) => handleProductTable(row.index, 'product_amount', e.target.value)}
+            />
+          ) : (
+            formatCurrency(value)
+          )
       },
       {
         Header: 'Giá sản phẩm',
         accessor: 'product_price',
-        Cell: ({ row, value }: any) => (
-          <FormControl
-            value={value}
-            className='text-center'
-            onChange={(e) => handleProductTable(row.index, 'product_price', e.target.value)}
-          />
-        )
+        Cell: ({ row, value }: any) =>
+          canEdit ? (
+            <FormControl
+              value={value}
+              type='number'
+              className='text-center no-spin'
+              onChange={(e) => handleProductTable(row.index, 'product_price', e.target.value)}
+            />
+          ) : (
+            formatCurrency(value)
+          )
       },
       {
         Header: 'Chiết khấu',
         accessor: 'product_discount',
-        Cell: ({ row, value }: any) => (
-          <FormControl
-            value={value}
-            className='text-center'
-            onChange={(e) => handleProductTable(row.index, 'product_discount', e.target.value)}
-          />
-        )
+        Cell: ({ row, value }: any) =>
+          canEdit ? (
+            <FormControl
+              type='number'
+              value={value}
+              className='text-center no-spin'
+              onChange={(e) => handleProductTable(row.index, 'product_discount', e.target.value)}
+            />
+          ) : (
+            formatCurrency(value)
+          )
       },
       {
         Header: 'Đơn vị',
         accessor: 'product_unit',
-        Cell: ({ row, value }: any) => (
-          <FormControl
-            value={value}
-            className='text-center'
-            onChange={(e) => handleProductTable(row.index, 'product_unit', e.target.value)}
-          />
-        )
+        Cell: ({ row, value }: any) =>
+          canEdit ? (
+            <FormControl
+              value={value}
+              className='text-center'
+              onChange={(e) => handleProductTable(row.index, 'product_unit', e.target.value)}
+            />
+          ) : (
+            value
+          )
       },
       {
         Header: 'Thành tiền',
@@ -164,6 +214,7 @@ const CEPurchaseOrder = () => {
       },
       {
         Header: 'Chức năng',
+        accessor: 'advance',
         Cell: ({ row }: any) => (
           <Button className='' variant='outline-danger' onClick={() => handleDeleteRow(row.index)}>
             <i className='feather icon-trash-2' />
@@ -204,7 +255,8 @@ const CEPurchaseOrder = () => {
       const result = res.data.data
       const options = result.map((supplier: SupplierRes) => ({
         label: supplier.customer_name,
-        value: supplier.id
+        value: supplier.customer_id,
+        id_supplier: supplier.id
       }))
       setOptionsSupplier(options)
     } catch (error) {
@@ -216,7 +268,7 @@ const CEPurchaseOrder = () => {
     setIsLoadingSupplier(true)
     try {
       const res = await SupplierService.getDetailSupplier(id)
-      setSelectedSupplier(res.data.data)
+      setDataSupplier(res.data.data)
       setIsLoadingSupplier(false)
     } catch (error) {
       setIsLoadingSupplier(false)
@@ -238,6 +290,7 @@ const CEPurchaseOrder = () => {
   }, [])
 
   const getProductDetail = useCallback(async (id: string) => {
+    setSelectedProduct(undefined)
     try {
       const res = await ProductService.getDetailProduct(id)
       const dataProduct: any = res.data.data
@@ -276,24 +329,92 @@ const CEPurchaseOrder = () => {
           return { ...purchase }
         })
       )
+      if (data.order_status === 'Tạo đơn') {
+        setCanEdit(true)
+      }
+      setIdSelectedSupplier(data.supplier.id)
+      setSelectedStaff({
+        label: data.staff.name,
+        value: data.staff.id
+      })
+      setSelectedBranch({
+        label: data.agency_branch.name,
+        value: data.agency_branch.id
+      })
       setIsLoading(false)
       setIsFetched(true)
+      setSelectedTags(
+        data.order_tags.map((tag: any) => ({
+          label: tag.Tag.tag_title,
+          value: tag.Tag.id
+        }))
+      )
+      setNote(data.order_note)
     } catch (error) {
       setIsLoading(false)
     }
   }, [params.id])
 
-  const updatedPurchaseOrder = useCallback(async () => {
-    try {
-      const data: PurchaseOrder = {}
-      console.log(data)
-      // await OrderService.updatedPurchaseOrderDetail(params.id, data)
-    } catch (error) {
-      console.log(error)
-    }
-  }, [])
+  const handleSaveBtn = (order_status: string) => {
+    setIsLoadingSave(true)
 
-  const selectedProduct1 = useCallback(
+    const data = { ...dataPurchaseOrder, shipper_id: undefined, payment_id: undefined, agency_branch_id: undefined }
+    delete data.agency_branch_id
+    delete data.payment_id
+    delete data.shipper_id
+
+    OrderService.updatePurchaseOrderDetail(params.id, data)
+      .then(() => {
+        setTimeout(() => {
+          setIsLoadingSave(false)
+          handleAlertConfirm({
+            text: order_status == '' ? 'Lưu đơn hàng nhập thành công' : 'Lưu và nhập đơn hàng thành công',
+            icon: 'success',
+            handleConfirmed: () => history.replace(`/app/purchase_orders/detail/${params.id}`)
+          })
+        }, 1000)
+      })
+      .catch(() =>
+        setTimeout(() => {
+          Swal.fire('', order_status == '' ? 'Lưu đơn hàng nhập thất bại' : 'Lưu và nhập đơn hàng thất bại', 'error')
+          setIsLoadingSave(false)
+        }, 1000)
+      )
+
+    if (order_status === 'Nhập hàng') {
+      OrderService.updatePurchaseOrderStatus(params.id, { order_status: 'Nhập hàng' })
+    }
+  }
+
+  const handleCreateBtn = (order_status: string) => {
+    setIsLoadingCreate(true)
+
+    console.log(dataPurchaseOrder)
+
+    OrderService.createPurchaseOrder(dataPurchaseOrder)
+      .then(() => {
+        setTimeout(() => {
+          setIsLoadingCreate(false)
+          handleAlertConfirm({
+            text: order_status == '' ? 'Tạo đơn hàng nhập thành công' : 'Tạo và nhập đơn hàng thành công',
+            icon: 'success',
+            handleConfirmed: () => history.replace(`/app/purchase_orders`)
+          })
+        }, 1000)
+      })
+      .catch(() =>
+        setTimeout(() => {
+          Swal.fire('', order_status == '' ? 'Tạo đơn hàng nhập thất bại' : 'Tạo và nhập đơn hàng thất bại', 'error')
+          setIsLoadingCreate(false)
+        }, 1000)
+      )
+
+    if (order_status === 'Nhập hàng') {
+      OrderService.updatePurchaseOrderStatus(params.id, { order_status: 'Nhập hàng' })
+    }
+  }
+
+  const selectedProductNew = useCallback(
     (e: any) => {
       const product = selectedProduct?.productVariants.find((item) => item.id === e.value)
       console.log(product)
@@ -370,14 +491,34 @@ const CEPurchaseOrder = () => {
           </h4>
         )}
         <span>
-          <Button className='m-0 mb-3 mr-2' variant='secondary' onClick={updatedPurchaseOrder}>
-            <i className={params.id ? 'feather icon-save' : 'feather icon-plus-circle'} />
-            {params.id ? 'Lưu' : 'Tạo đơn'}
-          </Button>
-          <Button className='m-0 mb-3'>
-            <i className={params.id ? 'feather icon-arrow-up-circle' : 'feather icon-upload'} />
-            {params.id ? 'Lưu và nhập đơn' : 'Tạo và nhập đơn'}
-          </Button>
+          <ButtonLoading
+            className={canEdit ? 'm-0 mb-3 mr-2' : 'm-0 mb-3'}
+            variant={canEdit ? 'secondary' : 'primary'}
+            loading={isLoadingSave || isLoadingCreate}
+            disabled={isLoadingSave || isLoadingCreate}
+            text={
+              <>
+                <i className={params.id ? 'feather icon-save' : 'feather icon-plus-circle'} />
+                {params.id ? 'Lưu' : 'Tạo đơn'}
+              </>
+            }
+            onSubmit={params.id ? () => handleSaveBtn('') : () => handleCreateBtn('')}
+          />
+
+          {canEdit && (
+            <ButtonLoading
+              className='m-0 mb-3'
+              loading={isLoadingSave || isLoadingCreate}
+              disabled={isLoadingSave || isLoadingCreate}
+              text={
+                <>
+                  <i className={params.id ? 'feather icon-arrow-up-circle' : 'feather icon-upload'} />
+                  {params.id ? 'Lưu và nhập đơn' : 'Tạo và nhập đơn'}
+                </>
+              }
+              onSubmit={params.id ? () => handleSaveBtn('Nhập hàng') : () => handleCreateBtn('Nhập hàng')}
+            ></ButtonLoading>
+          )}
         </span>
       </div>
       <Row className='text-normal'>
@@ -427,11 +568,12 @@ const CEPurchaseOrder = () => {
                     className='mb-4'
                     options={optionsSupplier}
                     onChange={(e: any) => {
-                      getSupplierDetail(e.value)
+                      setIdSelectedSupplier(e.value)
+                      getSupplierDetail(e.id_supplier)
                     }}
                     placeholder={customPlaceholder('Supplier')}
                   />
-                  {selectedSupplier ? (
+                  {dataSupplier ? (
                     <>
                       {isLoadingSupplier ? (
                         <div>
@@ -442,12 +584,12 @@ const CEPurchaseOrder = () => {
                           <Col lg={6}>
                             <div className='font-weight-bold'>
                               <p>
-                                <Link to='#'>{selectedSupplier.customer_name}</Link>
+                                <Link to='#'>{dataSupplier.customer_name}</Link>
                               </p>
-                              <p>Số điện thoại : {selectedSupplier.customer_phone}</p>
+                              <p>Số điện thoại : {dataSupplier.customer_phone}</p>
 
-                              {selectedSupplier.address_list.length > 0
-                                ? selectedSupplier.address_list.map((address: any, index: any) => (
+                              {dataSupplier.address_list.length > 0
+                                ? dataSupplier.address_list.map((address: any, index: any) => (
                                     <p key={`addressSupplier_${index}`}>
                                       Địa chỉ {index + 1}:{' '}
                                       <span style={{ fontWeight: '500' }}>{address.user_specific_address}</span>
@@ -499,12 +641,12 @@ const CEPurchaseOrder = () => {
                   <span>Chi nhánh:</span>
                   <div style={{ width: '65%' }}>
                     <Select
-                      placeholder={
-                        purchaseDetail?.agency_branch?.name ? purchaseDetail.agency_branch?.name : 'Chọn chi nhánh'
-                      }
+                      placeholder='Chọn chi nhánh'
                       isDisabled={!!params.id}
+                      defaultValue={selectedBranch}
                       options={optionsBranch}
                       loadingMessage={loadingMessage}
+                      onChange={(e: any) => setSelectedBranch(e)}
                     ></Select>
                   </div>
                 </div>
@@ -514,27 +656,30 @@ const CEPurchaseOrder = () => {
                     <Select
                       name='staff'
                       options={optionsStaff}
+                      isDisabled={!canEdit}
                       loadingMessage={loadingMessage}
-                      placeholder={purchaseDetail?.staff ? purchaseDetail.staff.name : 'Chọn nhân viên'}
+                      defaultValue={selectedStaff}
+                      onChange={(e: any) => {
+                        setSelectedStaff(e)
+                      }}
+                      placeholder={'Chọn nhân viên'}
                     ></Select>
                   </div>
                 </div>
                 <div className='flex-between'>
                   <span>Ngày hẹn giao:</span>
                   <div style={{ width: '65%' }}>
-                    <FormControl type='date' />
+                    <FormControl
+                      type='date'
+                      onChange={(e: any) => setDeliveryDate(e.target.value)}
+                      disabled={!canEdit}
+                    />
                   </div>
                 </div>
                 <div className='flex-between'>
                   <span>Mã tham chiếu : </span>
                   <div style={{ width: '65%' }}>
                     <FormControl />
-                  </div>
-                </div>
-                <div className='flex-between'>
-                  <span>Mã đơn : </span>
-                  <div style={{ width: '65%' }}>
-                    <FormControl disabled />
                   </div>
                 </div>
               </div>
@@ -548,20 +693,23 @@ const CEPurchaseOrder = () => {
                 <i className='feather icon-archive mr-2'></i>
                 Thông tin sản phẩm
               </h5>
-              <Select
-                className='mt-4'
-                options={optionsProduct}
-                onChange={(e: any) => {
-                  getProductDetail(e.value)
-                }}
-                placeholder={customPlaceholder('Product')}
-              />
+              {canEdit && (
+                <Select
+                  className='mt-4'
+                  options={optionsProduct}
+                  onChange={(e: any) => {
+                    getProductDetail(e.value)
+                  }}
+                  placeholder={customPlaceholder('Product')}
+                />
+              )}
+
               {selectedProduct && (
                 <Select
                   className='mt-4'
                   options={optionsProductVariant}
                   onChange={(e: any) => {
-                    selectedProduct1(e)
+                    selectedProductNew(e)
                   }}
                   placeholder='Chọn phiên bản sản phẩm'
                 />
@@ -577,14 +725,26 @@ const CEPurchaseOrder = () => {
                   <span className='mt-3'>Đơn hàng chưa có sản phẩm nào</span>
                 </div>
               ) : (
-                <CustomTable columns={columns} data={productList} handleRowClick={{}} hiddenColumns={['selection']} />
+                <CustomTable
+                  columns={columns}
+                  data={productList}
+                  handleRowClick={() => 1 == 1}
+                  hiddenColumns={['selection', !canEdit && 'advance']}
+                />
               )}
 
               <hr className='dashed-top' />
               <Row className='justify-content-between'>
                 <Col lg={3}>
                   <p className='font-weight-bold'>Ghi chú đơn</p>
-                  <FormControl as='textarea' rows={3} className='my-textarea' placeholder='VD: Hàng tặng gói riêng' />
+                  <FormControl
+                    as='textarea'
+                    rows={3}
+                    defaultValue={note}
+                    className='my-textarea'
+                    placeholder='VD: Hàng tặng gói riêng'
+                    onChange={(e: any) => setNote(e.target.value)}
+                  />
                   <p className='font-weight-bold mt-2'>Tags</p>
 
                   <Select
@@ -593,13 +753,15 @@ const CEPurchaseOrder = () => {
                     placeholder='Chọn tags'
                     noOptionsMessage={() => 'Đã chọn hết tags'}
                     menuPlacement='top'
+                    defaultValue={selectedTags}
                     loadingMessage={loadingMessage}
+                    onChange={(e: any) => setSelectedTags(e)}
                   />
                 </Col>
                 <Col lg={3}>
                   {totalProduct.map((total, index) => (
                     <span
-                      key={`debtSupplier_${index}`}
+                      key={`total_${index}`}
                       className={total.bold ? 'font-weight-bold flex-between m-3' : 'flex-between m-3'}
                       style={total.bold ? { borderTop: '1px solid gray', paddingTop: '10px' } : {}}
                     >

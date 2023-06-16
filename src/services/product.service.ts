@@ -12,7 +12,7 @@ const ProductService = {
   getListProduct: () => axiosConfig.get(PRODUCT.GET_ALL),
   getListProductType: () => axiosConfig.get(PRODUCT.GET_ALL_TYPE),
   getListProductBrand: () => axiosConfig.get(PRODUCT.GET_ALL_BRAND),
-  createProduct: (body: any) => axiosConfig.post(PRODUCT.CREATE_PRODUCT, body),
+  createProduct: (data: any) => axiosConfig.post(PRODUCT.CREATE_PRODUCT, data),
   getDetailProduct: (id: string) => axiosConfig.get(PRODUCT.GET_DETAIL(id))
 }
 
