@@ -153,6 +153,11 @@ const routes: any = [
         path: '/app/orders',
         component: lazy(() => import('./views/Orders'))
       },
+      {
+        exact: true,
+        path: '/app/orders/create',
+        component: lazy(() => import('./views/Orders/Create'))
+      },
 
       //-------------------APPLICATIONS---------------------------
       {

@@ -34,70 +34,20 @@ const menuItems = {
       title: 'Quản lý bán hàng',
       type: 'group',
       children: [
-        // {
-        //   id: 'orders',
-        //   title: 'Đơn hàng',
-        //   type: 'collapse',
-        //   icon: 'feather icon-clipboard',
-        //   children: [
-        //     {
-        //       id: 'orders-create',
-        //       title: 'Tạo đơn và giao hàng',
-        //       type: 'item',
-        //       url: '/app/sell-management/orders/create'
-        //     },
-        //     {
-        //       id: 'orders-list',
-        //       title: 'Danh sách đơn hàng',
-        //       type: 'item',
-        //       url: '/app/orders/'
-        //     }
-        //     // {
-        //     //   id: 'order-return',
-        //     //   title: 'Khách trả hàng',
-        //     //   type: 'item',
-        //     //   url: '/basic/alert'
-        //     // }
-        //   ]
-        // },
-        // {
-        //   id: 'delievery',
-        //   title: 'Vận chuyển',
-        //   type: 'collapse',
-        //   icon: 'feather icon-truck',
-        //   children: [
-        //     {
-        //       id: 'delievery-dashboard',
-        //       title: 'Tổng quan',
-        //       type: 'item',
-        //       url: '/basic/alert'
-        //     },
-        //     {
-        //       id: 'delievery-order-management',
-        //       title: 'Quản lý vận đơn',
-        //       type: 'item',
-        //       url: '/basic/alert'
-        //     },
-        //     {
-        //       id: 'delievery-check-cost',
-        //       title: 'Đối soát COD và phí',
-        //       type: 'item',
-        //       url: '/basic/alert'
-        //     },
-        //     {
-        //       id: 'delievery-connect-partner',
-        //       title: 'Kết nối đối tác',
-        //       type: 'item',
-        //       url: '/basic/alert'
-        //     },
-        //     {
-        //       id: 'delievery-config',
-        //       title: 'Cấu hình giao hàng',
-        //       type: 'item',
-        //       url: '/basic/alert'
-        //     }
-        //   ]
-        // },
+        {
+          id: 'orders',
+          title: 'Đơn hàng',
+          type: 'collapse',
+          icon: 'feather icon-clipboard',
+          children: [
+            {
+              id: 'orders-create',
+              title: 'Tạo đơn và giao hàng',
+              type: 'item',
+              url: '/app/orders/create'
+            }
+          ]
+        },
         {
           id: 'products',
           title: 'Sản phẩm',
