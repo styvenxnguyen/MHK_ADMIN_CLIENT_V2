@@ -55,7 +55,7 @@ const CEPurchaseOrder = () => {
   const [selectedBranch, setSelectedBranch] = useState<SelectProps>()
   const [deliveryDate, setDeliveryDate] = useState('')
   const [note, setNote] = useState('')
-  const [canEdit, setCanEdit] = useState(false)
+  const [canEdit, setCanEdit] = useState(true)
   const [selectedTags, setSelectedTags] = useState<SelectProps[]>([])
   const loadingMessage = () => 'Đang tải dữ liệu...'
 
@@ -329,8 +329,8 @@ const CEPurchaseOrder = () => {
           return { ...purchase }
         })
       )
-      if (data.order_status === 'Tạo đơn') {
-        setCanEdit(true)
+      if (data.order_status !== 'Tạo đơn') {
+        setCanEdit(false)
       }
       setIdSelectedSupplier(data.supplier.id)
       setSelectedStaff({
@@ -388,8 +388,6 @@ const CEPurchaseOrder = () => {
 
   const handleCreateBtn = (order_status: string) => {
     setIsLoadingCreate(true)
-
-    console.log(dataPurchaseOrder)
 
     OrderService.createPurchaseOrder(dataPurchaseOrder)
       .then(() => {

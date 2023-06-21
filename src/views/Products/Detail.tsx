@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import moment from 'moment'
-import { Row, Col, Card, Form, FormLabel, FormGroup, FormCheck } from 'react-bootstrap'
+import { Row, Col, Card, Form, FormLabel, FormGroup, FormCheck, Badge, Button } from 'react-bootstrap'
 import { useParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
 import PageLoader from '~/components/Loader/PageLoader'
@@ -11,15 +11,21 @@ import { Product, ProductVariant } from '~/types/Product.type'
 import Select from 'react-select'
 import { formatCurrency } from '~/utils/common'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
+import { PricePolicyGetter } from '~/types/PricePolicy.type'
 
-// interface NewItem {
-//   id: string
-//   value: string
-//   content: string
-// }
+interface priceItemsProp {
+  id: string
+  type: string
+  value: string
+}
 
 const ProductDetails = () => {
+  const getPriceItems = localStorage.getItem('price_items')
+  const initialPriceItems = getPriceItems !== null ? JSON.parse(getPriceItems) : null
+  const [priceItems, setPriceItems] = useState<any>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isSorting, setIsSorting] = useState(false)
   const [isFetched, setIsFetched] = useState(true)
   const [productDetail, setProductDetail] = useState<Product>()
   const [optionSelected, setOptionSelected] = useState([])
@@ -29,17 +35,31 @@ const ProductDetails = () => {
   const getDetailProduct = useCallback(async () => {
     try {
       const res = await ProductService.getDetailProduct(params.id)
-      setProductDetail(res.data.data)
+      const data = res.data.data
+      const listPriceVariants = data.productVariants[0].productPrices.map((price: PricePolicyGetter) => ({
+        id: price.price_id,
+        type: price.price_type,
+        value: price.price_value
+      }))
+      setProductDetail(data)
       setOptionSelected(
-        res.data.data.productVariants.map((item: ProductVariant) => ({
+        data.productVariants.map((item: ProductVariant) => ({
           label: `${item.product_variant_name} - ${item.product_variant_barcode}`,
           value: item.id
         }))
       )
-      setSelectedProduct(res.data.data.productVariants[0])
+      setSelectedProduct(data.productVariants[0])
+      if (initialPriceItems) {
+        const updatedItems = [...initialPriceItems]
+        setPriceItems(updatedItems)
+      } else {
+        localStorage.setItem('price_items', JSON.stringify(listPriceVariants))
+        setPriceItems(listPriceVariants)
+      }
     } catch (error) {
       console.log(error)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id])
 
   const handleSelected = useCallback(
@@ -49,7 +69,6 @@ const ProductDetails = () => {
     },
     [productDetail?.productVariants]
   )
-  console.log(selectedProduct)
 
   useEffect(() => {
     getDetailProduct()
@@ -61,74 +80,29 @@ const ProductDetails = () => {
         setIsLoading(false)
       })
   }, [getDetailProduct])
-  // const showLoader = false
-  // const [isSorting, setIsSorting] = useState(false)
 
-  // const data: any = {}
-  // const initialItems = JSON.parse(localStorage.getItem('items') ?? '[]')
-  // const [items, setItems] = useState<NewItem[]>([])
+  const handleSortClick = () => {
+    setIsSorting(true)
+  }
 
-  // const history = useHistory()
+  const handleCancelSortClick = () => {
+    setIsSorting(false)
+  }
 
-  // useEffect(() => {
-  //   TagService.getListTag()
-  //     .then((response) => {
-  //       const data = response.data.data
-  //       const newPriceVariantsList = data.map((price: any, index: number) => ({
-  //         id: `item-${index + 1}`,
-  //         content: price.price_type,
-  //         value: (Math.random() * 10000).toFixed(3)
-  //       }))
+  const handleSaveClick = () => {
+    setIsSorting(false)
+    localStorage.setItem('price_items', JSON.stringify(priceItems))
+  }
 
-  //       if (initialItems) {
-  //         const updatedItems = [...initialItems]
+  const handleOnDragEnd = (result: any) => {
+    if (!result.destination) return
+    const itemsCopy: any = Array.from(priceItems)
+    const [reorderedItem] = itemsCopy.splice(result.source.index, 1)
+    itemsCopy.splice(result.destination.index, 0, reorderedItem)
 
-  //         newPriceVariantsList.forEach((newItem: NewItem) => {
-  //           const existingItemIndex = updatedItems.findIndex((item) => item.id === newItem.id)
-  //           if (existingItemIndex !== -1) {
-  //             // Nếu đã tồn tại một phần tử có cùng id, cập nhật giá trị của phần tử đó
-  //             updatedItems[existingItemIndex].value = newItem.value
-  //           } else {
-  //             // Nếu không tồn tại phần tử có cùng id, thêm phần tử mới vào mảng
-  //             updatedItems.push(newItem)
-  //           }
-  //         })
-  //         localStorage.setItem('items', JSON.stringify(updatedItems))
-  //         setItems(updatedItems)
-  //       } else {
-  //         localStorage.setItem('items', JSON.stringify(newPriceVariantsList))
-  //         setItems(newPriceVariantsList)
-  //       }
-
-  //       setIsLoading(false)
-  //       setIsFetched(true)
-  //     })
-  //     .catch(() => {
-  //       setIsLoading(false)
-  //     })
-  // }, [])
-
-  // const handleSortClick = () => {
-  //   setIsSorting(true)
-  // }
-
-  // const handleCancelSortClick = () => {
-  //   setItems([...initialItems])
-  //   setIsSorting(false)
-  // }
-
-  // const handleSaveClick = () => {
-  //   setIsSorting(false)
-  //   localStorage.setItem('items', JSON.stringify(items))
-  // }
-
-  // const handleOnDragEnd = (result: any) => {
-  //   if (!result.destination) return
-  //   const itemsCopy = Array.from(items)
-  //   const [reorderedItem] = itemsCopy.splice(result.source.index, 1)
-  //   itemsCopy.splice(result.destination.index, 0, reorderedItem)
-  //   setItems(itemsCopy)
-  // }
+    console.log(itemsCopy)
+    setPriceItems(itemsCopy)
+  }
 
   if (isLoading) {
     return (
@@ -156,10 +130,8 @@ const ProductDetails = () => {
               Xoá sản phẩm
             </span>
           }
-          // loading={showLoader}
           type='submit'
           className='m-0 mb-3'
-          // disabled={showLoader}
           variant='outline-danger'
         ></ButtonLoading>
       </div>
@@ -188,7 +160,7 @@ const ProductDetails = () => {
             <Card.Body>
               <Row>
                 <Col sm={12} lg={4}>
-                  <Form.Group className='mb-0' as={Row} controlId='formHorizontalEmail'>
+                  <Form.Group className='mb-0' as={Row}>
                     <Form.Label column>Mã SKU</Form.Label>
                     <Col sm={10} lg={7}>
                       <FormLabel className='text-normal' column>
@@ -196,7 +168,7 @@ const ProductDetails = () => {
                       </FormLabel>
                     </Col>
                   </Form.Group>
-                  <Form.Group className='mb-0' as={Row} controlId='formHorizontalEmail'>
+                  <Form.Group className='mb-0' as={Row}>
                     <Form.Label column>Mã barcode</Form.Label>
                     <Col sm={10} lg={7}>
                       <FormLabel className='text-normal' column>
@@ -204,7 +176,7 @@ const ProductDetails = () => {
                       </FormLabel>
                     </Col>
                   </Form.Group>
-                  <Form.Group className='mb-0' as={Row} controlId='formHorizontalEmail'>
+                  <Form.Group className='mb-0' as={Row}>
                     <Form.Label column>Khối lượng</Form.Label>
                     <Col sm={10} lg={7}>
                       <FormLabel className='text-normal' column>
@@ -212,7 +184,7 @@ const ProductDetails = () => {
                       </FormLabel>
                     </Col>
                   </Form.Group>
-                  <Form.Group className='mb-0' as={Row} controlId='formHorizontalEmail'>
+                  <Form.Group className='mb-0' as={Row}>
                     <Form.Label column>Đơn vị tính</Form.Label>
                     <Col sm={10} lg={7}>
                       <FormLabel className='text-normal' column>
@@ -223,7 +195,7 @@ const ProductDetails = () => {
                       </FormLabel>
                     </Col>
                   </Form.Group>
-                  <Form.Group className='mb-0' as={Row} controlId='formHorizontalEmail'>
+                  <Form.Group className='mb-0' as={Row}>
                     <Form.Label column>Phân loại</Form.Label>
                     <Col sm={10} lg={7}>
                       <FormLabel className='text-normal' column>
@@ -231,17 +203,9 @@ const ProductDetails = () => {
                       </FormLabel>
                     </Col>
                   </Form.Group>
-                  <Form.Group className='mb-0' as={Row} controlId='formHorizontalEmail'>
-                    <Form.Label column>Mô tả</Form.Label>
-                    <Col sm={10} lg={6}>
-                      {/* <FormLabel className='text-normal' column>
-                        : {data.user_staff ? data.user_staff : '---'}
-                      </FormLabel> */}
-                    </Col>
-                  </Form.Group>
                 </Col>
                 <Col sm={12} lg={4}>
-                  <Form.Group className='mb-0' as={Row} controlId='formHorizontalEmail'>
+                  <Form.Group className='mb-0' as={Row}>
                     <Form.Label column>Loại sản phẩm</Form.Label>
                     <Col sm={10} lg={7}>
                       <FormLabel className='text-normal' column>
@@ -252,7 +216,7 @@ const ProductDetails = () => {
                       </FormLabel>
                     </Col>
                   </Form.Group>
-                  <Form.Group className='mb-0' as={Row} controlId='formHorizontalEmail'>
+                  <Form.Group className='mb-0' as={Row}>
                     <Form.Label column>Nhãn hiệu</Form.Label>
                     <Col sm={10} lg={7}>
                       <FormLabel className='text-normal' column>
@@ -263,7 +227,7 @@ const ProductDetails = () => {
                       </FormLabel>
                     </Col>
                   </Form.Group>
-                  <Form.Group className='mb-0' as={Row} controlId='formHorizontalEmail'>
+                  <Form.Group className='mb-0' as={Row}>
                     <Form.Label column>Tags</Form.Label>
                     <Col sm={12} lg={7}>
                       <FormLabel className='text-normal' column>
@@ -271,15 +235,10 @@ const ProductDetails = () => {
                         {productDetail?.productAdditionInformation?.productTagList &&
                         productDetail?.productAdditionInformation?.productTagList?.length > 0 ? (
                           <>
-                            {productDetail.productAdditionInformation.productTagList.map((e, index) => (
-                              <React.Fragment key={e.id}>
-                                {e.tag_title}{' '}
-                                {productDetail.productAdditionInformation.productTagList.length === index + 1 ? (
-                                  <></>
-                                ) : (
-                                  <>,</>
-                                )}
-                              </React.Fragment>
+                            {productDetail.productAdditionInformation.productTagList.map((e) => (
+                              <Badge key={e.id} variant='warning' className='p-1 mr-2'>
+                                {e.tag_title}
+                              </Badge>
                             ))}
                           </>
                         ) : (
@@ -288,7 +247,7 @@ const ProductDetails = () => {
                       </FormLabel>
                     </Col>
                   </Form.Group>
-                  <Form.Group className='mb-0' as={Row} controlId='formHorizontalEmail'>
+                  <Form.Group className='mb-0' as={Row}>
                     <Form.Label column>Ngày tạo</Form.Label>
                     <Col sm={10} lg={7}>
                       <FormLabel className='text-normal' column>
@@ -299,7 +258,7 @@ const ProductDetails = () => {
                       </FormLabel>
                     </Col>
                   </Form.Group>
-                  <Form.Group className='mb-0' as={Row} controlId='formHorizontalEmail'>
+                  <Form.Group className='mb-0' as={Row}>
                     <Form.Label column>Ngày cập nhật cuối</Form.Label>
                     <Col sm={10} lg={7}>
                       <FormLabel className='text-normal' column>
@@ -327,7 +286,7 @@ const ProductDetails = () => {
               <Card>
                 <Card.Header className='flex-between'>
                   <Card.Title as='h5'>Giá sản phẩm</Card.Title>
-                  {/* {isSorting ? (
+                  {isSorting ? (
                     <span>
                       <span className='text-normal' style={{ marginRight: 200, color: '#122ee2' }}>
                         Sắp xếp theo thứ tự vị trí ưu tiên từ trên xuống dưới
@@ -343,30 +302,88 @@ const ProductDetails = () => {
                     <Button onClick={handleSortClick} className='strong-title' size='sm'>
                       Sắp xếp
                     </Button>
-                  )} */}
+                  )}
                 </Card.Header>
                 <Card.Body>
-                  <Row>
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                        width: '100%',
-                        columnGap: '15px',
-                        padding: '0px 16px'
-                      }}
-                    >
-                      {selectedProduct?.productPrices.map((e) => (
-                        <Form.Group key={e.id} className='mb-0' as={Row} controlId='formHorizontalEmail'>
-                          <Form.Label column>{e.price_type}</Form.Label>
-                          <Col sm={10} lg={8}>
-                            <FormLabel className='text-normal' column>
-                              : {e.price_value ? formatCurrency(parseInt(e.price_value)) : '0'}
-                            </FormLabel>
-                          </Col>
-                        </Form.Group>
-                      ))}
-                    </div>
+                  <Row className='justify-content-center'>
+                    {isSorting ? (
+                      <DragDropContext onDragEnd={handleOnDragEnd}>
+                        <Droppable droppableId='items'>
+                          {(provided) => (
+                            <div className='text-center' {...provided.droppableProps} ref={provided.innerRef}>
+                              {priceItems.map(({ id, type }: priceItemsProp, index: number) => {
+                                return (
+                                  <Draggable key={id} draggableId={id} index={index}>
+                                    {(provided) => (
+                                      <div
+                                        className='mb-3'
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                      >
+                                        <Badge
+                                          style={{
+                                            fontWeight: 400,
+                                            fontSize: 15,
+                                            color: 'white',
+                                            width: 200,
+                                            padding: 14,
+                                            backgroundColor: 'rgb(79, 101, 241)',
+                                            backgroundImage:
+                                              'linear-gradient(90deg, rgb(111, 137, 251) 0%, rgb(97, 109, 245) 33%, rgb(92, 82, 235) 100%)'
+                                          }}
+                                        >
+                                          {index + 1}. <span>{type}</span>
+                                        </Badge>
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                )
+                              })}
+                              {provided.placeholder}
+                            </div>
+                          )}
+                        </Droppable>
+                      </DragDropContext>
+                    ) : (
+                      // <div
+                      //   style={{
+                      //     display: 'grid',
+                      //     gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                      //     width: '100%',
+                      //     columnGap: '15px',
+                      //     padding: '0px 16px'
+                      //   }}
+                      // >
+                      //   {priceItems.map((price: priceItemsProp) => (
+                      //     <Form.Group key={price.id} className='mb-0' as={Row} >
+                      //       <Form.Label column>{price.type}</Form.Label>
+                      //       <Col sm={10} lg={8}>
+                      //         <FormLabel className='text-normal' column>
+                      //           : {price.value ? formatCurrency(parseInt(price.value)) : '0'}
+                      //         </FormLabel>
+                      //       </Col>
+                      //     </Form.Group>
+                      //   ))}
+                      // </div>
+
+                      <Col>
+                        <Row>
+                          {priceItems.map((price: priceItemsProp) => (
+                            <Col key={price.id} lg={6}>
+                              <Form.Group className='mb-0' as={Row}>
+                                <Form.Label column>{price.type}</Form.Label>
+                                <Col sm={10} lg={8}>
+                                  <FormLabel className='text-normal' column>
+                                    : {price.value ? formatCurrency(parseInt(price.value)) : '0'}
+                                  </FormLabel>
+                                </Col>
+                              </Form.Group>
+                            </Col>
+                          ))}
+                        </Row>
+                      </Col>
+                    )}
                   </Row>
                 </Card.Body>
               </Card>

@@ -1,22 +1,21 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import { Row, Col, Card, Form, FormGroup, FormCheck, FormControl, Button } from 'react-bootstrap'
+import { Row, Col, Card, FormControl, Button, CloseButton, FormGroup, FormLabel } from 'react-bootstrap'
 import Select, { SingleValue } from 'react-select'
-import { HiOutlineXMark, HiOutlineBuildingStorefront } from 'react-icons/hi2'
 import { TbPackage } from 'react-icons/tb'
 import { FiTruck } from 'react-icons/fi'
-import { RiEBike2Line } from 'react-icons/ri'
-import { BsClockHistory } from 'react-icons/bs'
+import { SlSocialDropbox } from 'react-icons/sl'
 
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import CustomerService from '~/services/customer.service'
 
 import { Customer } from '~/types/Customer.type'
 import ProductService from '~/services/product.service'
-import { Product, ProductVariant } from '~/types/Product.type'
+import { Product } from '~/types/Product.type'
 import CustomTable from '~/components/Table/CustomTable'
 import { OrderProduct } from '~/types/OrderProduct.type'
 import { formatCurrency } from '~/utils/common'
 import { ButtonLoading } from '~/components/Button/LoadingButton'
+import DeliveryService from '~/services/delivery.service'
 
 const dataDebtSupplier = [
   {
@@ -38,29 +37,30 @@ const dataDebtSupplier = [
 ]
 
 const listButton = [
-  { label: 'Đẩy qua hãng vận chuyển', value: 1, icon: <FiTruck style={{ fontSize: '18px', marginBottom: '2px' }} /> },
-  {
-    label: 'Đẩy vận chuyển ngoài',
-    value: 2,
-    icon: <RiEBike2Line style={{ fontSize: '18px', marginBottom: '2px' }} />
-  },
-  {
-    label: 'Khách nhận tại cửa hàng',
-    value: 3,
-    icon: <HiOutlineBuildingStorefront style={{ fontSize: '18px', marginBottom: '2px' }} />
-  },
-  { label: 'Giao hàng sau', value: 4, icon: <BsClockHistory style={{ fontSize: '18px', marginBottom: '2px' }} /> }
+  { label: 'Đẩy qua hãng vận chuyển', value: 1, icon: <FiTruck style={{ fontSize: '18px', marginBottom: '2px' }} /> }
+  // {
+  //   label: 'Đẩy vận chuyển ngoài',
+  //   value: 2,
+  //   icon: <RiEBike2Line style={{ fontSize: '18px', marginBottom: '2px' }} />
+  // },
+  // {
+  //   label: 'Khách nhận tại cửa hàng',
+  //   value: 3,
+  //   icon: <HiOutlineBuildingStorefront style={{ fontSize: '18px', marginBottom: '2px' }} />
+  // },
+  // { label: 'Giao hàng sau', value: 4, icon: <BsClockHistory style={{ fontSize: '18px', marginBottom: '2px' }} /> }
 ]
 
 const OrderCreate = () => {
   const [listCustomer, setListCustomer] = useState<Customer[]>([])
   const [customerDetail, setCustomerDetail] = useState<Customer>()
   const [optionsProduct, setOptionsProduct] = useState([])
-  const [optionsProductVariant, setOptionsProductVariant] = useState([])
+  // const [optionsProductVariant, setOptionsProductVariant] = useState([])
   const [seletedProduct, setSelectedProduct] = useState()
   const [productList, setProductList] = useState<OrderProduct[]>([])
-  const [canEdit, setCanEdit] = useState(true)
+  const canEdit = true
   const [activeButton, setActiveButton] = useState<number>(1)
+  const [optionsShipper, setOptionsShipper] = useState([])
 
   const columns = React.useMemo(() => {
     const handleProductTable = (rowIndex: number, columnId: string, value: any) => {
@@ -174,7 +174,7 @@ const OrderCreate = () => {
   const customPlaceholder = (value: string) => {
     return (
       <span className='flex-between'>
-        <span>{value === 'Supplier' ? 'Tìm theo tên, SĐT, mã khách hàng...(F4)' : 'Tìm theo tên sản phẩm'} </span>
+        <span>{value === 'Supplier' ? 'Tìm theo tên khách hàng' : 'Tìm theo tên sản phẩm'} </span>
         <i className='feather icon-search'></i>
       </span>
     )
@@ -216,12 +216,12 @@ const OrderCreate = () => {
     try {
       if (e) {
         const res = await ProductService.getDetailProduct(e?.value)
-        const dataProduct: any = res.data.data
-        const options = dataProduct.productVariants.map((variant: ProductVariant) => ({
-          label: variant.product_variant_name,
-          value: variant.id
-        }))
-        setOptionsProductVariant(options)
+        // const dataProduct: any = res.data.data
+        // const options = dataProduct.productVariants.map((variant: ProductVariant) => ({
+        //   label: variant.product_variant_name,
+        //   value: variant.id
+        // }))
+        // setOptionsProductVariant(options)
         setSelectedProduct(res.data.data)
       }
     } catch (error) {
@@ -238,10 +238,27 @@ const OrderCreate = () => {
     [getCustomerDetail]
   )
 
+  const getListShipper = useCallback(() => {
+    DeliveryService.getAllDelivery()
+      .then((res) => {
+        const data = res.data.data
+        setOptionsShipper(
+          data.map((shipper: any) => ({
+            label: shipper.shipper_unit,
+            value: shipper.id
+          }))
+        )
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }, [])
+
   useEffect(() => {
     getListCustomer()
     getProductList()
-  }, [getListCustomer, getProductList])
+    getListShipper()
+  }, [getListCustomer, getProductList, getListShipper])
 
   return (
     <React.Fragment>
@@ -262,219 +279,226 @@ const OrderCreate = () => {
       </div>
 
       <Row className='text-normal'>
-        <Col lg={8}>
-          <Card style={{ height: '95%' }}>
-            <Card.Header>
-              <Card.Title as='h5'>Thông tin khách hàng</Card.Title>
-              {customerDetail && (
-                <div style={{ marginTop: '6px' }}>
-                  {' '}
-                  <span style={{ fontSize: '17px', color: '#0088FF', fontWeight: '600' }}>
-                    {customerDetail.customer_name}
-                  </span>{' '}
-                  - <span style={{ fontSize: '17px' }}>{customerDetail.customer_phone}</span>
-                  <span
-                    onClick={() => setCustomerDetail(undefined)}
-                    style={{ fontSize: '18px', marginLeft: '10px' }}
-                    aria-hidden='true'
-                  >
-                    <HiOutlineXMark style={{ marginBottom: '1px' }} />
-                  </span>
-                </div>
-              )}
-            </Card.Header>
-            {customerDetail ? (
-              <Card.Body>
-                <Row>
-                  <Col lg={6}>
-                    <div className='font-weight-bold'>
-                      <p>Đia chỉ giao hàng</p>
+        <Col lg={12}>
+          <Row style={{ maxHeight: '400px' }}>
+            <Col lg={8}>
+              <Card style={{ height: '90%' }}>
+                <Card.Header>
+                  <Card.Title as='h5'>
+                    <i className='feather icon-user mr-2' />
+                    Thông tin khách hàng
+                  </Card.Title>
+                  {customerDetail && (
+                    <div className='d-flex align-items-center mt-2'>
+                      <span style={{ fontSize: '17px', color: '#0088FF', fontWeight: '600' }} className='mr-1'>
+                        {customerDetail.customer_name}
+                      </span>
+                      <span style={{ fontSize: '17px' }} className='ml-1'>
+                        - {customerDetail.customer_phone}{' '}
+                      </span>
+                      <CloseButton
+                        style={{ float: 'initial' }}
+                        className='m-0 ml-2'
+                        onClick={() => setCustomerDetail(undefined)}
+                      />
                     </div>
-                    <p>
-                      {customerDetail.customer_name} - {customerDetail.customer_phone}
-                    </p>
-                    <p>
-                      {customerDetail.address_list[0].user_specific_address}{' '}
-                      {customerDetail.address_list[0].user_district} {customerDetail.address_list[0].user_province}
-                    </p>
-                  </Col>
+                  )}
+                </Card.Header>
+                {customerDetail ? (
+                  <Card.Body>
+                    <Row>
+                      <Col lg={6}>
+                        <div className='font-weight-bold'>
+                          <p>Đia chỉ giao hàng</p>
+                        </div>
+                        <p>
+                          {customerDetail.customer_name} - {customerDetail.customer_phone}
+                        </p>
+                        <p>
+                          {customerDetail.address_list[0].user_specific_address}{' '}
+                          {customerDetail.address_list[0].user_district} {customerDetail.address_list[0].user_province}
+                        </p>
+                      </Col>
 
-                  <Col>
-                    <div className='box-dash'>
-                      {dataDebtSupplier.map((debtSupplier, index) => (
-                        <span key={`debtSupplier_${index}`} className='flex-between m-2'>
-                          <span>{debtSupplier.data}</span>
-                          <span className='text-c-blue font-weight-bold'>{debtSupplier.value}</span>
-                        </span>
-                      ))}
+                      <Col>
+                        <div className='box-dash'>
+                          {dataDebtSupplier.map((debtSupplier, index) => (
+                            <span key={`debtSupplier_${index}`} className='flex-between m-2'>
+                              <span>{debtSupplier.data}</span>
+                              <span className='text-c-blue font-weight-bold'>{debtSupplier.value}</span>
+                            </span>
+                          ))}
+                        </div>
+                      </Col>
+                    </Row>
+                  </Card.Body>
+                ) : (
+                  <Card.Body style={{ height: '90%' }}>
+                    <Row>
+                      <Col>
+                        <Select
+                          className='mb-4'
+                          options={listCustomer.map((e) => ({
+                            label: `${e.customer_name} - ${e.customer_phone}`,
+                            value: e.id
+                          }))}
+                          onChange={(e) => selectedCustomer(e)}
+                          placeholder={customPlaceholder('Supplier')}
+                        />
+                      </Col>
+                    </Row>
+                    <>
+                      <p
+                        style={{ color: '#bfb2b2', height: '75%' }}
+                        className='d-flex justify-content-center align-items-center'
+                      >
+                        Chưa có thông tin khách hàng
+                      </p>
+                    </>
+                  </Card.Body>
+                )}
+              </Card>
+            </Col>
+            <Col sm={12} lg={4}>
+              <Card style={{ height: '90%' }}>
+                <Card.Header>
+                  <Card.Title as='h5'>Thông tin bổ sung</Card.Title>
+                </Card.Header>
+                <Card.Body style={{ height: '325px', overflowY: 'auto' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div className='flex-between'>
+                      <span>Bán bởi:</span>
+                      <div style={{ width: '65%' }}>
+                        <Select
+                          placeholder='Chọn chi nhánh'
+                          // isDisabled={!!params.id}
+                          // defaultValue={selectedBranch}
+                          // options={optionsBranch}
+                          // loadingMessage={loadingMessage}
+                          // onChange={(e: any) => setSelectedBranch(e)}
+                        ></Select>
+                      </div>
                     </div>
-                  </Col>
-                </Row>
-              </Card.Body>
-            ) : (
-              <Card.Body>
-                <Row>
-                  <Col>
-                    <Select
-                      className='mb-4'
-                      options={listCustomer.map((e) => ({
-                        label: `${e.customer_name} - ${e.customer_phone}`,
-                        value: e.id
-                      }))}
-                      onChange={(e) => selectedCustomer(e)}
-                      placeholder={customPlaceholder('Supplier')}
-                    />
-                  </Col>
-                </Row>
-                <>
-                  <p
-                    style={{ color: '#bfb2b2', height: '75%' }}
-                    className='d-flex justify-content-center align-items-center'
-                  >
-                    Chưa có thông tin khách hàng
-                  </p>
-                </>
-              </Card.Body>
-            )}
-          </Card>
+                    <div className='flex-between'>
+                      <span>Bán tại:</span>
+                      <div style={{ width: '65%' }}>
+                        <Select
+                          name='staff'
+                          // options={optionsStaff}
+                          // isDisabled={!canEdit}
+                          // loadingMessage={loadingMessage}
+                          // defaultValue={selectedStaff}
+                          // onChange={(e: any) => {
+                          //   setSelectedStaff(e)
+                          // }}
+                          placeholder={'Chọn nhân viên'}
+                        ></Select>
+                      </div>
+                    </div>
+                    <div className='flex-between'>
+                      <span>Nguồn:</span>
+                      <div style={{ width: '65%' }}>
+                        <Select
+                          name='staff'
+                          // options={optionsStaff}
+                          // isDisabled={!canEdit}
+                          // loadingMessage={loadingMessage}
+                          // defaultValue={selectedStaff}
+                          // onChange={(e: any) => {
+                          //   setSelectedStaff(e)
+                          // }}
+                          placeholder={'Chọn nhân viên'}
+                        ></Select>
+                      </div>
+                    </div>
+                    <div className='flex-between'>
+                      <span>Hẹn giao: </span>
+                      <div style={{ width: '65%' }}>
+                        <Select
+                          name='staff'
+                          // options={optionsStaff}
+                          // isDisabled={!canEdit}
+                          // loadingMessage={loadingMessage}
+                          // defaultValue={selectedStaff}
+                          // onChange={(e: any) => {
+                          //   setSelectedStaff(e)
+                          // }}
+                          placeholder={'Chọn nhân viên'}
+                        ></Select>
+                      </div>
+                    </div>
+                    <div className='flex-between'>
+                      <span>Mã đơn: </span>
+                      <div style={{ width: '65%' }}>
+                        <Select
+                          name='staff'
+                          // options={optionsStaff}
+                          // isDisabled={!canEdit}
+                          // loadingMessage={loadingMessage}
+                          // defaultValue={selectedStaff}
+                          // onChange={(e: any) => {
+                          //   setSelectedStaff(e)
+                          // }}
+                          placeholder={'Chọn nhân viên'}
+                        ></Select>
+                      </div>
+                    </div>
+                    <div className='flex-between'>
+                      <span style={{ width: '30%' }}>Đường dẫn đơn hàng: </span>
+                      <div style={{ width: '65%' }}>
+                        <Select
+                          name='staff'
+                          // options={optionsStaff}
+                          // isDisabled={!canEdit}
+                          // loadingMessage={loadingMessage}
+                          // defaultValue={selectedStaff}
+                          // onChange={(e: any) => {
+                          //   setSelectedStaff(e)
+                          // }}
+                          placeholder={'Chọn nhân viên'}
+                        ></Select>
+                      </div>
+                    </div>
+                    <div className='flex-between'>
+                      <span>Tham chiếu: </span>
+                      <div style={{ width: '65%' }}>
+                        <Select
+                          name='staff'
+                          // options={optionsStaff}
+                          // isDisabled={!canEdit}
+                          // loadingMessage={loadingMessage}
+                          // defaultValue={selectedStaff}
+                          // onChange={(e: any) => {
+                          //   setSelectedStaff(e)
+                          // }}
+                          placeholder={'Chọn nhân viên'}
+                        ></Select>
+                      </div>
+                    </div>
+                    <div className='flex-between'>
+                      <span style={{ width: '30%' }}>Thanh toán dự kiến: </span>
+                      <div style={{ width: '65%' }}>
+                        <Select
+                          name='staff'
+                          // options={optionsStaff}
+                          // isDisabled={!canEdit}
+                          // loadingMessage={loadingMessage}
+                          // defaultValue={selectedStaff}
+                          // onChange={(e: any) => {
+                          //   setSelectedStaff(e)
+                          // }}
+                          placeholder={'Chọn nhân viên'}
+                        ></Select>
+                      </div>
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
         </Col>
-        <Col sm={12} lg={4}>
-          <Card>
-            <Card.Header>
-              <Card.Title as='h5'>Thông tin bổ sung</Card.Title>
-            </Card.Header>
-            <Card.Body style={{ height: '250px', overflowY: 'auto' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div className='flex-between' style={{ display: 'flex' }}>
-                  <span>Bán bởi:</span>
-                  <div style={{ width: '65%' }}>
-                    <Select
-                      placeholder='Chọn chi nhánh'
-                      // isDisabled={!!params.id}
-                      // defaultValue={selectedBranch}
-                      // options={optionsBranch}
-                      // loadingMessage={loadingMessage}
-                      // onChange={(e: any) => setSelectedBranch(e)}
-                    ></Select>
-                  </div>
-                </div>
-                <div className='flex-between'>
-                  <span>Bán tại:</span>
-                  <div style={{ width: '65%' }}>
-                    <Select
-                      name='staff'
-                      // options={optionsStaff}
-                      // isDisabled={!canEdit}
-                      // loadingMessage={loadingMessage}
-                      // defaultValue={selectedStaff}
-                      // onChange={(e: any) => {
-                      //   setSelectedStaff(e)
-                      // }}
-                      placeholder={'Chọn nhân viên'}
-                    ></Select>
-                  </div>
-                </div>
-                <div className='flex-between'>
-                  <span>Nguồn:</span>
-                  <div style={{ width: '65%' }}>
-                    <Select
-                      name='staff'
-                      // options={optionsStaff}
-                      // isDisabled={!canEdit}
-                      // loadingMessage={loadingMessage}
-                      // defaultValue={selectedStaff}
-                      // onChange={(e: any) => {
-                      //   setSelectedStaff(e)
-                      // }}
-                      placeholder={'Chọn nhân viên'}
-                    ></Select>
-                  </div>
-                </div>
-                <div className='flex-between'>
-                  <span>Hẹn giao: </span>
-                  <div style={{ width: '65%' }}>
-                    <Select
-                      name='staff'
-                      // options={optionsStaff}
-                      // isDisabled={!canEdit}
-                      // loadingMessage={loadingMessage}
-                      // defaultValue={selectedStaff}
-                      // onChange={(e: any) => {
-                      //   setSelectedStaff(e)
-                      // }}
-                      placeholder={'Chọn nhân viên'}
-                    ></Select>
-                  </div>
-                </div>
-                <div className='flex-between'>
-                  <span>Mã đơn: </span>
-                  <div style={{ width: '65%' }}>
-                    <Select
-                      name='staff'
-                      // options={optionsStaff}
-                      // isDisabled={!canEdit}
-                      // loadingMessage={loadingMessage}
-                      // defaultValue={selectedStaff}
-                      // onChange={(e: any) => {
-                      //   setSelectedStaff(e)
-                      // }}
-                      placeholder={'Chọn nhân viên'}
-                    ></Select>
-                  </div>
-                </div>
-                <div className='flex-between'>
-                  <span style={{ width: '30%' }}>Đường dẫn đơn hàng: </span>
-                  <div style={{ width: '65%' }}>
-                    <Select
-                      name='staff'
-                      // options={optionsStaff}
-                      // isDisabled={!canEdit}
-                      // loadingMessage={loadingMessage}
-                      // defaultValue={selectedStaff}
-                      // onChange={(e: any) => {
-                      //   setSelectedStaff(e)
-                      // }}
-                      placeholder={'Chọn nhân viên'}
-                    ></Select>
-                  </div>
-                </div>
-                <div className='flex-between'>
-                  <span>Tham chiếu: </span>
-                  <div style={{ width: '65%' }}>
-                    <Select
-                      name='staff'
-                      // options={optionsStaff}
-                      // isDisabled={!canEdit}
-                      // loadingMessage={loadingMessage}
-                      // defaultValue={selectedStaff}
-                      // onChange={(e: any) => {
-                      //   setSelectedStaff(e)
-                      // }}
-                      placeholder={'Chọn nhân viên'}
-                    ></Select>
-                  </div>
-                </div>
-                <div className='flex-between'>
-                  <span style={{ width: '30%' }}>Thanh toán dự kiến: </span>
-                  <div style={{ width: '65%' }}>
-                    <Select
-                      name='staff'
-                      // options={optionsStaff}
-                      // isDisabled={!canEdit}
-                      // loadingMessage={loadingMessage}
-                      // defaultValue={selectedStaff}
-                      // onChange={(e: any) => {
-                      //   setSelectedStaff(e)
-                      // }}
-                      placeholder={'Chọn nhân viên'}
-                    ></Select>
-                  </div>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col>
+
+        <Col lg={12} sm={12}>
           <Card>
             <Card.Header>
               <h5>
@@ -514,30 +538,43 @@ const OrderCreate = () => {
             )}
           </Card>
         </Col>
+
         <Col sm={12} lg={12}>
           <Card>
             <Card.Header>
               <h5>
-                <i className='feather icon-archive mr-2'></i>
-                Thông tin sản phẩm
+                <SlSocialDropbox className='mr-2' />
+                Đóng gói và giao hàng
               </h5>
-              <div className='d-flex' style={{ paddingTop: '15px' }}>
-                {listButton.map((v, index) => (
+              <div className='d-flex pt-4'>
+                {listButton.map((button, index) => (
                   <Button
                     key={index}
-                    className=''
                     variant={`${index + 1 === activeButton ? 'outline-primary' : 'outline-secondary'}`}
-                    onClick={() => setActiveButton(v.value)}
+                    onClick={() => setActiveButton(button.value)}
                     style={{ display: 'flex', gap: '10px', alignItems: 'center' }}
                   >
-                    {/* {e.icon} */}
-                    <span>{v.icon}</span>
-                    {v.label}
+                    <span>{button.icon}</span>
+                    {button.label}
                   </Button>
                 ))}
               </div>
             </Card.Header>
-            <Card.Body></Card.Body>
+            <Card.Body>
+              <Row>
+                <Col>
+                  <FormGroup className='d-flex align-items-center'>
+                    <FormLabel>Chọn nhân viên vận chuyển: </FormLabel>
+                    <Select
+                      options={optionsShipper}
+                      defaultValue={optionsShipper[0]}
+                      menuPlacement='top'
+                      className='ml-3 w-25'
+                    />
+                  </FormGroup>
+                </Col>
+              </Row>
+            </Card.Body>
           </Card>
         </Col>
       </Row>

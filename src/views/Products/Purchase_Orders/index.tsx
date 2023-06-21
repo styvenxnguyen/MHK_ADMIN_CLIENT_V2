@@ -16,7 +16,7 @@ function PurchaseOrdersList() {
   const [isFetched, setIsFetched] = useState(false)
 
   useEffect(() => {
-    OrderService.getAllPurchaseOrder('Đơn nhập')
+    OrderService.getAllOrder('Đơn nhập')
       .then((response: any) => {
         const dataListProducts = response.data.data
         setListPurchaseOrders(dataListProducts)

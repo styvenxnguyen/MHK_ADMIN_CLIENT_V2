@@ -45,6 +45,26 @@ const menuItems = {
               title: 'Tạo đơn và giao hàng',
               type: 'item',
               url: '/app/orders/create'
+            },
+            {
+              id: 'orders-list',
+              title: 'Danh sách đơn hàng',
+              type: 'item',
+              url: '/app/orders'
+            }
+          ]
+        },
+        {
+          id: 'deliveries',
+          title: 'Vận chuyển',
+          type: 'collapse',
+          icon: 'feather icon-truck',
+          children: [
+            {
+              id: 'deliveries-list',
+              title: 'Danh sách đối tác',
+              type: 'item',
+              url: '/app/deliveries'
             }
           ]
         },
@@ -75,20 +95,6 @@ const menuItems = {
             }
           ]
         },
-        // {
-        //   id: 'cash-book',
-        //   title: 'Sổ quỹ',
-        //   type: 'collapse',
-        //   icon: 'feather icon-dollar-sign',
-        //   children: [
-        //     {
-        //       id: 'receipts-bill',
-        //       title: 'Phiếu thu',
-        //       type: 'item',
-        //       url: '/basic/alert'
-        //     }
-        //   ]
-        // },
         {
           id: 'customers',
           title: 'Khách hàng',

@@ -13,9 +13,7 @@ import InputTags from '~/components/InputTags'
 import { PricePolicyService } from '~/services/pricepolicy.service'
 import { TagService } from '~/services/tag.service'
 import { Helmet } from 'react-helmet'
-import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 import { ButtonLoading } from '~/components/Button/LoadingButton'
-import { useHistory } from 'react-router-dom'
 import Swal from 'sweetalert2'
 
 interface FormValues {
@@ -88,7 +86,6 @@ const DataFields = [
 ]
 
 const ProductCreate = () => {
-  const history = useHistory()
   const [showLoader, setShowLoader] = useState(false)
   const [optionsTag, setOptionsTag] = useState<TypeResponse[]>([])
   const [optionsType, setOptionsType] = useState<ProductType[]>([])
@@ -183,26 +180,27 @@ const ProductCreate = () => {
         properties: listProperty,
         product_variant_prices: listVariantPrice.filter((item) => item.price_value !== '')
       }
-      ProductService.createProduct(dataSubmit)
-        .then(() => {
-          setTimeout(() => {
-            setShowLoader(false)
-            handleAlertConfirm({
-              text: 'Thêm sản phẩm mới thành công',
-              icon: 'success',
-              handleConfirmed: () => history.replace('/app/products')
-            })
-          }, 1000)
-        })
-        .catch(() => {
-          setTimeout(() => {
-            setShowLoader(false)
-            handleAlertConfirm({
-              text: 'Thêm sản phẩm mới thất bại',
-              icon: 'error'
-            })
-          }, 1000)
-        })
+      console.log(dataSubmit)
+      // ProductService.createProduct(dataSubmit)
+      //   .then(() => {
+      //     setTimeout(() => {
+      //       setShowLoader(false)
+      //       handleAlertConfirm({
+      //         text: 'Thêm sản phẩm mới thành công',
+      //         icon: 'success',
+      //         handleConfirmed: () => history.replace('/app/products')
+      //       })
+      //     }, 1000)
+      //   })
+      //   .catch(() => {
+      //     setTimeout(() => {
+      //       setShowLoader(false)
+      //       handleAlertConfirm({
+      //         text: 'Thêm sản phẩm mới thất bại',
+      //         icon: 'error'
+      //       })
+      //     }, 1000)
+      //   })
     } catch (error) {
       Swal.fire('', 'Lỗi kết nối tới máy chủ', 'error')
     }

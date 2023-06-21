@@ -10,7 +10,7 @@ const ORDER = {
 }
 
 const OrderService = {
-  getAllPurchaseOrder: (params: string) => axiosConfig.get(ORDER.GET_ALL(params)),
+  getAllOrder: (params: string) => axiosConfig.get(ORDER.GET_ALL(params)),
   getPurchaseOrderDetail: (id: string) => axiosConfig.get(ORDER.PURCHASEORDER_DETAIL(id)),
   createPurchaseOrder: (data: PurchaseOrder) => axiosConfig.post(ORDER.CREATE_PURCHASEORDER, data),
   updatePurchaseOrderDetail: (id: string, data: PurchaseOrder) =>
