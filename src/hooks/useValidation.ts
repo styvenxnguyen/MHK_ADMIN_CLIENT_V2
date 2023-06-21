@@ -110,3 +110,7 @@ export const validationSchemaProperty = Yup.object().shape({
     })
     .matches(/^[a-zA-ZÀ-Ỹà-ỹ\s]+$/, 'Chỉ được nhập chữ vào tên thuộc tính')
 })
+
+export const validationSchemaProductCreate = Yup.object().shape({
+  product_name: Yup.string().required('Tên sản phẩm không được để trống')
+})

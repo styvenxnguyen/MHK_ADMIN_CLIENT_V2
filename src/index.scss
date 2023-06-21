@@ -803,25 +803,24 @@ input::placeholder {
   transition-duration: 200ms;
   border: none;
 }
-.select-container {
-  outline: 1px solid gray;
-  transition-duration: 200ms;
-  border: none;
-}
+// .select-container {
+//   outline: 1px solid gray;
+//   transition-duration: 200ms;
+//   border: none;
+// }
 
-.select-container {
+.select-container:focus {
   border: none;
   outline: 1px solid #04a9f5;
   border: none;
 }
 
 .select-container {
-  padding: 9px 0;
-  border-radius: 4px;
+  padding: 7px 0;
+  border-radius: 3px;
   width: 95%;
   display: flex;
   flex-wrap: wrap;
-  row-gap: 8px;
   .tag-list {
    margin-left: 8px;
    display: flex;
@@ -830,7 +829,7 @@ input::placeholder {
     .tag {
     background-color: #d9edff;
     margin-right: 8px;
-    padding: 4px 10px;
+    padding: 0px 10px;
     border-radius: 20px;
     svg {
       margin-bottom: 1px;
@@ -853,4 +852,13 @@ input::placeholder {
     border: none;
     padding-left: 9px;
   }
+}
+
+.hover-70:hover {
+  opacity: 0.7;
+  transition-duration: 200ms;
+}
+
+.hover-70:active {
+  opacity: 1;
 }
