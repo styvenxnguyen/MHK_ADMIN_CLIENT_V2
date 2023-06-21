@@ -1,13 +1,12 @@
 import { useState, useEffect, useCallback, ChangeEvent, KeyboardEvent } from 'react'
-import { Col, Form as FormBootstrap, FormGroup } from 'react-bootstrap'
+import { Card, Col, Form, FormGroup, Row } from 'react-bootstrap'
 import { HiChevronDoubleDown } from 'react-icons/hi'
 import { HiXMark } from 'react-icons/hi2'
-import Select from 'react-select'
-import { Formik, Field, Form, ErrorMessage, FieldProps } from 'formik'
+import Select, { SingleValue } from 'react-select'
+import { Formik } from 'formik'
 
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import ProductService from '~/services/product.service'
-import Title from '~/components/Title/Title'
 import { formatCurrency } from '~/utils/common'
 import InputTags from '~/components/InputTags'
 import { PricePolicyService } from '~/services/pricepolicy.service'
@@ -15,6 +14,7 @@ import { TagService } from '~/services/tag.service'
 import { Helmet } from 'react-helmet'
 import { ButtonLoading } from '~/components/Button/LoadingButton'
 import Swal from 'sweetalert2'
+import { validationSchemaProductCreate } from '~/hooks/useValidation'
 
 interface FormValues {
   product_name: string
@@ -58,31 +58,16 @@ const optionUnitWeight = [
   { label: 'kg', weight: 'kg' }
 ]
 
-const DataFields = [
-  {
-    id: 'product_code',
-    name: 'product_code',
-    label: 'Mã sản phẩm/SKU',
-    type: 'text'
-  },
-  {
-    id: 'product_weight',
-    name: 'product_weight',
-    label: 'Khối lượng',
-    type: 'number'
-  },
-  {
-    id: 'product_barcode',
-    name: 'product_barcode',
-    label: 'Mã vạch/Barcode',
-    type: 'text'
-  }
-  // {
-  //   id: 'product_unit_price',
-  //   name: 'product_unit_price',
-  //   label: 'Đơn vị tính',
-  //   type: 'number'
-  // }
+const CardGeneralInformation = [
+  { label: 'Mã sản phẩm/SKU', name: '', id: 'formCodeProduct' },
+  { label: 'Khối lượng', name: 'product_weight', id: 'formWeightProduct' },
+  { label: 'Mã vạch/Barcode', name: '', id: 'formBarcodeProduct' },
+  { label: 'Đơn vị tính', name: '', id: 'formUnitProduct' }
+]
+
+const options = [
+  { value: 'g', label: 'g' },
+  { value: 'kg', label: 'kg' }
 ]
 
 const ProductCreate = () => {
@@ -94,6 +79,7 @@ const ProductCreate = () => {
   const [showMore, setShowMore] = useState<boolean>(false)
   const [value, setValue] = useState<boolean>(false)
   const [valueBrand, setValueBrand] = useState()
+  const [unitWeight, setUnitWeight] = useState('g')
   const [valueType, setValueType] = useState()
   const [valueTags, setValueTags] = useState([])
   const [listVariantPrice, setListVariantPrice] = useState<{ price_id: string; price_value: string }[]>([
@@ -107,7 +93,7 @@ const ProductCreate = () => {
   const [listProperty, setListProperty] = useState<{ key: string; values: string[] }[]>([
     {
       key: inputSize,
-      values: ['']
+      values: []
     }
   ])
 
@@ -173,7 +159,7 @@ const ProductCreate = () => {
         product_name: values.product_name,
         product_classify: 'Sản phẩm thường',
         product_weight: `${values.product_weight}`,
-        product_weight_calculator_unit: values.product_weight_calculator_unit,
+        product_weight_calculator_unit: unitWeight,
         type_id: valueType,
         brand_id: valueBrand,
         tagIDList: valueTags,
@@ -206,8 +192,14 @@ const ProductCreate = () => {
     }
   }
 
+  const handleUnitWeight = useCallback((e: SingleValue<{ value: string; label: string }>) => {
+    if (e?.value) {
+      setUnitWeight(e.value)
+    }
+  }, [])
+
   const handleChangeInput = useCallback(
-    (event: ChangeEvent<HTMLInputElement>, item: { value: string }) => {
+    (event: ChangeEvent<any>, item: { value: string }) => {
       const value = event.target.value
       const newArr = listVariantPrice.map((i: { price_id: string; price_value: string }) => {
         if (i.price_id === item.value)
@@ -366,7 +358,7 @@ const ProductCreate = () => {
       <Helmet>
         <title>Thêm sản phẩm</title>
       </Helmet>
-      <Formik initialValues={initialValues} validate={validate} onSubmit={handleSubmit}>
+      {/* <Formik initialValues={initialValues} validate={validate} onSubmit={handleSubmit}>
         <Form onKeyDown={handleKeyPress}>
           <span className='flex-between'>
             <BackPreviousPage path='/app/products' text='Quay lại danh sách sản phẩm' />
@@ -717,6 +709,271 @@ const ProductCreate = () => {
             </div>
           </div>
         </Form>
+      </Formik> */}
+
+      <Formik initialValues={initialValues} validationSchema={validationSchemaProductCreate} onSubmit={handleSubmit}>
+        {({ errors, setFieldValue, handleChange, handleSubmit, touched, values }) => (
+          <Form onKeyDown={handleKeyPress}>
+            <span className='flex-between'>
+              <BackPreviousPage path='/app/products' text='Quay lại danh sách sản phẩm' />
+              <ButtonLoading
+                text={
+                  <span>
+                    <i className='feather icon-plus-circle mr-2'></i>
+                    Lưu sản phẩm
+                  </span>
+                }
+                onSubmit={handleSubmit}
+                loading={showLoader}
+                type='submit'
+                disabled={showLoader}
+                className='m-0 mb-3'
+              ></ButtonLoading>
+            </span>
+
+            <Row>
+              <Col sm={12} lg={8}>
+                <Row>
+                  <Col lg={12}>
+                    <Card>
+                      <Card.Header>
+                        <Card.Title as='h5'>Hình thức quản lý</Card.Title>
+                      </Card.Header>
+                      <Card.Body>
+                        <Form.Group controlId='formProductClassify'>
+                          <Form.Check type='radio' checked className='text-normal' label='Sản phẩm thường'></Form.Check>
+                        </Form.Group>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+
+                  <Col sm={12} lg={12}>
+                    <Card>
+                      <Card.Header>
+                        <Card.Title as='h5'>Thông tin chung</Card.Title>
+                      </Card.Header>
+                      <Card.Body>
+                        <Form.Group controlId='formProductName'>
+                          <Form.Label>
+                            Tên sản phẩm <span className='text-c-red'>*</span>
+                          </Form.Label>
+                          <Form.Control
+                            name='product_name'
+                            value={values.product_name}
+                            onChange={handleChange}
+                            placeholder='Nhập tên khách hàng'
+                          />
+                          {touched.product_name && errors.product_name && (
+                            <small className='text-danger form-text'>{errors.product_name}</small>
+                          )}
+                        </Form.Group>
+                        <Row>
+                          {CardGeneralInformation.map((item, index) => (
+                            <Col key={index} lg={6}>
+                              <Form.Group controlId={item.id}>
+                                <Form.Label>{item.label}</Form.Label>
+                                <div className='d-flex'>
+                                  <Form.Control
+                                    type={index === 1 ? 'number' : 'text'}
+                                    style={{ width: index === 1 ? '75%' : '100%' }}
+                                    name={item.name}
+                                    value={index === 1 ? values.product_weight : ''}
+                                    onChange={handleChange}
+                                  />
+                                  {index === 1 && (
+                                    <div style={{ flex: '1' }}>
+                                      <Select onChange={handleUnitWeight} defaultValue={options[0]} options={options} />
+                                    </div>
+                                  )}
+                                </div>
+                              </Form.Group>
+                            </Col>
+                          ))}
+                        </Row>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+
+                  <Col sm={12} lg={12}>
+                    <Card>
+                      <Card.Header style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Card.Title as='h5'>Giá sản phẩm</Card.Title>
+                        <span className='hover-70' style={{ color: '#04a9f5', fontWeight: '600', cursor: 'pointer' }}>
+                          <i style={{ marginRight: '4px' }} className='feather icon-plus-circle'></i>
+                          Thêm chính sách giá
+                        </span>
+                      </Card.Header>
+                      <Card.Body>
+                        <Row>
+                          {(showMore ? optionPricePolicy : optionPricePolicy.slice(0, 3)).map(
+                            (item: { label: string; value: string }, index) => (
+                              <Col key={index} lg={6}>
+                                <Form.Group controlId={item.label}>
+                                  <Form.Label>{item.label}</Form.Label>
+                                  <Form.Control
+                                    type='number'
+                                    name={item.value}
+                                    // value={item.value}
+                                    onChange={(value) => {
+                                      handleChangeInput(value, item)
+                                    }}
+                                  />
+                                </Form.Group>
+                              </Col>
+                            )
+                          )}
+                        </Row>
+                        <span
+                          style={{ color: '#04a9f5', fontWeight: '600', cursor: 'pointer' }}
+                          className='hover-70'
+                          onClick={() => setShowMore(!showMore)}
+                          aria-hidden='true'
+                        >
+                          <HiChevronDoubleDown
+                            style={{ marginRight: '4px', marginBottom: '3px' }}
+                            className={`${showMore && 'rotate-180'}`}
+                          />
+                          <span>{showMore ? 'Thu gọn giá sản phẩm' : 'Hiển thị thêm chính sách giá'}</span>
+                        </span>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+
+                  <Col lg={12}>
+                    <Card>
+                      <Card.Header style={{ position: 'relative' }}>
+                        <Card.Title as='h5'>Thuộc tính</Card.Title>
+                        <div
+                          style={{ position: 'absolute', top: '8px', left: '120px' }}
+                          className='switch switch-primary'
+                        >
+                          <input
+                            id='toggleCheck'
+                            checked={value}
+                            onChange={() => {
+                              setValue((prevState: any) => !prevState)
+                              setShowProperty([
+                                {
+                                  valueName: 'Kích thước',
+                                  value: [],
+                                  key: 1
+                                }
+                              ])
+                              setOpenToggle(!openToggle)
+                            }}
+                            type='checkbox'
+                          />
+                          <label htmlFor='toggleCheck' className='cr'>
+                            {' '}
+                          </label>
+                        </div>
+                        <p style={{ marginTop: '15px' }}>
+                          Thêm mới thuộc tính giúp sản phẩm có nhiều lựa chọn, như kích cỡ hay màu sắc
+                        </p>
+                      </Card.Header>
+
+                      {value && (
+                        <Card.Body>
+                          {showProperty.map((e, index) => (
+                            <Row key={index} style={{ position: 'relative' }}>
+                              <Col lg={4}>
+                                <Form.Group>
+                                  {index === 0 && (
+                                    <Form.Label style={{ fontWeight: '600', color: 'black' }}>
+                                      Tên thuộc tính
+                                    </Form.Label>
+                                  )}
+                                  <input
+                                    type='text'
+                                    name={`${e.key}`}
+                                    value={e.key === 1 ? inputSize : e.key === 2 ? inputColor : inputMaterial}
+                                    id={`${index + 1}`}
+                                    onChange={(v) => handleChangPropertyName(v, index)}
+                                    className={`style-field`}
+                                    style={{ borderRadius: '3px', padding: '8px', width: '100%' }}
+                                    placeholder=''
+                                  />
+                                </Form.Group>
+                              </Col>
+                              <Col lg={8}>
+                                <Form.Group>
+                                  {index === 0 && (
+                                    <Form.Label style={{ fontWeight: '600', color: 'black' }}>Giá trị</Form.Label>
+                                  )}
+                                  <InputTags
+                                    id={`${index + 1}`}
+                                    name={`${e.key + 10}`}
+                                    index={index}
+                                    onChange={handleChangPropertyValue}
+                                    list={listProperty}
+                                    placeholder='Gõ ký tự và ấn Enter để thêm thuộc tính'
+                                  />
+                                </Form.Group>
+                              </Col>
+                              {index > 0 && (
+                                <button
+                                  className='hover-70'
+                                  onClick={() => deletedRowProperty(e.key, index)}
+                                  style={{
+                                    position: 'absolute',
+                                    right: '-2px',
+                                    bottom: '23px',
+                                    cursor: 'pointer',
+                                    border: 'none',
+                                    background: 'white'
+                                  }}
+                                >
+                                  <HiXMark style={{ fontSize: '20px' }} />
+                                </button>
+                              )}
+                            </Row>
+                          ))}
+
+                          {showProperty.length < 3 && openToggle && (
+                            <span
+                              className='hover-70'
+                              style={{ color: '#04a9f5', fontWeight: '600', cursor: 'pointer' }}
+                              onClick={handleAdd}
+                              aria-hidden='true'
+                            >
+                              <i style={{ marginRight: '4px' }} className='feather icon-plus-circle'></i>
+                              Thêm thuộc tính khác
+                            </span>
+                          )}
+                        </Card.Body>
+                      )}
+                    </Card>
+                  </Col>
+                </Row>
+              </Col>
+
+              <Col sm={12} lg={4}>
+                <Card>
+                  <Card.Header>
+                    <Card.Title as='h5'>Thông tin bổ sung</Card.Title>
+                  </Card.Header>
+                  <Card.Body>
+                    {DataAdditionalInformation.map((item, index) => (
+                      <FormGroup key={index}>
+                        <Form.Label>{item.label}</Form.Label>
+                        <Select
+                          name={item.nameOption}
+                          isMulti={item.isMulti}
+                          options={item.listOption.map((item: any) => ({
+                            value: item.id,
+                            label: index === 2 ? item.tag_title : item.brand_title
+                          }))}
+                          onChange={handleChangeSelect}
+                          placeholder={item.placeholder}
+                        ></Select>
+                      </FormGroup>
+                    ))}
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
+          </Form>
+        )}
       </Formik>
     </>
   )
