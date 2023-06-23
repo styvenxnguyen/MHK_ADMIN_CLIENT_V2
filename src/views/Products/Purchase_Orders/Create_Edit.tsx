@@ -26,11 +26,7 @@ import { Product, ProductVariant } from '~/types/Product.type'
 import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 import { ButtonLoading } from '~/components/Button/LoadingButton'
 import Swal from 'sweetalert2'
-
-interface SelectProps {
-  label: string
-  value: string
-}
+import { SelectProps } from '~/types/Select.type'
 
 const CEPurchaseOrder = () => {
   const history = useHistory()

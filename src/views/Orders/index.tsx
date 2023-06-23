@@ -98,10 +98,10 @@ function OrdersList() {
     []
   )
 
-  // const handleRowClick = (row: any) => {
-  //   const id = row.values.id
-  //   history.push(`/app/products/detail/${id}`)
-  // }
+  const handleRowClick = (row: any) => {
+    const id = row.values.id
+    history.push(`/app/orders/detail/${id}`)
+  }
 
   if (isLoading)
     return (
@@ -130,7 +130,7 @@ function OrdersList() {
               </Button>{' '}
             </Card.Header>
             <Card.Body>
-              <CustomTable columns={columns} data={listOrders} handleRowClick={() => 1 == 1} />
+              <CustomTable columns={columns} data={listOrders} handleRowClick={handleRowClick} />
             </Card.Body>
           </Card>
         </Col>

@@ -48,6 +48,7 @@ const ProductDetails = () => {
           value: item.id
         }))
       )
+
       setSelectedProduct(data.productVariants[0])
       if (initialPriceItems) {
         const updatedItems = [...initialPriceItems]

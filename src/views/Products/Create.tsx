@@ -15,6 +15,8 @@ import { Helmet } from 'react-helmet'
 import { ButtonLoading } from '~/components/Button/LoadingButton'
 import Swal from 'sweetalert2'
 import { validationSchemaProductCreate } from '~/hooks/useValidation'
+import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
+import { useHistory } from 'react-router-dom'
 
 interface FormValues {
   product_name: string
@@ -66,6 +68,7 @@ const options = [
 ]
 
 const ProductCreate = () => {
+  const history = useHistory()
   const [showLoader, setShowLoader] = useState(false)
   const [optionsTag, setOptionsTag] = useState<TypeResponse[]>([])
   const [optionsType, setOptionsType] = useState<ProductType[]>([])
@@ -95,8 +98,8 @@ const ProductCreate = () => {
   const DataAdditionalInformation = [
     {
       id: 'type_id',
-      name: 'type_id',
-      label: 'Loại sản phẩm',
+      label: 'type_id',
+      title: 'Loại sản phẩm',
       placeholder: 'Chọn loại sản phẩm',
       type: 'select',
       isMulti: false,
@@ -105,8 +108,8 @@ const ProductCreate = () => {
     },
     {
       id: 'brand_id',
-      name: 'brand_id',
-      label: 'Nhãn hiệu',
+      label: 'brand_id',
+      title: 'Nhãn hiệu',
       placeholder: 'Chọn nhãn hiệu',
       type: 'select',
       isMulti: false,
@@ -115,8 +118,8 @@ const ProductCreate = () => {
     },
     {
       id: 'tagIDList',
-      name: 'tagIDList',
-      label: 'Tags',
+      label: 'tagIDList',
+      title: 'Tags',
       placeholder: 'Chọn tags',
       type: 'select',
       isMulti: true,
@@ -152,27 +155,26 @@ const ProductCreate = () => {
         properties: listProperty,
         product_variant_prices: listVariantPrice.filter((item) => item.price_value !== '')
       }
-      console.log(dataSubmit)
-      // ProductService.createProduct(dataSubmit)
-      //   .then(() => {
-      //     setTimeout(() => {
-      //       setShowLoader(false)
-      //       handleAlertConfirm({
-      //         text: 'Thêm sản phẩm mới thành công',
-      //         icon: 'success',
-      //         handleConfirmed: () => history.replace('/app/products')
-      //       })
-      //     }, 1000)
-      //   })
-      //   .catch(() => {
-      //     setTimeout(() => {
-      //       setShowLoader(false)
-      //       handleAlertConfirm({
-      //         text: 'Thêm sản phẩm mới thất bại',
-      //         icon: 'error'
-      //       })
-      //     }, 1000)
-      //   })
+      ProductService.createProduct(dataSubmit)
+        .then(() => {
+          setTimeout(() => {
+            setShowLoader(false)
+            handleAlertConfirm({
+              text: 'Thêm sản phẩm mới thành công',
+              icon: 'success',
+              handleConfirmed: () => history.replace('/app/products')
+            })
+          }, 1000)
+        })
+        .catch(() => {
+          setTimeout(() => {
+            setShowLoader(false)
+            handleAlertConfirm({
+              text: 'Thêm sản phẩm mới thất bại',
+              icon: 'error'
+            })
+          }, 1000)
+        })
     } catch (error) {
       Swal.fire('', 'Lỗi kết nối tới máy chủ', 'error')
     }
@@ -375,7 +377,13 @@ const ProductCreate = () => {
                       </Card.Header>
                       <Card.Body>
                         <Form.Group controlId='formProductClassify'>
-                          <Form.Check type='radio' checked className='text-normal' label='Sản phẩm thường'></Form.Check>
+                          <Form.Check
+                            type='radio'
+                            readOnly
+                            checked
+                            className='text-normal'
+                            label='Sản phẩm thường'
+                          ></Form.Check>
                         </Form.Group>
                       </Card.Body>
                     </Card>
@@ -395,7 +403,7 @@ const ProductCreate = () => {
                             name='product_name'
                             value={values.product_name}
                             onChange={handleChange}
-                            placeholder='Nhập tên khách hàng'
+                            placeholder='Nhập tên sản phẩm'
                           />
                           {touched.product_name && errors.product_name && (
                             <small className='text-danger form-text'>{errors.product_name}</small>
@@ -589,13 +597,13 @@ const ProductCreate = () => {
                   <Card.Body>
                     {DataAdditionalInformation.map((item, index) => (
                       <FormGroup key={index}>
-                        <Form.Label>{item.label}</Form.Label>
+                        <Form.Label>{item.title}</Form.Label>
                         <Select
                           name={item.nameOption}
                           isMulti={item.isMulti}
                           options={item.listOption.map((item: any) => ({
                             value: item.id,
-                            label: index === 2 ? item.tag_title : item.brand_title
+                            label: index === 0 ? item.type_title : index === 1 ? item.brand_title : item.tag_title
                           }))}
                           onChange={handleChangeSelect}
                           placeholder={item.placeholder}

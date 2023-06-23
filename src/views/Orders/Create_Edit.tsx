@@ -10,12 +10,22 @@ import CustomerService from '~/services/customer.service'
 
 import { Customer } from '~/types/Customer.type'
 import ProductService from '~/services/product.service'
-import { Product } from '~/types/Product.type'
+import { Product, ProductVariant } from '~/types/Product.type'
 import CustomTable from '~/components/Table/CustomTable'
 import { OrderProduct } from '~/types/OrderProduct.type'
 import { formatCurrency } from '~/utils/common'
 import { ButtonLoading } from '~/components/Button/LoadingButton'
 import DeliveryService from '~/services/delivery.service'
+import { Helmet } from 'react-helmet'
+import PageLoader from '~/components/Loader/PageLoader'
+import Error from '../Errors'
+import AgencyBranchService from '~/services/agencybranch.service'
+import StaffService from '~/services/staff.service'
+import PaymentService from '~/services/payment.service'
+import OrderService from '~/services/order.service'
+import { useParams } from 'react-router-dom'
+import { PurchaseOrder } from '~/types/PurchaseOrder.type'
+import { SelectProps } from '~/types/Select.type'
 
 const dataDebtSupplier = [
   {
@@ -52,15 +62,26 @@ const listButton = [
 ]
 
 const OrderCreate = () => {
+  const params: { id: string } = useParams()
+  const [isLoading, setIsLoading] = useState(true)
+  const [isFetched, setIsFetched] = useState(false)
   const [listCustomer, setListCustomer] = useState<Customer[]>([])
+  const [orderDetail, setOrderDetail] = useState<PurchaseOrder>()
   const [customerDetail, setCustomerDetail] = useState<Customer>()
   const [optionsProduct, setOptionsProduct] = useState([])
-  // const [optionsProductVariant, setOptionsProductVariant] = useState([])
-  const [seletedProduct, setSelectedProduct] = useState()
-  const [productList, setProductList] = useState<OrderProduct[]>([])
-  const canEdit = true
-  const [activeButton, setActiveButton] = useState<number>(1)
+  const [optionsBranch, setOptionsBranch] = useState([])
   const [optionsShipper, setOptionsShipper] = useState([])
+  const [optionsStaff, setOptionsStaff] = useState([])
+  const [optionsPayment, setOptionsPayment] = useState([])
+  const [optionsProductVariant, setOptionsProductVariant] = useState([])
+  const [selectedProduct, setSelectedProduct] = useState<Product>()
+  const [selectedStaff, setSelectedStaff] = useState<SelectProps>()
+  const [selectedBranch, setSelectedBranch] = useState<SelectProps>()
+  const [note, setNote] = useState('')
+  const [selectedTags, setSelectedTags] = useState<SelectProps[]>([])
+  const [productList, setProductList] = useState<OrderProduct[]>([])
+  const [canEdit, setCanEdit] = useState(true)
+  const [activeButton, setActiveButton] = useState<number>(1)
 
   const columns = React.useMemo(() => {
     const handleProductTable = (rowIndex: number, columnId: string, value: any) => {
@@ -174,7 +195,7 @@ const OrderCreate = () => {
   const customPlaceholder = (value: string) => {
     return (
       <span className='flex-between'>
-        <span>{value === 'Supplier' ? 'Tìm theo tên khách hàng' : 'Tìm theo tên sản phẩm'} </span>
+        <span>{value === 'Customer' ? 'Tìm theo tên khách hàng' : 'Tìm theo tên sản phẩm'} </span>
         <i className='feather icon-search'></i>
       </span>
     )
@@ -198,6 +219,42 @@ const OrderCreate = () => {
     }
   }, [])
 
+  const getListBranch = useCallback(() => {
+    AgencyBranchService.getListAgencyBranch().then((res) => {
+      const data = res.data.data
+      setOptionsBranch(
+        data.map((branch: any) => ({
+          label: branch.agency_branch_name,
+          value: branch.id
+        }))
+      )
+    })
+  }, [])
+
+  const getListStaff = useCallback(() => {
+    StaffService.getListStaff().then((res) => {
+      const data = res.data.data
+      setOptionsStaff(
+        data.map((staff: any) => ({
+          label: staff.staff_name,
+          value: staff.staff_id
+        }))
+      )
+    })
+  }, [])
+
+  const getListPayment = useCallback(() => {
+    PaymentService.getAllPayment().then((res) => {
+      const data = res.data.data
+      setOptionsPayment(
+        data.map((payment: any) => ({
+          label: payment.payment_type,
+          value: payment.id
+        }))
+      )
+    })
+  }, [])
+
   const getProductList = useCallback(async () => {
     try {
       const res = await ProductService.getListProduct()
@@ -216,18 +273,53 @@ const OrderCreate = () => {
     try {
       if (e) {
         const res = await ProductService.getDetailProduct(e?.value)
-        // const dataProduct: any = res.data.data
-        // const options = dataProduct.productVariants.map((variant: ProductVariant) => ({
-        //   label: variant.product_variant_name,
-        //   value: variant.id
-        // }))
-        // setOptionsProductVariant(options)
+        const dataProduct: any = res.data.data
+        const options = dataProduct.productVariants.map((variant: ProductVariant) => ({
+          label: variant.product_variant_name,
+          value: variant.id
+        }))
+        setOptionsProductVariant(options)
         setSelectedProduct(res.data.data)
       }
     } catch (error) {
       console.log(error)
     }
   }, [])
+
+  const getPurchaseOrderDetail = useCallback(async () => {
+    try {
+      const res = await OrderService.getPurchaseOrderDetail(params.id)
+      const data = res.data.data
+      setOrderDetail(data)
+      setProductList(
+        data.order_product_list.map((purchase: PurchaseOrder) => {
+          return { ...purchase }
+        })
+      )
+      if (data.order_status !== 'Tạo đơn') {
+        setCanEdit(false)
+      }
+      setSelectedStaff({
+        label: data.staff.name,
+        value: data.staff.id
+      })
+      setSelectedBranch({
+        label: data.agency_branch.name,
+        value: data.agency_branch.id
+      })
+      setIsLoading(false)
+      setIsFetched(true)
+      setSelectedTags(
+        data.order_tags.map((tag: any) => ({
+          label: tag.Tag.tag_title,
+          value: tag.Tag.id
+        }))
+      )
+      setNote(data.order_note)
+    } catch (error) {
+      setIsLoading(false)
+    }
+  }, [params.id])
 
   const selectedCustomer = useCallback(
     (e: SingleValue<{ label: string; value: string }>) => {
@@ -254,11 +346,57 @@ const OrderCreate = () => {
       })
   }, [])
 
+  const selectedProductNew = useCallback(
+    (e: any) => {
+      const product = selectedProduct?.productVariants.find((item) => item.id === e.value)
+      console.log(product)
+      if (product) {
+        setProductList([
+          ...productList,
+          {
+            order_product_item_id: product?.id,
+            product_amount: 1,
+            product_discount: 0,
+            product_price: 0,
+            product_unit: 'Cái',
+            product_variant_detail_SKU: product?.product_variant_SKU,
+            product_variant_detail_id: product?.id,
+            product_variant_detail_name: product.product_variant_name
+          }
+        ])
+      }
+    },
+    [selectedProduct?.productVariants, productList]
+  )
+
   useEffect(() => {
-    getListCustomer()
-    getProductList()
-    getListShipper()
-  }, [getListCustomer, getProductList, getListShipper])
+    const fetchData = async () => {
+      await getListCustomer()
+      await getProductList()
+      await getListShipper()
+      await getListBranch()
+      await getListStaff()
+      await getListPayment()
+      setIsLoading(false)
+      setIsFetched(true)
+    }
+
+    fetchData()
+  }, [getListCustomer, getProductList, getListShipper, getListBranch, getListStaff, getListPayment])
+
+  if (isLoading)
+    return (
+      <>
+        <Helmet>
+          <title>Tạo đơn hàng</title>
+        </Helmet>
+        <PageLoader />
+      </>
+    )
+
+  if (!isFetched) {
+    return <Error errorCode='500' />
+  }
 
   return (
     <React.Fragment>
@@ -343,7 +481,7 @@ const OrderCreate = () => {
                             value: e.id
                           }))}
                           onChange={(e) => selectedCustomer(e)}
-                          placeholder={customPlaceholder('Supplier')}
+                          placeholder={customPlaceholder('Customer')}
                         />
                       </Col>
                     </Row>
@@ -367,46 +505,26 @@ const OrderCreate = () => {
                 <Card.Body style={{ height: '325px', overflowY: 'auto' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     <div className='flex-between'>
-                      <span>Bán bởi:</span>
+                      <span>Bán tại:</span>
                       <div style={{ width: '65%' }}>
                         <Select
+                          menuPortalTarget={document.body}
+                          menuPlacement='auto'
                           placeholder='Chọn chi nhánh'
-                          // isDisabled={!!params.id}
-                          // defaultValue={selectedBranch}
-                          // options={optionsBranch}
-                          // loadingMessage={loadingMessage}
+                          defaultValue={optionsBranch[0]}
+                          options={optionsBranch}
                           // onChange={(e: any) => setSelectedBranch(e)}
                         ></Select>
                       </div>
                     </div>
                     <div className='flex-between'>
-                      <span>Bán tại:</span>
+                      <span>Bán bởi:</span>
                       <div style={{ width: '65%' }}>
                         <Select
                           name='staff'
-                          // options={optionsStaff}
-                          // isDisabled={!canEdit}
-                          // loadingMessage={loadingMessage}
-                          // defaultValue={selectedStaff}
-                          // onChange={(e: any) => {
-                          //   setSelectedStaff(e)
-                          // }}
-                          placeholder={'Chọn nhân viên'}
-                        ></Select>
-                      </div>
-                    </div>
-                    <div className='flex-between'>
-                      <span>Nguồn:</span>
-                      <div style={{ width: '65%' }}>
-                        <Select
-                          name='staff'
-                          // options={optionsStaff}
-                          // isDisabled={!canEdit}
-                          // loadingMessage={loadingMessage}
-                          // defaultValue={selectedStaff}
-                          // onChange={(e: any) => {
-                          //   setSelectedStaff(e)
-                          // }}
+                          menuPortalTarget={document.body}
+                          menuPlacement='auto'
+                          options={optionsStaff}
                           placeholder={'Chọn nhân viên'}
                         ></Select>
                       </div>
@@ -414,80 +532,36 @@ const OrderCreate = () => {
                     <div className='flex-between'>
                       <span>Hẹn giao: </span>
                       <div style={{ width: '65%' }}>
-                        <Select
-                          name='staff'
-                          // options={optionsStaff}
-                          // isDisabled={!canEdit}
-                          // loadingMessage={loadingMessage}
-                          // defaultValue={selectedStaff}
-                          // onChange={(e: any) => {
-                          //   setSelectedStaff(e)
-                          // }}
-                          placeholder={'Chọn nhân viên'}
-                        ></Select>
+                        <FormControl type='date' />
                       </div>
                     </div>
                     <div className='flex-between'>
                       <span>Mã đơn: </span>
                       <div style={{ width: '65%' }}>
-                        <Select
-                          name='staff'
-                          // options={optionsStaff}
-                          // isDisabled={!canEdit}
-                          // loadingMessage={loadingMessage}
-                          // defaultValue={selectedStaff}
-                          // onChange={(e: any) => {
-                          //   setSelectedStaff(e)
-                          // }}
-                          placeholder={'Chọn nhân viên'}
-                        ></Select>
+                        <FormControl />
                       </div>
                     </div>
                     <div className='flex-between'>
                       <span style={{ width: '30%' }}>Đường dẫn đơn hàng: </span>
                       <div style={{ width: '65%' }}>
-                        <Select
-                          name='staff'
-                          // options={optionsStaff}
-                          // isDisabled={!canEdit}
-                          // loadingMessage={loadingMessage}
-                          // defaultValue={selectedStaff}
-                          // onChange={(e: any) => {
-                          //   setSelectedStaff(e)
-                          // }}
-                          placeholder={'Chọn nhân viên'}
-                        ></Select>
+                        <FormControl />
                       </div>
                     </div>
                     <div className='flex-between'>
                       <span>Tham chiếu: </span>
                       <div style={{ width: '65%' }}>
-                        <Select
-                          name='staff'
-                          // options={optionsStaff}
-                          // isDisabled={!canEdit}
-                          // loadingMessage={loadingMessage}
-                          // defaultValue={selectedStaff}
-                          // onChange={(e: any) => {
-                          //   setSelectedStaff(e)
-                          // }}
-                          placeholder={'Chọn nhân viên'}
-                        ></Select>
+                        <FormControl />
                       </div>
                     </div>
                     <div className='flex-between'>
                       <span style={{ width: '30%' }}>Thanh toán dự kiến: </span>
                       <div style={{ width: '65%' }}>
                         <Select
-                          name='staff'
-                          // options={optionsStaff}
-                          // isDisabled={!canEdit}
-                          // loadingMessage={loadingMessage}
-                          // defaultValue={selectedStaff}
-                          // onChange={(e: any) => {
-                          //   setSelectedStaff(e)
-                          // }}
-                          placeholder={'Chọn nhân viên'}
+                          name='payment'
+                          menuPortalTarget={document.body}
+                          menuPlacement='auto'
+                          options={optionsPayment}
+                          placeholder={'Chọn phương thức'}
                         ></Select>
                       </div>
                     </div>
@@ -513,20 +587,21 @@ const OrderCreate = () => {
                 }}
                 placeholder={customPlaceholder('Product')}
               />
-            </Card.Header>
-            {seletedProduct ? (
-              <Card.Body>
-                <CustomTable
-                  columns={columns}
-                  data={productList}
-                  handleRowClick={() => 1 == 1}
-                  hiddenColumns={['selection', !canEdit && 'advance']}
+
+              {selectedProduct && (
+                <Select
+                  className='mt-4'
+                  options={optionsProductVariant}
+                  onChange={(e: any) => {
+                    selectedProductNew(e)
+                  }}
+                  placeholder='Chọn phiên bản sản phẩm'
                 />
-                <hr className='dashed-top' />
-              </Card.Body>
-            ) : (
-              <Card.Body>
-                {' '}
+              )}
+            </Card.Header>
+
+            <Card.Body>
+              {productList.length === 0 ? (
                 <div
                   style={{ color: '#9d9d9d' }}
                   className='d-flex justify-content-center align-items-center py-5 flex-column'
@@ -534,8 +609,15 @@ const OrderCreate = () => {
                   <TbPackage size={80} />
                   <span className='mt-3'>Đơn hàng chưa có sản phẩm nào</span>
                 </div>
-              </Card.Body>
-            )}
+              ) : (
+                <CustomTable
+                  columns={columns}
+                  data={productList}
+                  handleRowClick={() => 1 == 1}
+                  hiddenColumns={['selection', !canEdit && 'advance']}
+                />
+              )}
+            </Card.Body>
           </Card>
         </Col>
 
@@ -550,7 +632,7 @@ const OrderCreate = () => {
                 {listButton.map((button, index) => (
                   <Button
                     key={index}
-                    variant={`${index + 1 === activeButton ? 'outline-primary' : 'outline-secondary'}`}
+                    variant={`${index + 1 === activeButton ? 'primary' : 'outline-primary'}`}
                     onClick={() => setActiveButton(button.value)}
                     style={{ display: 'flex', gap: '10px', alignItems: 'center' }}
                   >
@@ -567,8 +649,8 @@ const OrderCreate = () => {
                     <FormLabel>Chọn nhân viên vận chuyển: </FormLabel>
                     <Select
                       options={optionsShipper}
-                      defaultValue={optionsShipper[0]}
-                      menuPlacement='top'
+                      defaultValue={optionsShipper.length > 0 ? optionsShipper[0] : null}
+                      menuPlacement='auto'
                       className='ml-3 w-25'
                     />
                   </FormGroup>
