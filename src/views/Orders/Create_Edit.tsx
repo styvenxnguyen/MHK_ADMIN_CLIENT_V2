@@ -1,5 +1,17 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import { Row, Col, Card, FormControl, Button, CloseButton, FormGroup, FormLabel } from 'react-bootstrap'
+import {
+  Row,
+  Col,
+  Card,
+  FormControl,
+  Button,
+  CloseButton,
+  FormGroup,
+  FormLabel,
+  DropdownButton,
+  Dropdown,
+  Spinner
+} from 'react-bootstrap'
 import Select, { SingleValue } from 'react-select'
 import { TbPackage } from 'react-icons/tb'
 import { FiTruck } from 'react-icons/fi'
@@ -14,7 +26,6 @@ import { Product, ProductVariant } from '~/types/Product.type'
 import CustomTable from '~/components/Table/CustomTable'
 import { OrderProduct } from '~/types/OrderProduct.type'
 import { formatCurrency } from '~/utils/common'
-import { ButtonLoading } from '~/components/Button/LoadingButton'
 import DeliveryService from '~/services/delivery.service'
 import { Helmet } from 'react-helmet'
 import PageLoader from '~/components/Loader/PageLoader'
@@ -23,9 +34,12 @@ import AgencyBranchService from '~/services/agencybranch.service'
 import StaffService from '~/services/staff.service'
 import PaymentService from '~/services/payment.service'
 import OrderService from '~/services/order.service'
-import { useParams } from 'react-router-dom'
+import { useHistory, useParams } from 'react-router-dom'
 import { PurchaseOrder } from '~/types/PurchaseOrder.type'
 import { SelectProps } from '~/types/Select.type'
+import { TagService } from '~/services/tag.service'
+import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
+import Swal from 'sweetalert2'
 
 const dataDebtSupplier = [
   {
@@ -61,27 +75,71 @@ const listButton = [
   // { label: 'Giao hàng sau', value: 4, icon: <BsClockHistory style={{ fontSize: '18px', marginBottom: '2px' }} /> }
 ]
 
-const OrderCreate = () => {
+const OrdersCreate = () => {
+  const history = useHistory()
   const params: { id: string } = useParams()
   const [isLoading, setIsLoading] = useState(true)
   const [isFetched, setIsFetched] = useState(false)
+  const [isLoadingCreate, setIsLoadingCreate] = useState(false)
   const [listCustomer, setListCustomer] = useState<Customer[]>([])
-  const [orderDetail, setOrderDetail] = useState<PurchaseOrder>()
   const [customerDetail, setCustomerDetail] = useState<Customer>()
   const [optionsProduct, setOptionsProduct] = useState([])
   const [optionsBranch, setOptionsBranch] = useState([])
   const [optionsShipper, setOptionsShipper] = useState([])
   const [optionsStaff, setOptionsStaff] = useState([])
   const [optionsPayment, setOptionsPayment] = useState([])
+  const [optionsTag, setOptionsTag] = useState([])
   const [optionsProductVariant, setOptionsProductVariant] = useState([])
+  const [valueCustomer, setValueCustomer] = useState<SelectProps>({
+    label: '',
+    value: ''
+  })
   const [selectedProduct, setSelectedProduct] = useState<Product>()
-  const [selectedStaff, setSelectedStaff] = useState<SelectProps>()
-  const [selectedBranch, setSelectedBranch] = useState<SelectProps>()
+  const [selectedPayment, setSelectedPayment] = useState<SelectProps>({
+    label: '',
+    value: ''
+  })
+  const [selectedStaff, setSelectedStaff] = useState<SelectProps>({
+    label: '',
+    value: ''
+  })
+  const [selectedBranch, setSelectedBranch] = useState<SelectProps>({
+    label: '',
+    value: ''
+  })
+  const [selectedShipper, setSelectedShipper] = useState<SelectProps>({
+    label: '',
+    value: ''
+  })
   const [note, setNote] = useState('')
   const [selectedTags, setSelectedTags] = useState<SelectProps[]>([])
+  const [deliveryDate, setDeliveryDate] = useState('')
   const [productList, setProductList] = useState<OrderProduct[]>([])
   const [canEdit, setCanEdit] = useState(true)
   const [activeButton, setActiveButton] = useState<number>(1)
+
+  const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
+  const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
+  const totalDiscount = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_discount), 0)
+  const totalPayment = totalAmount - totalDiscount
+
+  const dataOrder = {
+    supplier_id: valueCustomer.value,
+    agency_branch_id: selectedBranch.value,
+    shipper_id: selectedShipper.value,
+    staff_id: selectedStaff.value,
+    order_delivery_date: deliveryDate,
+    order_note: note,
+    payment_id: selectedPayment.value,
+    tags: selectedTags.map((tag: SelectProps) => tag.value),
+    products: productList.map((product) => ({
+      p_variant_id: product.product_variant_detail_id,
+      unit: product.product_unit,
+      amount: product.product_amount,
+      price: product.product_price,
+      discount: product.product_discount
+    }))
+  }
 
   const columns = React.useMemo(() => {
     const handleProductTable = (rowIndex: number, columnId: string, value: any) => {
@@ -174,7 +232,8 @@ const OrderCreate = () => {
         Cell: ({ row }: any) => {
           const amount = row.values.product_amount
           const price = row.values.product_price
-          const totalPrice = formatCurrency(amount * price)
+          const discount = row.values.product_discount
+          const totalPrice = formatCurrency(amount * price - discount)
           return totalPrice
         }
       },
@@ -191,6 +250,26 @@ const OrderCreate = () => {
     ]
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productList.length])
+
+  const totalProduct = [
+    {
+      data: 'Số lượng',
+      value: totalQuantity
+    },
+    {
+      data: 'Tổng tiền',
+      value: formatCurrency(totalAmount)
+    },
+    {
+      data: 'Chiết khấu',
+      value: formatCurrency(totalDiscount)
+    },
+    {
+      data: 'Tiền cần trả',
+      value: formatCurrency(totalPayment),
+      bold: true
+    }
+  ]
 
   const customPlaceholder = (value: string) => {
     return (
@@ -226,6 +305,18 @@ const OrderCreate = () => {
         data.map((branch: any) => ({
           label: branch.agency_branch_name,
           value: branch.id
+        }))
+      )
+    })
+  }, [])
+
+  const getListTag = useCallback(() => {
+    TagService.getListTag().then((response) => {
+      const tagsList = response.data.data
+      setOptionsTag(
+        tagsList.map((tag: any) => ({
+          label: tag.tag_title,
+          value: tag.id
         }))
       )
     })
@@ -270,6 +361,7 @@ const OrderCreate = () => {
   }, [])
 
   const getProductDetail = useCallback(async (e: SingleValue<{ label: string; value: string }>) => {
+    setSelectedProduct(undefined)
     try {
       if (e) {
         const res = await ProductService.getDetailProduct(e?.value)
@@ -286,11 +378,10 @@ const OrderCreate = () => {
     }
   }, [])
 
-  const getPurchaseOrderDetail = useCallback(async () => {
+  const getSellOrderDetail = useCallback(async () => {
     try {
       const res = await OrderService.getPurchaseOrderDetail(params.id)
       const data = res.data.data
-      setOrderDetail(data)
       setProductList(
         data.order_product_list.map((purchase: PurchaseOrder) => {
           return { ...purchase }
@@ -301,7 +392,7 @@ const OrderCreate = () => {
       }
       setSelectedStaff({
         label: data.staff.name,
-        value: data.staff.id
+        value: data.staff.staff_id
       })
       setSelectedBranch({
         label: data.agency_branch.name,
@@ -369,20 +460,56 @@ const OrderCreate = () => {
     [selectedProduct?.productVariants, productList]
   )
 
+  const handleCreateBtn = () => {
+    setIsLoadingCreate(true)
+
+    OrderService.createSellOrder(dataOrder)
+      .then(() => {
+        setTimeout(() => {
+          setIsLoadingCreate(false)
+          handleAlertConfirm({
+            text: 'Tạo đơn hàng thành công',
+            icon: 'success',
+            handleConfirmed: () => history.replace(`/app/orders`)
+          })
+        }, 1000)
+      })
+      .catch(() =>
+        setTimeout(() => {
+          Swal.fire('', 'Tạo đơn hàng thất bại', 'error')
+          setIsLoadingCreate(false)
+        }, 1000)
+      )
+  }
+
   useEffect(() => {
-    const fetchData = async () => {
-      await getListCustomer()
-      await getProductList()
-      await getListShipper()
-      await getListBranch()
-      await getListStaff()
-      await getListPayment()
-      setIsLoading(false)
-      setIsFetched(true)
+    if (params.id) {
+      getSellOrderDetail()
+    } else {
+      setTimeout(() => {
+        setIsLoading(false)
+        setIsFetched(true)
+      }, 1000)
     }
 
-    fetchData()
-  }, [getListCustomer, getProductList, getListShipper, getListBranch, getListStaff, getListPayment])
+    getListCustomer()
+    getProductList()
+    getListShipper()
+    getListBranch()
+    getListStaff()
+    getListPayment()
+    getListTag()
+  }, [
+    getSellOrderDetail,
+    getListCustomer,
+    getProductList,
+    getListShipper,
+    getListBranch,
+    getListStaff,
+    getListPayment,
+    getListTag,
+    params.id
+  ])
 
   if (isLoading)
     return (
@@ -402,18 +529,27 @@ const OrderCreate = () => {
     <React.Fragment>
       <div className='d-flex justify-content-between'>
         <BackPreviousPage text='Quay lại danh sách đơn hàng' path='/app/products' />
-        <ButtonLoading
-          type='submit'
-          // loading={showLoader}
-          // disabled={showLoader}
-          className='m-0 mb-3'
-          text={
-            <>
-              <i className='feather icon-plus-circle'></i>
-              Tạo đơn hàng
-            </>
+        <DropdownButton
+          disabled={isLoadingCreate}
+          id='create-order-dropdown'
+          className={isLoadingCreate ? 'hide-arrow' : ''}
+          title={
+            isLoadingCreate ? (
+              <span>
+                <Spinner size='sm' className='mr-2' animation='border' />
+                <span className={isLoadingCreate ? '' : 'mr-2'}>Đang tạo đơn...</span>
+              </span>
+            ) : (
+              <span>
+                <i className='feather icon-plus-circle mr-2' />
+                <span className='mr-2'>Tạo đơn hàng</span>
+              </span>
+            )
           }
-        />
+        >
+          <Dropdown.Item onClick={handleCreateBtn}>Tạo đơn</Dropdown.Item>
+          {/* <Dropdown.Item>Tạo đơn và duyệt</Dropdown.Item> */}
+        </DropdownButton>
       </div>
 
       <Row className='text-normal'>
@@ -437,7 +573,13 @@ const OrderCreate = () => {
                       <CloseButton
                         style={{ float: 'initial' }}
                         className='m-0 ml-2'
-                        onClick={() => setCustomerDetail(undefined)}
+                        onClick={() => {
+                          setValueCustomer({
+                            label: '',
+                            value: ''
+                          })
+                          setCustomerDetail(undefined)
+                        }}
                       />
                     </div>
                   )}
@@ -480,7 +622,10 @@ const OrderCreate = () => {
                             label: `${e.customer_name} - ${e.customer_phone}`,
                             value: e.id
                           }))}
-                          onChange={(e) => selectedCustomer(e)}
+                          onChange={(e: any) => {
+                            selectedCustomer(e)
+                            setValueCustomer(e)
+                          }}
                           placeholder={customPlaceholder('Customer')}
                         />
                       </Col>
@@ -513,7 +658,7 @@ const OrderCreate = () => {
                           placeholder='Chọn chi nhánh'
                           defaultValue={optionsBranch[0]}
                           options={optionsBranch}
-                          // onChange={(e: any) => setSelectedBranch(e)}
+                          onChange={(e: any) => setSelectedBranch(e)}
                         ></Select>
                       </div>
                     </div>
@@ -525,6 +670,7 @@ const OrderCreate = () => {
                           menuPortalTarget={document.body}
                           menuPlacement='auto'
                           options={optionsStaff}
+                          onChange={(e: any) => setSelectedStaff(e)}
                           placeholder={'Chọn nhân viên'}
                         ></Select>
                       </div>
@@ -532,7 +678,7 @@ const OrderCreate = () => {
                     <div className='flex-between'>
                       <span>Hẹn giao: </span>
                       <div style={{ width: '65%' }}>
-                        <FormControl type='date' />
+                        <FormControl type='date' onChange={(e: any) => setDeliveryDate(e.target.value)} />
                       </div>
                     </div>
                     <div className='flex-between'>
@@ -562,6 +708,7 @@ const OrderCreate = () => {
                           menuPlacement='auto'
                           options={optionsPayment}
                           placeholder={'Chọn phương thức'}
+                          onChange={(e: any) => setSelectedPayment(e)}
                         ></Select>
                       </div>
                     </div>
@@ -617,6 +764,44 @@ const OrderCreate = () => {
                   hiddenColumns={['selection', !canEdit && 'advance']}
                 />
               )}
+              <hr className='dashed-top' />
+              <Row className='justify-content-between'>
+                <Col lg={3}>
+                  <p className='font-weight-bold'>Ghi chú đơn</p>
+                  <FormControl
+                    as='textarea'
+                    rows={3}
+                    defaultValue={note}
+                    className='my-textarea'
+                    placeholder='VD: Hàng tặng gói riêng'
+                    onChange={(e: any) => setNote(e.target.value)}
+                  />
+                  <p className='font-weight-bold mt-2'>Tags</p>
+
+                  <Select
+                    options={optionsTag}
+                    isMulti
+                    placeholder='Chọn tags'
+                    noOptionsMessage={() => 'Đã chọn hết tags'}
+                    menuPlacement='top'
+                    defaultValue={selectedTags}
+                    loadingMessage={() => 'Đang tải dữ liệu ...'}
+                    onChange={(e: any) => setSelectedTags(e)}
+                  />
+                </Col>
+                <Col lg={3}>
+                  {totalProduct.map((total, index) => (
+                    <span
+                      key={`total_${index}`}
+                      className={total.bold ? 'font-weight-bold flex-between m-3' : 'flex-between m-3'}
+                      style={total.bold ? { borderTop: '1px solid gray', paddingTop: '10px' } : {}}
+                    >
+                      <span>{total.data}</span>
+                      <span>{total.value}</span>
+                    </span>
+                  ))}
+                </Col>
+              </Row>
             </Card.Body>
           </Card>
         </Col>
@@ -649,9 +834,10 @@ const OrderCreate = () => {
                     <FormLabel>Chọn nhân viên vận chuyển: </FormLabel>
                     <Select
                       options={optionsShipper}
-                      defaultValue={optionsShipper.length > 0 ? optionsShipper[0] : null}
+                      placeholder='Chọn đối tác'
                       menuPlacement='auto'
                       className='ml-3 w-25'
+                      onChange={(e: any) => setSelectedShipper(e)}
                     />
                   </FormGroup>
                 </Col>
@@ -664,4 +850,4 @@ const OrderCreate = () => {
   )
 }
 
-export default OrderCreate
+export default OrdersCreate

@@ -1,5 +1,5 @@
-const OrderDetail = () => {
+const OrdersDetail = () => {
   return <div>CHI TIẾT ĐƠN HÀNG</div>
 }
 
-export default OrderDetail
+export default OrdersDetail

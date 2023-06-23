@@ -204,7 +204,8 @@ const CEPurchaseOrder = () => {
         Cell: ({ row }: any) => {
           const amount = row.values.product_amount
           const price = row.values.product_price
-          const totalPrice = formatCurrency(amount * price)
+          const discount = row.values.product_discount
+          const totalPrice = formatCurrency(amount * price - discount)
           return totalPrice
         }
       },
@@ -315,6 +316,18 @@ const CEPurchaseOrder = () => {
     }
   }, [])
 
+  const getTagList = useCallback(() => {
+    TagService.getListTag().then((response) => {
+      const tagsList = response.data.data
+      setOptionsTag(
+        tagsList.map((tag: any) => ({
+          label: tag.tag_title,
+          value: tag.id
+        }))
+      )
+    })
+  }, [])
+
   const getPurchaseOrderDetail = useCallback(async () => {
     try {
       const res = await OrderService.getPurchaseOrderDetail(params.id)
@@ -411,7 +424,6 @@ const CEPurchaseOrder = () => {
   const selectedProductNew = useCallback(
     (e: any) => {
       const product = selectedProduct?.productVariants.find((item) => item.id === e.value)
-      console.log(product)
       if (product) {
         setProductList([
           ...productList,
@@ -444,7 +456,8 @@ const CEPurchaseOrder = () => {
     getAgencyBranch()
     getSupplierList()
     getProductList()
-  }, [getPurchaseOrderDetail, getStaffList, getAgencyBranch, getSupplierList, getProductList, params.id])
+    getTagList()
+  }, [getPurchaseOrderDetail, getStaffList, getAgencyBranch, getSupplierList, getProductList, getTagList, params.id])
 
   useEffect(() => {
     TagService.getListTag().then((response) => {
