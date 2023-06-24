@@ -57,7 +57,10 @@ const CEPurchaseOrder = () => {
 
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
-  const totalDiscount = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_discount), 0)
+  const totalDiscount = productList.reduce(
+    (acc: number, item: any) => acc + (item.product_amount * item.product_price * item.product_discount) / 100,
+    0
+  )
   const totalPayment = totalAmount - totalDiscount
 
   const dataPurchaseOrder = {
@@ -182,7 +185,9 @@ const CEPurchaseOrder = () => {
               onChange={(e) => handleProductTable(row.index, 'product_discount', e.target.value)}
             />
           ) : (
-            formatCurrency(value)
+            <span>
+              {value}% ({formatCurrency((row.values.product_amount * row.values.product_price * value) / 100)})
+            </span>
           )
       },
       {
@@ -205,7 +210,9 @@ const CEPurchaseOrder = () => {
           const amount = row.values.product_amount
           const price = row.values.product_price
           const discount = row.values.product_discount
-          const totalPrice = formatCurrency(amount * price - discount)
+
+          const totalPrice = formatCurrency((amount * price * (100 - discount)) / 100)
+
           return totalPrice
         }
       },

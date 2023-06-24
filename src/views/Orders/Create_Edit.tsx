@@ -20,7 +20,7 @@ import { SlSocialDropbox } from 'react-icons/sl'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import CustomerService from '~/services/customer.service'
 
-import { Customer } from '~/types/Customer.type'
+import { Customer, CustomerList } from '~/types/Customer.type'
 import ProductService from '~/services/product.service'
 import { Product, ProductVariant } from '~/types/Product.type'
 import CustomTable from '~/components/Table/CustomTable'
@@ -81,7 +81,7 @@ const OrdersCreate = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [isFetched, setIsFetched] = useState(false)
   const [isLoadingCreate, setIsLoadingCreate] = useState(false)
-  const [listCustomer, setListCustomer] = useState<Customer[]>([])
+  const [listCustomer, setListCustomer] = useState<CustomerList[]>([])
   const [customerDetail, setCustomerDetail] = useState<Customer>()
   const [optionsProduct, setOptionsProduct] = useState([])
   const [optionsBranch, setOptionsBranch] = useState([])
@@ -90,27 +90,12 @@ const OrdersCreate = () => {
   const [optionsPayment, setOptionsPayment] = useState([])
   const [optionsTag, setOptionsTag] = useState([])
   const [optionsProductVariant, setOptionsProductVariant] = useState([])
-  const [valueCustomer, setValueCustomer] = useState<SelectProps>({
-    label: '',
-    value: ''
-  })
+  const [valueCustomer, setValueCustomer] = useState<SelectProps>()
   const [selectedProduct, setSelectedProduct] = useState<Product>()
-  const [selectedPayment, setSelectedPayment] = useState<SelectProps>({
-    label: '',
-    value: ''
-  })
-  const [selectedStaff, setSelectedStaff] = useState<SelectProps>({
-    label: '',
-    value: ''
-  })
-  const [selectedBranch, setSelectedBranch] = useState<SelectProps>({
-    label: '',
-    value: ''
-  })
-  const [selectedShipper, setSelectedShipper] = useState<SelectProps>({
-    label: '',
-    value: ''
-  })
+  const [selectedPayment, setSelectedPayment] = useState<SelectProps>()
+  const [selectedStaff, setSelectedStaff] = useState<SelectProps>()
+  const [selectedBranch, setSelectedBranch] = useState<SelectProps>()
+  const [selectedShipper, setSelectedShipper] = useState<SelectProps>()
   const [note, setNote] = useState('')
   const [selectedTags, setSelectedTags] = useState<SelectProps[]>([])
   const [deliveryDate, setDeliveryDate] = useState('')
@@ -120,17 +105,20 @@ const OrdersCreate = () => {
 
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
-  const totalDiscount = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_discount), 0)
+  const totalDiscount = productList.reduce(
+    (acc: number, item: any) => acc + (item.product_amount * item.product_price * item.product_discount) / 100,
+    0
+  )
   const totalPayment = totalAmount - totalDiscount
 
   const dataOrder = {
-    supplier_id: valueCustomer.value,
-    agency_branch_id: selectedBranch.value,
-    shipper_id: selectedShipper.value,
-    staff_id: selectedStaff.value,
+    supplier_id: valueCustomer?.value,
+    agency_branch_id: selectedBranch?.value,
+    shipper_id: selectedShipper?.value,
+    staff_id: selectedStaff?.value,
     order_delivery_date: deliveryDate,
     order_note: note,
-    payment_id: selectedPayment.value,
+    payment_id: selectedPayment?.value,
     tags: selectedTags.map((tag: SelectProps) => tag.value),
     products: productList.map((product) => ({
       p_variant_id: product.product_variant_detail_id,
@@ -233,7 +221,9 @@ const OrdersCreate = () => {
           const amount = row.values.product_amount
           const price = row.values.product_price
           const discount = row.values.product_discount
-          const totalPrice = formatCurrency(amount * price - discount)
+
+          const totalPrice = formatCurrency((amount * price * (100 - discount)) / 100)
+
           return totalPrice
         }
       },
@@ -413,9 +403,9 @@ const OrdersCreate = () => {
   }, [params.id])
 
   const selectedCustomer = useCallback(
-    (e: SingleValue<{ label: string; value: string }>) => {
+    (e: SingleValue<{ label: string; value: string; idCustomer: string }>) => {
       if (e) {
-        getCustomerDetail(e?.value)
+        getCustomerDetail(e?.idCustomer)
       }
     },
     [getCustomerDetail]
@@ -620,7 +610,8 @@ const OrdersCreate = () => {
                           className='mb-4'
                           options={listCustomer.map((e) => ({
                             label: `${e.customer_name} - ${e.customer_phone}`,
-                            value: e.id
+                            value: e.customer_id,
+                            idCustomer: e.id
                           }))}
                           onChange={(e: any) => {
                             selectedCustomer(e)
@@ -656,7 +647,7 @@ const OrdersCreate = () => {
                           menuPortalTarget={document.body}
                           menuPlacement='auto'
                           placeholder='Chọn chi nhánh'
-                          defaultValue={optionsBranch[0]}
+                          defaultValue={selectedBranch}
                           options={optionsBranch}
                           onChange={(e: any) => setSelectedBranch(e)}
                         ></Select>
@@ -670,6 +661,7 @@ const OrdersCreate = () => {
                           menuPortalTarget={document.body}
                           menuPlacement='auto'
                           options={optionsStaff}
+                          defaultValue={selectedStaff}
                           onChange={(e: any) => setSelectedStaff(e)}
                           placeholder={'Chọn nhân viên'}
                         ></Select>
@@ -707,6 +699,7 @@ const OrdersCreate = () => {
                           menuPortalTarget={document.body}
                           menuPlacement='auto'
                           options={optionsPayment}
+                          defaultValue={selectedPayment}
                           placeholder={'Chọn phương thức'}
                           onChange={(e: any) => setSelectedPayment(e)}
                         ></Select>
@@ -837,6 +830,7 @@ const OrdersCreate = () => {
                       placeholder='Chọn đối tác'
                       menuPlacement='auto'
                       className='ml-3 w-25'
+                      defaultValue={selectedShipper}
                       onChange={(e: any) => setSelectedShipper(e)}
                     />
                   </FormGroup>

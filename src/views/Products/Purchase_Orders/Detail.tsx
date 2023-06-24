@@ -21,7 +21,10 @@ const PurchaseOrderDetail = () => {
   const [isFetched, setIsFetched] = useState(false)
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
-  const totalDiscount = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_discount), 0)
+  const totalDiscount = productList.reduce(
+    (acc: number, item: any) => acc + (item.product_amount * item.product_price * item.product_discount) / 100,
+    0
+  )
   const totalPayment = totalAmount - totalDiscount
 
   const columns = React.useMemo(
@@ -51,7 +54,15 @@ const PurchaseOrderDetail = () => {
       {
         Header: 'Chiết khấu',
         accessor: 'product_discount',
-        Cell: ({ value }: any) => formatCurrency(value)
+        Cell: ({ value, row }: any) => {
+          const amount = row.values.product_amount
+          const price = row.values.product_price
+          return (
+            <span>
+              {value}% ({formatCurrency((amount * price * value) / 100)})
+            </span>
+          )
+        }
       },
       {
         Header: 'Đơn vị',
@@ -62,8 +73,9 @@ const PurchaseOrderDetail = () => {
         Cell: ({ row }: any) => {
           const amount = row.values.product_amount
           const price = row.values.product_price
+          const discount = row.values.product_discount
 
-          const totalPrice = formatCurrency(amount * price)
+          const totalPrice = formatCurrency((amount * price * (100 - discount)) / 100)
 
           return totalPrice
         }
