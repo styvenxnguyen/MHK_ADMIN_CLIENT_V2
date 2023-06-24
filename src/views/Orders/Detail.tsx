@@ -2,6 +2,8 @@ import moment from 'moment'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Badge, Button, Card, Col, Row } from 'react-bootstrap'
 import { useHistory, useParams } from 'react-router-dom'
+import Select from 'react-select'
+
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import CustomTable from '~/components/Table/CustomTable'
 import CustomerService from '~/services/customer.service'
@@ -23,6 +25,25 @@ const dataDebtSupplier = [
   {
     data: 'Trả hàng',
     value: '0'
+  }
+]
+
+const optionStatus = [
+  {
+    label: 'Giao ĐTVC',
+    value: 1
+  },
+  {
+    label: 'Hoãn giao',
+    value: 1
+  },
+  {
+    label: 'Giao đơn đóng hàng',
+    value: 1
+  },
+  {
+    label: 'Sale chốt ',
+    value: 1
   }
 ]
 
@@ -107,24 +128,40 @@ const OrdersDetail = () => {
 
   const dataPurchaseOrders = [
     {
-      data: 'Chi nhánh',
-      value: detailOrder && detailOrder.agency_branch ? detailOrder.agency_branch.name : '---'
+      data: 'Trạng thái xử lý',
+      value: optionStatus
     },
     {
       data: 'Chính sách giá',
       value: '---'
     },
     {
-      data: 'Nhân viên phụ trách',
+      data: 'Bán tại',
       value: detailOrder && detailOrder.staff ? detailOrder.staff.name : '---'
     },
     {
-      data: 'Ngày hẹn giao',
+      data: 'Bán bởi',
       value: '---'
     },
     {
-      data: 'Ngày nhập',
+      data: 'Hẹn giao hàng',
       value: moment().utcOffset(7).format('DD/MM/YYYY - HH:mm:ss') || '---'
+    },
+    {
+      data: 'Nguồn',
+      value: '---'
+    },
+    {
+      data: 'Kênh bán hàng',
+      value: '---'
+    },
+    {
+      data: 'Ngày bán',
+      value: '---'
+    },
+    {
+      data: 'Đường dẫn',
+      value: '---'
     },
     {
       data: 'Tham chiếu',
@@ -151,7 +188,7 @@ const OrdersDetail = () => {
     try {
       if (detailOrder?.supplier?.user_id) {
         const res = await CustomerService.getCustomerDetail(detailOrder?.supplier?.user_id)
-        console.log(res.data.data)
+        setCustomer(res.data.data)
       }
     } catch (error) {
       console.log(error)
@@ -167,6 +204,7 @@ const OrdersDetail = () => {
       getCustomer()
     }
   }, [getCustomer, detailOrder?.supplier])
+  console.log(detailOrder)
   console.log(customer)
 
   return (
@@ -188,26 +226,35 @@ const OrdersDetail = () => {
                 <i className='feather icon-user mr-2'></i>
                 Thông tin khách hàng
               </h5>
-              <div style={{ fontSize: '18px', marginTop: '10px' }}>
-                <span style={{ color: '#0088ff' }}> Pham Van B </span> - <span>0934842</span>
+              <div style={{ fontSize: '16px', marginTop: '10px' }}>
+                <span style={{ color: '#0088ff', fontWeight: '600' }}>{customer?.customer_name}</span> -{' '}
+                <span>{customer?.customer_phone}</span>
               </div>
             </Card.Header>
             <Card.Body>
               <Row>
                 <Col lg={7} style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
                   <div>
-                    <p>ĐIA CHỈ GIAO HÀNG</p>
+                    <p style={{ fontWeight: '600' }}>ĐIA CHỈ GIAO HÀNG</p>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span>0918649167</span>
-                      <span>Thôn Đồng Lâm, Xã Hồng Minh, Huyện Hưng Hà, Thái Bình</span>
+                      <span style={{ fontSize: '13px' }}>{customer?.customer_phone}</span>
+                      <span style={{ fontSize: '13px' }}>
+                        {customer?.address_list[0].user_specific_address}, {customer?.address_list[0].user_district},
+                        {` `}
+                        {customer?.address_list[0].user_province}
+                      </span>
                     </div>
                   </div>
 
                   <div>
-                    <p>ĐỊA CHỈ NHẬN HÓA ĐƠN</p>
+                    <p style={{ fontWeight: '600' }}>ĐIA CHỈ NHẬN HÓA ĐƠN</p>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span>0918649167</span>
-                      <span>Thôn Đồng Lâm, Xã Hồng Minh, Huyện Hưng Hà, Thái Bình</span>
+                      <span style={{ fontSize: '13px' }}>{customer?.customer_phone}</span>
+                      <span style={{ fontSize: '13px' }}>
+                        {customer?.address_list[0].user_specific_address}, {customer?.address_list[0].user_district},
+                        {` `}
+                        {customer?.address_list[0].user_province}
+                      </span>
                     </div>
                   </div>
                 </Col>
@@ -238,8 +285,19 @@ const OrdersDetail = () => {
             <Card.Body>
               {dataPurchaseOrders.map((data: any, index) => (
                 <span key={`dataPurchaseOrders_${index}`} className='d-flex mb-3'>
-                  <span>{data.data} : </span>
-                  <span className='ml-2'>{data.value}</span>
+                  <span style={{ width: '140px' }}>{data.data} </span>
+                  {index === 0 ? (
+                    <div style={{ position: 'relative', flex: '1' }}>
+                      <div style={{ position: 'absolute', right: 0, left: '5px', top: '-7px' }}>
+                        <Select placeholder='' options={data.value} isMulti={false} name='colors'></Select>
+                      </div>
+                    </div>
+                  ) : (
+                    <span className='ml-2'>
+                      :{` `}
+                      {data.value}
+                    </span>
+                  )}
                 </span>
               ))}
             </Card.Body>
