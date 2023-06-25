@@ -206,7 +206,9 @@ const PurchaseOrderDetail = () => {
                 <Col lg={6}>
                   <div className='font-weight-bold'>
                     <p>
-                      <Link to='#'>{purchaseDetail?.supplier && purchaseDetail.supplier.name}</Link>
+                      <Link to={`/app/suppliers/detail/${purchaseDetail?.supplier?.user_id}`}>
+                        {purchaseDetail?.supplier && purchaseDetail.supplier.name}
+                      </Link>
                     </p>
                     <p>Số điện thoại : {purchaseDetail?.supplier && purchaseDetail.supplier.phone}</p>
 

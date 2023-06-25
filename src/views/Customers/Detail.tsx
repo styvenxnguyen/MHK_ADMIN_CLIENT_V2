@@ -7,7 +7,7 @@ import { Helmet } from 'react-helmet'
 import Error from '~/views/Errors'
 import PageLoader from '~/components/Loader/PageLoader'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
-import Addresses from './AdditionalData/Addresses'
+import Addresses from '../../components/AdditionalData/Addresses'
 import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 
 const CustomerDetail = () => {
@@ -427,7 +427,7 @@ const CustomerDetail = () => {
           <Tabs variant='pills' defaultActiveKey='addresses' className='tabs-menu'>
             <Tab eventKey='addresses' title='Địa chỉ'>
               <div className='px-3'>
-                <Addresses />
+                <Addresses value='customer' />
               </div>
             </Tab>
             <Tab eventKey='profile' title='Công nợ'>

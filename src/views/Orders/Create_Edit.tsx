@@ -535,11 +535,14 @@ const OrdersCreate = () => {
   return (
     <React.Fragment>
       <div className='d-flex justify-content-between'>
-        <BackPreviousPage text='Quay lại chi tiết đơn hàng' path={`/app/orders/detail/${params.id}`} />
+        <BackPreviousPage
+          text={params.id ? 'Quay lại chi tiết đơn hàng' : 'Quay lại danh sách đơn hàng'}
+          path={params.id ? `/app/orders/detail/${params.id}` : '/app/orders/'}
+        />
         <DropdownButton
           disabled={isLoadingCreate}
           id='create-order-dropdown'
-          className={isLoadingCreate ? 'hide-arrow' : ''}
+          className={isLoadingCreate || params.id ? 'hide-arrow' : ''}
           title={
             isLoadingCreate ? (
               <span>
@@ -548,8 +551,8 @@ const OrdersCreate = () => {
               </span>
             ) : (
               <span>
-                <i className='feather icon-plus-circle mr-2' />
-                <span className='mr-2'>Tạo đơn hàng</span>
+                <i className={params.id ? 'feather icon-save mr-2' : 'feather icon-plus-circle mr-2'} />
+                <span className={params.id ? '' : 'mr-2'}>{params.id ? 'Lưu đơn hàng' : 'Tạo đơn hàng'}</span>
               </span>
             )
           }

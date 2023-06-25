@@ -553,7 +553,9 @@ const CEPurchaseOrder = () => {
                   <Col lg={6}>
                     <div className='font-weight-bold'>
                       <p>
-                        <Link to='#'>{purchaseDetail?.supplier && purchaseDetail.supplier.name}</Link>
+                        <Link to={`/app/supplier/detail/${purchaseDetail?.supplier?.user_id}`}>
+                          {purchaseDetail?.supplier && purchaseDetail.supplier.name}
+                        </Link>
                       </p>
                       <p>Số điện thoại : {purchaseDetail?.supplier && purchaseDetail.supplier.phone}</p>
 
@@ -601,7 +603,7 @@ const CEPurchaseOrder = () => {
                           <Col lg={6}>
                             <div className='font-weight-bold'>
                               <p>
-                                <Link to='#'>{dataSupplier.customer_name}</Link>
+                                <Link to={`/app/suppliers/detail/${dataSupplier.id}`}>{dataSupplier.customer_name}</Link>
                               </p>
                               <p>Số điện thoại : {dataSupplier.customer_phone}</p>
 

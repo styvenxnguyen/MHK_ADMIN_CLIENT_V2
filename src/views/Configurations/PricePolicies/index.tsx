@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Button, Card, Col, Row } from 'react-bootstrap'
+import { Card, Col, Row } from 'react-bootstrap'
 import { Helmet } from 'react-helmet'
 import PageLoader from '~/components/Loader/PageLoader'
 import Error from '~/views/Errors'
@@ -78,10 +78,10 @@ const PricePolicies = () => {
           <Card>
             <Card.Header className='flex-between'>
               <Card.Title as='h5'>Danh sách chính sách giá</Card.Title>
-              <Button className='m-0'>
+              {/* <Button className='m-0'>
                 <i className='feather icon-plus-circle mr-2'></i>
                 Thêm chính sách giá
-              </Button>
+              </Button> */}
             </Card.Header>
             <Card.Body>
               <CustomTable columns={columns} data={pricePoliciesList} handleRowClick={{}}></CustomTable>

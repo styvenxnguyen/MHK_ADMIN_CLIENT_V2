@@ -12,11 +12,29 @@ import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 import PageLoader from '~/components/Loader/PageLoader'
 import { validationSchemaAddresses } from '~/hooks/useValidation'
 
-function Addresses() {
+interface Props {
+  value: string
+}
+
+const dataObject = [
+  {
+    title: 'khách hàng',
+    value: 'customer',
+    url: 'customer/get-by-id'
+  },
+  {
+    title: 'nhà cung cấp',
+    value: 'supplier',
+    url: 'supplier/get-by-id'
+  }
+]
+
+function Addresses({ value }: Props) {
   const [isLoading, setIsLoading] = useState(true)
   const [showLoader, setShowLoader] = useState(false)
   const [isDelete, setIsDelete] = useState(false)
   const [isFetched, setIsFetched] = useState(false)
+  const [data, setData] = useState<any>()
   const [showModalAdd, setShowModalAdd] = useState(false)
   const [showModalUpdate, setShowModalUpdate] = useState(false)
   const [addressList, setAddressList] = useState([])
@@ -52,18 +70,27 @@ function Addresses() {
   )
 
   useEffect(() => {
-    axiosConfig
-      .get(`/customer/get-by-id/${id}`)
-      .then((response) => {
-        const customerData = response.data.data
-        setAddressList(customerData.address_list)
-        setIsLoading(false)
-        setIsFetched(true)
-      })
-      .catch(() => {
-        setIsLoading(false)
-      })
-  }, [id])
+    if (dataObject && value !== undefined) {
+      const filteredObject = dataObject.find((object) => object.value === value)
+      if (filteredObject) {
+        setData(filteredObject)
+      }
+    }
+
+    if (data) {
+      axiosConfig
+        .get(`/${data.url}/${id}`)
+        .then((response) => {
+          const customerData = response.data.data
+          setAddressList(customerData.address_list)
+          setIsLoading(false)
+          setIsFetched(true)
+        })
+        .catch(() => {
+          setIsLoading(false)
+        })
+    }
+  }, [value, data, id])
 
   const handleAddAddress = () => {
     setShowModalAdd(true)
@@ -158,13 +185,13 @@ function Addresses() {
           .delete(`/address/delete/${idAddress}`)
           .then(() => {
             setTimeout(() => {
-              handleAlertConfirm({ text: 'Xoá địa chỉ khách hàng thành công', icon: 'success' })
+              handleAlertConfirm({ text: `Xoá địa chỉ ${data.title} thành công`, icon: 'success' })
             }, 1000)
           })
           .catch(() => {
             setTimeout(() => {
               setIsDelete(false)
-              Swal.fire('Thất bại', 'Đã xảy ra lỗi khi xoá địa chỉ khách hàng', 'warning')
+              Swal.fire('Thất bại', `Đã xảy ra lỗi khi xoá địa chỉ ${data.title}`, 'warning')
             }, 1000)
           })
       }
@@ -199,7 +226,7 @@ function Addresses() {
               show={showModalAdd}
               handleClose={handleCloseModal}
               handleSubmit={handleSubmit}
-              title='Thêm địa chỉ khách hàng'
+              title={`Thêm địa chỉ ${data.title}`}
               textSubmit={showLoader ? 'Đang thêm...' : 'Thêm'}
               size='lg'
               disabled={!dirty || showLoader}
@@ -265,7 +292,7 @@ function Addresses() {
               handleDelete={handleDelete}
               handleClose={handleCloseModal}
               handleSubmit={handleSubmit}
-              title='Cập nhật địa chỉ khách hàng'
+              title={`Cập nhật địa chỉ ${data.title}`}
               textSubmit={showLoader ? 'Đang lưu...' : 'Lưu'}
               size='lg'
               disabled={!dirty || showLoader}
@@ -315,7 +342,7 @@ function Addresses() {
 
       {addressList.length === 0 ? (
         <div className='text-center font-weight-bold text-normal'>
-          Khách hàng chưa cập nhật địa chỉ
+          {data.title.charAt(0).toUpperCase() + data.title.slice(1)} chưa cập nhật địa chỉ
           <p className='mt-2'>
             <Link to='#' onClick={handleAddAddress}>
               Nhấn vào đây để thêm ngay
