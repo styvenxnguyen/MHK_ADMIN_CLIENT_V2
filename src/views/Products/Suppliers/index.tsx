@@ -67,7 +67,7 @@ function SuppliersList() {
 
   const handleRowClick = (row: any) => {
     const id = row.values.id
-    history.push(`/app/supplier/detail/${id}`)
+    history.push(`/app/suppliers/detail/${id}`)
   }
 
   if (isLoading)

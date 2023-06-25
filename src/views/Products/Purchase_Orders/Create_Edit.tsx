@@ -27,6 +27,7 @@ import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 import { ButtonLoading } from '~/components/Button/LoadingButton'
 import Swal from 'sweetalert2'
 import { SelectProps } from '~/types/Select.type'
+import moment from 'moment'
 
 const CEPurchaseOrder = () => {
   const history = useHistory()
@@ -357,8 +358,8 @@ const CEPurchaseOrder = () => {
         label: data.agency_branch.name,
         value: data.agency_branch.id
       })
-      setIsLoading(false)
-      setIsFetched(true)
+      setDeliveryDate(moment(data.order_delivery_date).utcOffset(7).format('YYYY-MM-DD'))
+
       setSelectedTags(
         data.order_tags.map((tag: any) => ({
           label: tag.Tag.tag_title,
@@ -366,6 +367,8 @@ const CEPurchaseOrder = () => {
         }))
       )
       setNote(data.order_note)
+      setIsLoading(false)
+      setIsFetched(true)
     } catch (error) {
       setIsLoading(false)
     }
@@ -685,6 +688,7 @@ const CEPurchaseOrder = () => {
                   <div style={{ width: '65%' }}>
                     <FormControl
                       type='date'
+                      defaultValue={deliveryDate}
                       onChange={(e: any) => setDeliveryDate(e.target.value)}
                       disabled={!canEdit}
                     />

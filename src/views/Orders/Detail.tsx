@@ -1,10 +1,12 @@
 import moment from 'moment'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Badge, Button, Card, Col, Row } from 'react-bootstrap'
+import { Helmet } from 'react-helmet'
 import { useHistory, useParams } from 'react-router-dom'
 import Select from 'react-select'
 
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
+import PageLoader from '~/components/Loader/PageLoader'
 import CustomTable from '~/components/Table/CustomTable'
 import CustomerService from '~/services/customer.service'
 import OrderService from '~/services/order.service'
@@ -12,6 +14,7 @@ import { Customer } from '~/types/Customer.type'
 import { OrderProduct } from '~/types/OrderProduct.type'
 import { PurchaseOrder } from '~/types/PurchaseOrder.type'
 import { formatCurrency } from '~/utils/common'
+import Error from '../Errors'
 
 const dataDebtSupplier = [
   {
@@ -51,11 +54,16 @@ const OrdersDetail = () => {
   const history = useHistory()
   const params: { id: string } = useParams()
   const [detailOrder, setDetailOrder] = useState<PurchaseOrder>()
+  const [isLoading, setIsLoading] = useState(true)
+  const [isFetched, setIsFetched] = useState(false)
   const [customer, setCustomer] = useState<Customer>()
   const [productList, setProductList] = useState<OrderProduct[]>([])
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
-  const totalDiscount = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_discount), 0)
+  const totalDiscount = productList.reduce(
+    (acc: number, item: any) => acc + (item.product_amount * item.product_price * item.product_discount) / 100,
+    0
+  )
   const totalPayment = totalAmount - totalDiscount
 
   const totalProduct = [
@@ -105,7 +113,15 @@ const OrdersDetail = () => {
       {
         Header: 'Chiết khấu',
         accessor: 'product_discount',
-        Cell: ({ value }: any) => formatCurrency(value)
+        Cell: ({ value, row }: any) => {
+          const amount = row.values.product_amount
+          const price = row.values.product_price
+          return (
+            <span>
+              {value}% ({formatCurrency((amount * price * value) / 100)})
+            </span>
+          )
+        }
       },
       {
         Header: 'Đơn vị',
@@ -116,8 +132,9 @@ const OrdersDetail = () => {
         Cell: ({ row }: any) => {
           const amount = row.values.product_amount
           const price = row.values.product_price
+          const discount = row.values.product_discount
 
-          const totalPrice = formatCurrency(amount * price)
+          const totalPrice = formatCurrency((amount * price * (100 - discount)) / 100)
 
           return totalPrice
         }
@@ -126,7 +143,7 @@ const OrdersDetail = () => {
     []
   )
 
-  const dataPurchaseOrders = [
+  const dataSellOrders = [
     {
       data: 'Trạng thái xử lý',
       value: optionStatus
@@ -137,42 +154,25 @@ const OrdersDetail = () => {
     },
     {
       data: 'Bán tại',
-      value: detailOrder && detailOrder.staff ? detailOrder.staff.name : '---'
+      value: detailOrder && detailOrder.agency_branch ? detailOrder.agency_branch?.name : '---'
     },
     {
       data: 'Bán bởi',
-      value: '---'
+      value: detailOrder && detailOrder.staff ? detailOrder.staff.name : '---'
     },
     {
       data: 'Hẹn giao hàng',
-      value: moment().utcOffset(7).format('DD/MM/YYYY - HH:mm:ss') || '---'
-    },
-    {
-      data: 'Nguồn',
-      value: '---'
-    },
-    {
-      data: 'Kênh bán hàng',
-      value: '---'
+      value: detailOrder ? moment(detailOrder.order_delivery_date).utcOffset(7).format('DD/MM/YYYY - HH:mm:ss') : '---'
     },
     {
       data: 'Ngày bán',
-      value: '---'
-    },
-    {
-      data: 'Đường dẫn',
-      value: '---'
-    },
-    {
-      data: 'Tham chiếu',
-      value: '---'
+      value: detailOrder ? moment(detailOrder.createdAt).utcOffset(7).format('DD/MM/YYYY - HH:mm:ss') : '---'
     }
   ]
 
   const getDetailOrder = useCallback(async () => {
     try {
-      const res = await OrderService.getPurchaseOrderDetail_V2(params.id)
-      console.log(res.data.data)
+      const res = await OrderService.getSellOrderDetail(params.id)
       setDetailOrder(res.data.data)
       setProductList(
         res.data.data.order_product_list.map((purchase: PurchaseOrder, index: number) => {
@@ -197,6 +197,17 @@ const OrdersDetail = () => {
 
   useEffect(() => {
     getDetailOrder()
+      .then(() => {
+        setTimeout(() => {
+          setIsLoading(false)
+          setIsFetched(true)
+        }, 1000)
+      })
+      .catch(() => {
+        setTimeout(() => {
+          setIsLoading(false)
+        }, 1000)
+      })
   }, [getDetailOrder])
 
   useEffect(() => {
@@ -204,18 +215,30 @@ const OrdersDetail = () => {
       getCustomer()
     }
   }, [getCustomer, detailOrder?.supplier])
-  console.log(detailOrder)
-  console.log(customer)
+
+  if (isLoading)
+    return (
+      <>
+        <Helmet>
+          <title>Chi tiết đơn hàng</title>
+        </Helmet>
+        <PageLoader />
+      </>
+    )
+
+  if (!isFetched) {
+    return <Error errorCode='500' />
+  }
 
   return (
     <div>
       <span className='flex-between'>
         <BackPreviousPage path='/app/purchase_orders' text='Quay lại danh sách đơn hàng' />
 
-        {/* <Button className='m-0 mb-3' onClick={() => history.push(`/app/purchase_orders/detail/${params.id}/edit`)}>
+        <Button className='m-0 mb-3' onClick={() => history.push(`/app/orders/detail/${params.id}/edit`)}>
           <i className='feather icon-edit'></i>
-          Sửa đơn nhập
-        </Button> */}
+          Sửa đơn hàng
+        </Button>
       </span>
 
       <Row className='text-normal'>
@@ -237,8 +260,8 @@ const OrdersDetail = () => {
                   <div>
                     <p style={{ fontWeight: '600' }}>ĐIA CHỈ GIAO HÀNG</p>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontSize: '13px' }}>{customer?.customer_phone}</span>
-                      <span style={{ fontSize: '13px' }}>
+                      <span style={{ fontSize: '14px' }}>{customer?.customer_phone}</span>
+                      <span style={{ fontSize: '14px' }}>
                         {customer?.address_list[0].user_specific_address}, {customer?.address_list[0].user_district},
                         {` `}
                         {customer?.address_list[0].user_province}
@@ -249,8 +272,8 @@ const OrdersDetail = () => {
                   <div>
                     <p style={{ fontWeight: '600' }}>ĐIA CHỈ NHẬN HÓA ĐƠN</p>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontSize: '13px' }}>{customer?.customer_phone}</span>
-                      <span style={{ fontSize: '13px' }}>
+                      <span style={{ fontSize: '14px' }}>{customer?.customer_phone}</span>
+                      <span style={{ fontSize: '14px' }}>
                         {customer?.address_list[0].user_specific_address}, {customer?.address_list[0].user_district},
                         {` `}
                         {customer?.address_list[0].user_province}
@@ -283,8 +306,8 @@ const OrdersDetail = () => {
               </h5>
             </Card.Header>
             <Card.Body>
-              {dataPurchaseOrders.map((data: any, index) => (
-                <span key={`dataPurchaseOrders_${index}`} className='d-flex mb-3'>
+              {dataSellOrders.map((data: any, index) => (
+                <span key={`dataSellOrders_${index}`} className='d-flex mb-4'>
                   <span style={{ width: '140px' }}>{data.data} </span>
                   {index === 0 ? (
                     <div style={{ position: 'relative', flex: '1' }}>

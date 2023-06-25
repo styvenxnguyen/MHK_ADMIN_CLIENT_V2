@@ -40,6 +40,7 @@ import { SelectProps } from '~/types/Select.type'
 import { TagService } from '~/services/tag.service'
 import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 import Swal from 'sweetalert2'
+import moment from 'moment'
 
 const dataDebtSupplier = [
   {
@@ -370,7 +371,7 @@ const OrdersCreate = () => {
 
   const getSellOrderDetail = useCallback(async () => {
     try {
-      const res = await OrderService.getPurchaseOrderDetail(params.id)
+      const res = await OrderService.getSellOrderDetail(params.id)
       const data = res.data.data
       setProductList(
         data.order_product_list.map((purchase: PurchaseOrder) => {
@@ -388,19 +389,35 @@ const OrdersCreate = () => {
         label: data.agency_branch.name,
         value: data.agency_branch.id
       })
-      setIsLoading(false)
-      setIsFetched(true)
+      setValueCustomer({
+        label: data.supplier.name,
+        value: data.supplier.user_id
+      })
       setSelectedTags(
         data.order_tags.map((tag: any) => ({
           label: tag.Tag.tag_title,
           value: tag.Tag.id
         }))
       )
+      setSelectedPayment({
+        label: data.payment.payment_type,
+        value: data.payment.id
+      })
+
+      setDeliveryDate(moment(data.order_delivery_date).utcOffset(7).format('YYYY-MM-DD'))
+      getCustomerDetail(data.supplier.user_id)
+        .then(() => {
+          setIsLoading(false)
+          setIsFetched(true)
+        })
+        .catch(() => {
+          setIsLoading(false)
+        })
       setNote(data.order_note)
     } catch (error) {
       setIsLoading(false)
     }
-  }, [params.id])
+  }, [params.id, getCustomerDetail])
 
   const selectedCustomer = useCallback(
     (e: SingleValue<{ label: string; value: string; idCustomer: string }>) => {
@@ -505,7 +522,7 @@ const OrdersCreate = () => {
     return (
       <>
         <Helmet>
-          <title>Tạo đơn hàng</title>
+          <title>{params.id ? 'Sửa đơn hàng' : 'Tạo đơn hàng'}</title>
         </Helmet>
         <PageLoader />
       </>
@@ -518,7 +535,7 @@ const OrdersCreate = () => {
   return (
     <React.Fragment>
       <div className='d-flex justify-content-between'>
-        <BackPreviousPage text='Quay lại danh sách đơn hàng' path='/app/products' />
+        <BackPreviousPage text='Quay lại chi tiết đơn hàng' path={`/app/orders/detail/${params.id}`} />
         <DropdownButton
           disabled={isLoadingCreate}
           id='create-order-dropdown'
@@ -608,6 +625,7 @@ const OrdersCreate = () => {
                       <Col>
                         <Select
                           className='mb-4'
+                          defaultValue={valueCustomer}
                           options={listCustomer.map((e) => ({
                             label: `${e.customer_name} - ${e.customer_phone}`,
                             value: e.customer_id,
@@ -670,23 +688,15 @@ const OrdersCreate = () => {
                     <div className='flex-between'>
                       <span>Hẹn giao: </span>
                       <div style={{ width: '65%' }}>
-                        <FormControl type='date' onChange={(e: any) => setDeliveryDate(e.target.value)} />
+                        <FormControl
+                          type='date'
+                          defaultValue={deliveryDate}
+                          onChange={(e: any) => setDeliveryDate(e.target.value)}
+                        />
                       </div>
                     </div>
                     <div className='flex-between'>
                       <span>Mã đơn: </span>
-                      <div style={{ width: '65%' }}>
-                        <FormControl />
-                      </div>
-                    </div>
-                    <div className='flex-between'>
-                      <span style={{ width: '30%' }}>Đường dẫn đơn hàng: </span>
-                      <div style={{ width: '65%' }}>
-                        <FormControl />
-                      </div>
-                    </div>
-                    <div className='flex-between'>
-                      <span>Tham chiếu: </span>
                       <div style={{ width: '65%' }}>
                         <FormControl />
                       </div>

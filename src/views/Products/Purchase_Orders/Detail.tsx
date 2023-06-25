@@ -134,11 +134,11 @@ const PurchaseOrderDetail = () => {
     },
     {
       data: 'Ngày hẹn giao',
-      value: '---'
+      value: purchaseDetail ? moment(purchaseDetail.order_delivery_date).utcOffset(7).format('DD/MM/YYYY') : '---'
     },
     {
       data: 'Ngày nhập',
-      value: moment().utcOffset(7).format('DD/MM/YYYY - HH:mm:ss') || '---'
+      value: purchaseDetail ? moment(purchaseDetail.createdAt).utcOffset(7).format('DD/MM/YYYY') : '---'
     },
     {
       data: 'Tham chiếu',

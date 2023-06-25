@@ -153,6 +153,11 @@ const routes: any = [
         path: '/app/suppliers',
         component: lazy(() => import('./views/Products/Suppliers'))
       },
+      {
+        exact: true,
+        path: '/app/suppliers/detail/:id',
+        component: lazy(() => import('./views/Products/Suppliers/Detail'))
+      },
 
       //-------------------ORDERS---------------------------
       {
@@ -169,6 +174,11 @@ const routes: any = [
         exact: true,
         path: '/app/orders/detail/:id',
         component: lazy(() => import('./views/Orders/Detail'))
+      },
+      {
+        exact: true,
+        path: '/app/orders/detail/:id/edit',
+        component: lazy(() => import('./views/Orders/Create_Edit'))
       },
 
       //-------------------APPLICATIONS---------------------------
