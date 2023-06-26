@@ -114,8 +114,6 @@ const CustomerEdit = () => {
       })
   }, [])
 
-  console.log(selectedTags)
-
   const filterSelectedOptions = (options: any, selectedOptions: any) => {
     return options.filter(
       (option: any) => !selectedOptions.find((selectedOption: any) => selectedOption.value === option.value)
@@ -123,8 +121,6 @@ const CustomerEdit = () => {
   }
 
   const filteredOptionsTag = filterSelectedOptions(optionsTag, selectedTags)
-
-
 
   const handleSubmit = (values: any) => {
     setShowLoader(true)
@@ -165,7 +161,7 @@ const CustomerEdit = () => {
           }, 1000)
         })
         .catch((errors) => {
-          const errorResponses = errors.response.data.message
+          const errorResponses = errors.response.data.data
           const errorMessages = errorResponses.map((error: any) => {
             if (error.includes('name')) {
               return `Tên KH: <b>${values.name}</b> đã tồn tại`

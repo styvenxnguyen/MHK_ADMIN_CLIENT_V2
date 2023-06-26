@@ -90,6 +90,16 @@ const Branches = () => {
         Cell: ({ value }: any) => (
           <span>{value ? <i style={{ fontWeight: 600, fontSize: 22 }} className='feather icon-check'></i> : ''}</span>
         )
+      },
+      {
+        Header: 'Chức năng',
+        accessor: 'advance',
+        Cell: ({ row }: any) => (
+          <Button className='' variant='outline-primary' onClick={() => handleRowClick(row)}>
+            <i className='feather icon-edit' />
+            Sửa
+          </Button>
+        )
       }
     ],
     []

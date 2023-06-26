@@ -36,6 +36,10 @@ function ProductsList() {
         accessor: 'id'
       },
       {
+        Header: 'Mã SKU',
+        accessor: 'product_SKU'
+      },
+      {
         Header: 'Tên sản phẩm',
         accessor: 'product_name'
       },

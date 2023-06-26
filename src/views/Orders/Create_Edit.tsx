@@ -584,10 +584,7 @@ const OrdersCreate = () => {
                         style={{ float: 'initial' }}
                         className='m-0 ml-2'
                         onClick={() => {
-                          setValueCustomer({
-                            label: '',
-                            value: ''
-                          })
+                          setValueCustomer(undefined)
                           setCustomerDetail(undefined)
                         }}
                       />

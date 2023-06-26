@@ -56,7 +56,12 @@ function CustomTable({
     {
       columns,
       data,
-      initialState: { pageIndex: 0, hiddenColumns, sortBy: [{ id: 'createdAt', desc: true }] } as CustomInitialState
+      initialState: {
+        pageIndex: 0,
+        pageSize: 30,
+        hiddenColumns,
+        sortBy: [{ id: 'createdAt', desc: true }]
+      } as CustomInitialState
     },
     useGlobalFilter,
     useSortBy,
@@ -81,6 +86,8 @@ function CustomTable({
       ])
     }
   )
+
+  const clickableColumns = ['user_code', 'customer_name', 'product_name', 'product_SKU', 'order_code', 'staff_name']
   const [showGoToPage, setShowGoToPage] = useState(false)
   const [showErrorPage, setShowErrorPage] = useState(false)
   const [pagePagination, setPagePagination] = useState('')
@@ -149,12 +156,12 @@ function CustomTable({
           Hiển thị
           <select
             className='form-control w-auto mx-2'
-            value={pageSize}
+            defaultValue={pageSize}
             onChange={(e) => {
               setPageSize(Number(e.target.value))
             }}
           >
-            {[5, 10, 20, 30, 40, 50].map((pageSize) => (
+            {[30, 50, 100].map((pageSize) => (
               <option key={pageSize} value={pageSize}>
                 {pageSize}
               </option>
@@ -217,28 +224,40 @@ function CustomTable({
           {page.map((row: any) => {
             prepareRow(row)
             return (
-              <tr className='row-has-detail' key={row.values.id} {...row.getRowProps()}>
+              <tr key={row.values.id} {...row.getRowProps()}>
                 {row.cells.map((cell: any) => {
-                  return cell.column.id === 'selection' ? (
-                    <td style={{ width: '50px', textAlign: 'center' }} {...cell.getCellProps()}>
-                      <input
-                        {...row.getToggleRowSelectedProps()}
-                        type='checkbox'
+                  if (cell.column.id === 'selection') {
+                    return (
+                      <td key={row.values.id} style={{ width: '50px', textAlign: 'center' }} {...cell.getCellProps()}>
+                        <input
+                          {...row.getToggleRowSelectedProps()}
+                          type='checkbox'
+                          {...cell.getCellProps()}
+                          indeterminate={selectedFlatRows.length > 0 ? selectedFlatRows.length : undefined}
+                          title=''
+                        />
+                      </td>
+                    )
+                  } else if (clickableColumns.includes(cell.column.id)) {
+                    return (
+                      <td
+                        className='text-click'
+                        key={row.values.id}
+                        onClick={() => {
+                          handleRowClick(row)
+                        }}
                         {...cell.getCellProps()}
-                        indeterminate={selectedFlatRows.length > 0 ? selectedFlatRows.length : undefined}
-                        title=''
-                      />
-                    </td>
-                  ) : (
-                    <td
-                      onClick={() => {
-                        handleRowClick(row)
-                      }}
-                      {...cell.getCellProps()}
-                    >
-                      {cell.render('Cell')}
-                    </td>
-                  )
+                      >
+                        {cell.render('Cell')}
+                      </td>
+                    )
+                  } else {
+                    return (
+                      <td key={row.values.id} {...cell.getCellProps()}>
+                        {cell.render('Cell')}
+                      </td>
+                    )
+                  }
                 })}
               </tr>
             )

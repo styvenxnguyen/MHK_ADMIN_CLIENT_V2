@@ -532,8 +532,7 @@ tbody {
 }
 
 .swal2-styled.swal2-confirm,
-.swal2-styled.swal2-cancel
-{
+.swal2-styled.swal2-cancel {
   font-size: 0.94em;
 }
 
@@ -592,15 +591,15 @@ tbody {
   background-color: transparent !important;
 }
 
-.hover-card{
-  background-color: #F2F9FF;
+.hover-card {
+  background-color: #f2f9ff;
   box-shadow: none;
   transition: none;
   border: solid 1px transparent;
 }
 
-.hover-card:hover{
-  border: solid 1px ;
+.hover-card:hover {
+  border: solid 1px;
 }
 
 .no-spin::-webkit-inner-spin-button,
@@ -739,10 +738,6 @@ tbody {
   margin: 0;
 }
 
-.style-field {
-  -moz-appearance: textfield;
-}
-
 .error-field {
   border: 1px solid red;
 }
@@ -767,7 +762,7 @@ tbody {
 }
 
 input::placeholder {
-  color: rgb(167, 166, 166)
+  color: rgb(167, 166, 166);
 }
 
 .error-text {
@@ -782,32 +777,11 @@ input::placeholder {
   transform: rotate(180deg);
 }
 
-// .select-container {
-//   position: relative;
-// }
-
-// .tag-list {
-//   position: absolute;
-//   left: 8px;
-//   top: 6px;
-//   bottom: 6px;
-//   list-style-type: none;
-//   display: flex;
-//   gap: 8px;
-//   color: #000;
-
-// }
-
 .select-container {
   outline: 1px solid rgb(205, 205, 205);
   transition-duration: 200ms;
   border: none;
 }
-// .select-container {
-//   outline: 1px solid gray;
-//   transition-duration: 200ms;
-//   border: none;
-// }
 
 .select-container:focus {
   border: none;
@@ -822,24 +796,24 @@ input::placeholder {
   display: flex;
   flex-wrap: wrap;
   .tag-list {
-   margin-left: 8px;
-   display: flex;
-   flex-wrap: wrap;
-   row-gap: 8px;
+    margin-left: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 8px;
     .tag {
-    background-color: #d9edff;
-    margin-right: 8px;
-    padding: 0px 10px;
-    border-radius: 20px;
-    svg {
-      margin-bottom: 1px;
-      padding-left: 3px;
-      font-size: 18px;
-      cursor: pointer;
-      color: #0088ff;
-      font-weight: 600;
+      background-color: #d9edff;
+      margin-right: 8px;
+      padding: 0px 10px;
+      border-radius: 20px;
+      svg {
+        margin-bottom: 1px;
+        padding-left: 3px;
+        font-size: 18px;
+        cursor: pointer;
+        color: #0088ff;
+        font-weight: 600;
+      }
     }
-  }
   }
 
   .input-container {
@@ -863,3 +837,12 @@ input::placeholder {
   opacity: 1;
 }
 
+.text-click {
+  color: blue;
+}
+
+.text-click:hover {
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
+}

@@ -206,20 +206,22 @@ const PurchaseOrderDetail = () => {
                 <Col lg={6}>
                   <div className='font-weight-bold'>
                     <p>
-                      <Link to={`/app/suppliers/detail/${purchaseDetail?.supplier?.user_id}`}>
+                      <Link className='text-click' to={`/app/suppliers/detail/${purchaseDetail?.supplier?.user_id}`}>
                         {purchaseDetail?.supplier && purchaseDetail.supplier.name}
                       </Link>
                     </p>
                     <p>Số điện thoại : {purchaseDetail?.supplier && purchaseDetail.supplier.phone}</p>
 
-                    {purchaseDetail?.supplier && purchaseDetail.supplier.addresses
-                      ? purchaseDetail.supplier.addresses.map((address: any, index: any) => (
-                          <p key={`addressSupplier_${index}`}>
-                            Địa chỉ {index + 1}:{' '}
-                            <span style={{ fontWeight: '500' }}>{address.user_specific_address}</span>
-                          </p>
-                        ))
-                      : 'Chưa cập nhật địa chỉ'}
+                    {purchaseDetail?.supplier && purchaseDetail.supplier.addresses ? (
+                      <p>
+                        Địa chỉ :
+                        <span style={{ fontWeight: '500' }} className='ml-2' >
+                          {purchaseDetail.supplier.addresses[0].user_specific_address}
+                        </span>
+                      </p>
+                    ) : (
+                      'Chưa cập nhật địa chỉ'
+                    )}
                   </div>
                 </Col>
 
