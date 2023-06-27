@@ -846,3 +846,152 @@ input::placeholder {
   text-decoration: underline;
   cursor: pointer;
 }
+
+.input-select-tags:focus {
+  border: none;
+  outline: 1px solid #04a9f5;
+  border: none;
+}
+
+.input-select-tags {
+  outline: 1px solid #80bdff;
+  box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+  background: #f4f7fa;
+  position: relative;
+  transition-duration: 200ms;
+  border: none;
+  padding: 7px 4px;
+  border-radius: 3px;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  .tag-item {
+    color: #2b4263;
+    height: unset;
+    margin: 4px;
+    padding: 2px 0px;
+    min-height: 24px;
+    user-select: auto;
+    white-space: normal;
+    background-color: #d9edff;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    vertical-align: middle;
+    span {
+      white-space: normal;
+      overflow: hidden;
+      white-space: nowrap;
+      font-size: 14px;
+      padding-left: 12px;
+      padding-right: 12px;
+      text-overflow: ellipsis;
+    }
+    svg {
+      color: rgba(0, 0, 0, 0.26);
+      width: 16px;
+      height: 16px;
+      margin: 0 5px 0 -6px;
+      cursor: pointer;
+      :hover {
+        color: rgba(0, 0, 0, 0.603);
+      }
+    }
+  }
+  input {
+    outline: none;
+    border: none;
+    min-width: 156px;
+    flex-grow: 1;
+    text-overflow: ellipsis;
+    margin: 4px 4px;
+  }
+}
+
+.input-select-tags-blur {
+  outline: 1px solid rgb(205, 205, 205);
+
+  position: relative;
+  transition-duration: 200ms;
+  border: none;
+  padding: 7px 4px;
+  border-radius: 3px;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  .tag-item {
+    color: #2b4263;
+    height: unset;
+    margin: 4px;
+    padding: 2px 0px;
+    min-height: 24px;
+    user-select: auto;
+    white-space: normal;
+    background-color: #d9edff;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    vertical-align: middle;
+    span {
+      white-space: normal;
+      overflow: hidden;
+      white-space: nowrap;
+      font-size: 14px;
+      padding-left: 12px;
+      padding-right: 12px;
+      text-overflow: ellipsis;
+    }
+    svg {
+      color: rgba(0, 0, 0, 0.26);
+      width: 16px;
+      height: 16px;
+      margin: 0 5px 0 -6px;
+      cursor: pointer;
+      :hover {
+        color: rgba(0, 0, 0, 0.603);
+      }
+    }
+  }
+  input {
+    outline: none;
+    border: none;
+    min-width: 156px;
+    flex-grow: 1;
+    text-overflow: ellipsis;
+    margin: 4px 4px;
+  }
+}
+
+.select-multiple {
+  width: auto;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  right: 0;
+  left: 0;
+  top: 102%;
+  background-color: white;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  padding: 8px 0;
+  border-radius: 3px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 10;
+  span {
+    padding: 8px 16px;
+    cursor: pointer;
+    margin: 0px 6px;
+    color: rgb(15, 24, 36);
+  }
+  span:hover {
+    background: #c9e1f6;
+    transition-duration: 200ms;
+    border-radius: 4px;
+    color: #0088ff;
+  }
+}

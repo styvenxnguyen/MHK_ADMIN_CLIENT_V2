@@ -41,6 +41,7 @@ import { TagService } from '~/services/tag.service'
 import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 import Swal from 'sweetalert2'
 import moment from 'moment'
+import InputTagMui from '~/components/InputTags/InputTagMui'
 
 const dataDebtSupplier = [
   {
@@ -103,6 +104,20 @@ const OrdersCreate = () => {
   const [productList, setProductList] = useState<OrderProduct[]>([])
   const [canEdit, setCanEdit] = useState(true)
   const [activeButton, setActiveButton] = useState<number>(1)
+
+  const [test, setTest] = useState<string[]>()
+
+  const options = [
+    { value: 'Opt1', label: '1' },
+    { value: 'Opt2', label: '2' },
+    { value: 'Opt3', label: '3' }
+  ]
+
+  const handleListTags = (value: string[]) => {
+    setTest(value)
+  }
+
+  console.log(test)
 
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
@@ -780,8 +795,9 @@ const OrdersCreate = () => {
                     onChange={(e: any) => setNote(e.target.value)}
                   />
                   <p className='font-weight-bold mt-2'>Tags</p>
+                  <InputTagMui list={optionsTag} onChange={handleListTags} />
 
-                  <Select
+                  {/* <Select
                     options={optionsTag}
                     isMulti
                     placeholder='Chọn tags'
@@ -790,7 +806,7 @@ const OrdersCreate = () => {
                     defaultValue={selectedTags}
                     loadingMessage={() => 'Đang tải dữ liệu ...'}
                     onChange={(e: any) => setSelectedTags(e)}
-                  />
+                  /> */}
                 </Col>
                 <Col lg={3}>
                   {totalProduct.map((total, index) => (
