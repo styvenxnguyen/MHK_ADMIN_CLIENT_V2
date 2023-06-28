@@ -357,7 +357,7 @@ const OrdersCreate = () => {
       const res = await ProductService.getListProduct()
       const result = res.data.data
       const options = result.map((product: Product) => ({
-        label: product.product_name,
+        label: `${product.product_SKU} - ${product.product_name}`,
         value: product.id
       }))
       setOptionsProduct(options)
