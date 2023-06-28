@@ -41,6 +41,9 @@ import { TagService } from '~/services/tag.service'
 import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 import Swal from 'sweetalert2'
 import moment from 'moment'
+import InputTagMui from '~/components/InputTags/InputTagMui'
+import { PricePolicy } from '~/types/PricePolicy.type'
+import { PricePolicyService } from '~/services/pricepolicy.service'
 
 const dataDebtSupplier = [
   {
@@ -103,6 +106,12 @@ const OrdersCreate = () => {
   const [productList, setProductList] = useState<OrderProduct[]>([])
   const [canEdit, setCanEdit] = useState(true)
   const [activeButton, setActiveButton] = useState<number>(1)
+  const [listPrice, setListPrice] = useState<PricePolicy[]>([])
+  const [tagList, setTagList] = useState<string[]>()
+
+  const handleListTags = (value: string[]) => {
+    setTagList(value)
+  }
 
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
@@ -120,7 +129,7 @@ const OrdersCreate = () => {
     order_delivery_date: deliveryDate,
     order_note: note,
     payment_id: selectedPayment?.value,
-    tags: selectedTags.map((tag: SelectProps) => tag.value),
+    tags: tagList,
     products: productList.map((product) => ({
       p_variant_id: product.product_variant_detail_id,
       unit: product.product_unit,
@@ -178,7 +187,13 @@ const OrdersCreate = () => {
         Cell: ({ row, value }: any) =>
           canEdit ? (
             <FormControl
-              value={value}
+              // value={value}
+              value={
+                selectedProduct?.productVariants
+                  .find((e) => e.id === row.original.product_variant_detail_id)
+                  ?.productPrices.find((e) => e.price_id === listPrice.find((e) => e.isSellDefault === true)?.id)
+                  ?.price_value
+              }
               type='number'
               className='text-center no-spin'
               onChange={(e) => handleProductTable(row.index, 'product_price', e.target.value)}
@@ -489,6 +504,15 @@ const OrdersCreate = () => {
       )
   }
 
+  const getPriceList = useCallback(async () => {
+    try {
+      const res = await PricePolicyService.getListPrice()
+      setListPrice(res.data.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }, [])
+
   useEffect(() => {
     if (params.id) {
       getSellOrderDetail()
@@ -506,6 +530,7 @@ const OrdersCreate = () => {
     getListStaff()
     getListPayment()
     getListTag()
+    getPriceList()
   }, [
     getSellOrderDetail,
     getListCustomer,
@@ -515,6 +540,7 @@ const OrdersCreate = () => {
     getListStaff,
     getListPayment,
     getListTag,
+    getPriceList,
     params.id
   ])
 
@@ -780,8 +806,9 @@ const OrdersCreate = () => {
                     onChange={(e: any) => setNote(e.target.value)}
                   />
                   <p className='font-weight-bold mt-2'>Tags</p>
+                  <InputTagMui list={optionsTag} onChange={handleListTags} />
 
-                  <Select
+                  {/* <Select
                     options={optionsTag}
                     isMulti
                     placeholder='Chọn tags'
@@ -790,7 +817,7 @@ const OrdersCreate = () => {
                     defaultValue={selectedTags}
                     loadingMessage={() => 'Đang tải dữ liệu ...'}
                     onChange={(e: any) => setSelectedTags(e)}
-                  />
+                  /> */}
                 </Col>
                 <Col lg={3}>
                   {totalProduct.map((total, index) => (

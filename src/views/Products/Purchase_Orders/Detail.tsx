@@ -4,6 +4,7 @@ import { Badge, Button, Card, Col, Row } from 'react-bootstrap'
 import { Helmet } from 'react-helmet'
 import { Link, useHistory, useParams } from 'react-router-dom'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
+import InputTagMui from '~/components/InputTags/InputTagMui'
 import PageLoader from '~/components/Loader/PageLoader'
 import CustomTable from '~/components/Table/CustomTable'
 import OrderService from '~/services/order.service'
@@ -215,7 +216,7 @@ const PurchaseOrderDetail = () => {
                     {purchaseDetail?.supplier && purchaseDetail.supplier.addresses ? (
                       <p>
                         Địa chỉ :
-                        <span style={{ fontWeight: '500' }} className='ml-2' >
+                        <span style={{ fontWeight: '500' }} className='ml-2'>
                           {purchaseDetail.supplier.addresses[0].user_specific_address}
                         </span>
                       </p>
