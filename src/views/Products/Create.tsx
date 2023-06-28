@@ -17,6 +17,7 @@ import Swal from 'sweetalert2'
 import { validationSchemaProductCreate } from '~/hooks/useValidation'
 import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 import { useHistory } from 'react-router-dom'
+import InputTagMui from '~/components/InputTags/InputTagMui'
 
 interface FormValues {
   product_name: string
@@ -70,7 +71,7 @@ const options = [
 const ProductCreate = () => {
   const history = useHistory()
   const [showLoader, setShowLoader] = useState(false)
-  const [optionsTag, setOptionsTag] = useState<TypeResponse[]>([])
+  const [optionsTag, setOptionsTag] = useState([])
   const [optionsType, setOptionsType] = useState<ProductType[]>([])
   const [optionsBrand, setOptionsBrand] = useState<ProductType[]>([])
   const [optionPricePolicy, setOptionPricePolicy] = useState([])
@@ -79,7 +80,7 @@ const ProductCreate = () => {
   const [valueBrand, setValueBrand] = useState()
   const [unitWeight, setUnitWeight] = useState('g')
   const [valueType, setValueType] = useState()
-  const [valueTags, setValueTags] = useState([])
+  const [valueTags, setValueTags] = useState<string[]>([])
   const [listVariantPrice, setListVariantPrice] = useState<{ price_id: string; price_value: string }[]>([
     { price_id: '', price_value: '' }
   ])
@@ -237,6 +238,10 @@ const ProductCreate = () => {
     setListProperty(newList)
   }
 
+  const changeTags = useCallback((value: string[]) => {
+    setValueTags(value)
+  }, [])
+
   const handleChangeSelect = useCallback((e: any, option: any) => {
     switch (option.name) {
       case 'brand':
@@ -244,12 +249,6 @@ const ProductCreate = () => {
         break
       case 'type':
         setValueType(e.value)
-        break
-      case 'tags':
-        {
-          const newAr = e.map((i: any) => i.value)
-          setValueTags(newAr)
-        }
         break
     }
   }, [])
@@ -310,7 +309,13 @@ const ProductCreate = () => {
   const getListTag = useCallback(async () => {
     try {
       const res = await TagService.getListTag()
-      setOptionsTag(res.data.data)
+      const data = res.data.data
+      setOptionsTag(
+        data.map((tag: any) => ({
+          label: tag.tag_title,
+          value: tag.id
+        }))
+      )
     } catch (error) {
       console.log(error)
     }
@@ -595,7 +600,7 @@ const ProductCreate = () => {
                     <Card.Title as='h5'>Thông tin bổ sung</Card.Title>
                   </Card.Header>
                   <Card.Body>
-                    {DataAdditionalInformation.map((item, index) => (
+                    {DataAdditionalInformation.slice(0, 2).map((item, index) => (
                       <FormGroup key={index}>
                         <Form.Label>{item.title}</Form.Label>
                         <Select
@@ -608,6 +613,12 @@ const ProductCreate = () => {
                           onChange={handleChangeSelect}
                           placeholder={item.placeholder}
                         ></Select>
+                      </FormGroup>
+                    ))}
+                    {DataAdditionalInformation.slice(2, 3).map((item, index) => (
+                      <FormGroup key={index}>
+                        <Form.Label>{item.title}</Form.Label>
+                        <InputTagMui onChange={changeTags} list={optionsTag} />
                       </FormGroup>
                     ))}
                   </Card.Body>

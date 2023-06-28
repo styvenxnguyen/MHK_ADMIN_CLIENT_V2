@@ -1,5 +1,6 @@
 import React, { useState, useEffect, KeyboardEvent, ChangeEvent, useCallback, useRef } from 'react'
 import { HiXMark } from 'react-icons/hi2'
+import { TagService } from '~/services/tag.service'
 
 interface SelectProps {
   list: { label: string; value: string }[]
@@ -8,9 +9,11 @@ interface SelectProps {
 
 const InputTagMui: React.FC<SelectProps> = ({ onChange, list }) => {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([])
+  const [selectedOptionsValue, setSelectedOptionsValue] = useState<string[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isSelectVisible, setIsSelectVisible] = useState<boolean>(false)
   const [blurInput, setBlurInput] = useState<boolean>(true)
+  const [listTag, setListTag] = useState<any>([])
   const myRef = useRef<HTMLDivElement>(null)
 
   const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -26,34 +29,51 @@ const InputTagMui: React.FC<SelectProps> = ({ onChange, list }) => {
           setInputValue('')
         } else {
           const newSelectedOptions = [...selectedOptions, newOption]
+          const value = [...selectedOptionsValue, newOption]
           setSelectedOptions(newSelectedOptions)
+          setSelectedOptionsValue(value)
           setInputValue('')
         }
       }
     },
-    [inputValue, selectedOptions]
+    [inputValue, selectedOptions, selectedOptionsValue]
   )
 
   const handleRemove = useCallback(
     (option: string) => {
       const newSelectedOptions = selectedOptions.filter((selectedOption) => selectedOption !== option)
+      const value = selectedOptionsValue.filter(
+        (selectedOption) => selectedOption !== listTag.find((e: any) => e.tag_title === option).id
+      )
       setSelectedOptions(newSelectedOptions)
+      setSelectedOptionsValue(value)
     },
-    [selectedOptions]
+    [selectedOptions, listTag, selectedOptionsValue]
   )
 
   const handleSelect = useCallback(
-    (e: string) => {
+    (e: string, v: string) => {
       if (selectedOptions.find((item) => item === e)) {
         setIsSelectVisible(false)
       } else {
         const newSelectedOptions = [...selectedOptions, e]
+        const value = [...selectedOptionsValue, v]
         setSelectedOptions(newSelectedOptions)
+        setSelectedOptionsValue(value)
         setIsSelectVisible(false)
       }
     },
-    [selectedOptions]
+    [selectedOptions, selectedOptionsValue]
   )
+
+  const getListTags = useCallback(async () => {
+    try {
+      const res = await TagService.getListTag()
+      setListTag(res.data.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }, [])
 
   const handleInputFocus = () => {
     setIsSelectVisible(true)
@@ -84,10 +104,14 @@ const InputTagMui: React.FC<SelectProps> = ({ onChange, list }) => {
   }, [selectedOptions])
 
   useEffect(() => {
-    if (selectedOptions) {
-      onChange(selectedOptions)
+    if (selectedOptionsValue) {
+      onChange(selectedOptionsValue)
     }
-  }, [onChange, selectedOptions])
+  }, [onChange, selectedOptionsValue])
+
+  useEffect(() => {
+    getListTags()
+  }, [getListTags])
 
   return (
     <div className={` ${blurInput ? 'input-select-tags-blur' : 'input-select-tags'}`}>
@@ -113,7 +137,12 @@ const InputTagMui: React.FC<SelectProps> = ({ onChange, list }) => {
       {isSelectVisible && (
         <div ref={myRef} className='select-multiple'>
           {list.map((option) => (
-            <span id='selected-input' onClick={() => handleSelect(option.label)} key={option.value} aria-hidden>
+            <span
+              id='selected-input'
+              onClick={() => handleSelect(option.label, option.value)}
+              key={option.value}
+              aria-hidden
+            >
               {option.label}
             </span>
           ))}

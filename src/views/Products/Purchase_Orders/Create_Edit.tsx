@@ -28,6 +28,8 @@ import { ButtonLoading } from '~/components/Button/LoadingButton'
 import Swal from 'sweetalert2'
 import { SelectProps } from '~/types/Select.type'
 import moment from 'moment'
+import { PricePolicy } from '~/types/PricePolicy.type'
+import { PricePolicyService } from '~/services/pricepolicy.service'
 
 const CEPurchaseOrder = () => {
   const history = useHistory()
@@ -55,6 +57,7 @@ const CEPurchaseOrder = () => {
   const [canEdit, setCanEdit] = useState(true)
   const [selectedTags, setSelectedTags] = useState<SelectProps[]>([])
   const loadingMessage = () => 'Đang tải dữ liệu...'
+  const [priceList, setPriceList] = useState<PricePolicy[]>([])
 
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
@@ -63,6 +66,7 @@ const CEPurchaseOrder = () => {
     0
   )
   const totalPayment = totalAmount - totalDiscount
+  console.log(priceList)
 
   const dataPurchaseOrder = {
     supplier_id: idSelectedSupplier,
@@ -164,12 +168,25 @@ const CEPurchaseOrder = () => {
         accessor: 'product_price',
         Cell: ({ row, value }: any) =>
           canEdit ? (
-            <FormControl
-              value={value}
-              type='number'
-              className='text-center no-spin'
-              onChange={(e) => handleProductTable(row.index, 'product_price', e.target.value)}
-            />
+            <>
+              <FormControl
+                value={
+                  selectedProduct?.productVariants
+                    .find((e) => e.id === row.original.product_variant_detail_id)
+                    ?.productPrices.find((e) => e.price_id === priceList.find((e) => e.isSellDefault === true)?.id)
+                    ?.price_value
+                }
+                type='number'
+                className='text-center no-spin'
+                onChange={(e) => handleProductTable(row.index, 'product_price', e.target.value)}
+              />
+              {console.log(
+                selectedProduct?.productVariants
+                  .find((e) => e.id === row.original.product_variant_detail_id)
+                  ?.productPrices.find((e) => e.price_id === priceList.find((e) => e.isSellDefault === true)?.id)
+                  ?.price_value
+              )}
+            </>
           ) : (
             formatCurrency(value)
           )
@@ -453,6 +470,15 @@ const CEPurchaseOrder = () => {
     [selectedProduct?.productVariants, productList]
   )
 
+  const getListPrice = useCallback(async () => {
+    try {
+      const res = await PricePolicyService.getListPrice()
+      setPriceList(res.data.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }, [])
+
   useEffect(() => {
     if (params.id) {
       getPurchaseOrderDetail()
@@ -467,7 +493,17 @@ const CEPurchaseOrder = () => {
     getSupplierList()
     getProductList()
     getTagList()
-  }, [getPurchaseOrderDetail, getStaffList, getAgencyBranch, getSupplierList, getProductList, getTagList, params.id])
+    getListPrice()
+  }, [
+    getPurchaseOrderDetail,
+    getStaffList,
+    getAgencyBranch,
+    getSupplierList,
+    getProductList,
+    getTagList,
+    getListPrice,
+    params.id
+  ])
 
   useEffect(() => {
     TagService.getListTag().then((response) => {
@@ -603,7 +639,9 @@ const CEPurchaseOrder = () => {
                           <Col lg={6}>
                             <div className='font-weight-bold'>
                               <p>
-                                <Link to={`/app/suppliers/detail/${dataSupplier.id}`}>{dataSupplier.customer_name}</Link>
+                                <Link to={`/app/suppliers/detail/${dataSupplier.id}`}>
+                                  {dataSupplier.customer_name}
+                                </Link>
                               </p>
                               <p>Số điện thoại : {dataSupplier.customer_phone}</p>
 

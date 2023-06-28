@@ -42,6 +42,8 @@ import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 import Swal from 'sweetalert2'
 import moment from 'moment'
 import InputTagMui from '~/components/InputTags/InputTagMui'
+import { PricePolicy } from '~/types/PricePolicy.type'
+import { PricePolicyService } from '~/services/pricepolicy.service'
 
 const dataDebtSupplier = [
   {
@@ -104,6 +106,7 @@ const OrdersCreate = () => {
   const [productList, setProductList] = useState<OrderProduct[]>([])
   const [canEdit, setCanEdit] = useState(true)
   const [activeButton, setActiveButton] = useState<number>(1)
+  const [price, setListPrice] = useState<PricePolicy>([])
 
   const [test, setTest] = useState<string[]>()
 
@@ -504,6 +507,16 @@ const OrdersCreate = () => {
       )
   }
 
+  const getPriceList = useCallback(async() => {
+    try {
+      const res = await PricePolicyService.getListPrice()
+      console.log(res.data)
+      setListPrice(res.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }, [])
+
   useEffect(() => {
     if (params.id) {
       getSellOrderDetail()
@@ -521,6 +534,7 @@ const OrdersCreate = () => {
     getListStaff()
     getListPayment()
     getListTag()
+    getPriceList()
   }, [
     getSellOrderDetail,
     getListCustomer,
@@ -530,6 +544,7 @@ const OrdersCreate = () => {
     getListStaff,
     getListPayment,
     getListTag,
+    getPriceList,
     params.id
   ])
 
