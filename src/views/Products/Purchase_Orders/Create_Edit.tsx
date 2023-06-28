@@ -30,6 +30,7 @@ import { SelectProps } from '~/types/Select.type'
 import moment from 'moment'
 import { PricePolicy } from '~/types/PricePolicy.type'
 import { PricePolicyService } from '~/services/pricepolicy.service'
+import InputTagMui from '~/components/InputTags/InputTagMui'
 
 const CEPurchaseOrder = () => {
   const history = useHistory()
@@ -58,6 +59,7 @@ const CEPurchaseOrder = () => {
   const [selectedTags, setSelectedTags] = useState<SelectProps[]>([])
   const loadingMessage = () => 'Đang tải dữ liệu...'
   const [priceList, setPriceList] = useState<PricePolicy[]>([])
+  const [valueTags, setValueTags] = useState<string[]>([])
 
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
@@ -76,7 +78,7 @@ const CEPurchaseOrder = () => {
     staff_id: selectedStaff?.value || '',
     order_delivery_date: deliveryDate,
     order_note: note,
-    tags: selectedTags.map((tag: SelectProps) => tag.value),
+    tags: valueTags,
     products: productList.map((product) => ({
       p_variant_id: product.product_variant_detail_id,
       unit: product.product_unit,
@@ -120,6 +122,10 @@ const CEPurchaseOrder = () => {
       bold: true
     }
   ]
+
+  const changeTags = useCallback((value: string[]) => {
+    setValueTags(value)
+  }, [])
 
   const columns = React.useMemo(() => {
     const handleProductTable = (rowIndex: number, columnId: string, value: any) => {
@@ -805,7 +811,9 @@ const CEPurchaseOrder = () => {
                   />
                   <p className='font-weight-bold mt-2'>Tags</p>
 
-                  <Select
+                  <InputTagMui onChange={changeTags} list={optionsTag} />
+
+                  {/* <Select
                     options={optionsTag}
                     isMulti
                     placeholder='Chọn tags'
@@ -814,7 +822,7 @@ const CEPurchaseOrder = () => {
                     defaultValue={selectedTags}
                     loadingMessage={loadingMessage}
                     onChange={(e: any) => setSelectedTags(e)}
-                  />
+                  /> */}
                 </Col>
                 <Col lg={3}>
                   {totalProduct.map((total, index) => (

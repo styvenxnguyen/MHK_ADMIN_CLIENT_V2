@@ -106,21 +106,12 @@ const OrdersCreate = () => {
   const [productList, setProductList] = useState<OrderProduct[]>([])
   const [canEdit, setCanEdit] = useState(true)
   const [activeButton, setActiveButton] = useState<number>(1)
-  const [price, setListPrice] = useState<PricePolicy>([])
-
-  const [test, setTest] = useState<string[]>()
-
-  const options = [
-    { value: 'Opt1', label: '1' },
-    { value: 'Opt2', label: '2' },
-    { value: 'Opt3', label: '3' }
-  ]
+  const [listPrice, setListPrice] = useState<PricePolicy[]>([])
+  const [tagList, setTagList] = useState<string[]>()
 
   const handleListTags = (value: string[]) => {
-    setTest(value)
+    setTagList(value)
   }
-
-  console.log(test)
 
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
@@ -138,7 +129,7 @@ const OrdersCreate = () => {
     order_delivery_date: deliveryDate,
     order_note: note,
     payment_id: selectedPayment?.value,
-    tags: selectedTags.map((tag: SelectProps) => tag.value),
+    tags: tagList,
     products: productList.map((product) => ({
       p_variant_id: product.product_variant_detail_id,
       unit: product.product_unit,
@@ -196,7 +187,13 @@ const OrdersCreate = () => {
         Cell: ({ row, value }: any) =>
           canEdit ? (
             <FormControl
-              value={value}
+              // value={value}
+              value={
+                selectedProduct?.productVariants
+                  .find((e) => e.id === row.original.product_variant_detail_id)
+                  ?.productPrices.find((e) => e.price_id === listPrice.find((e) => e.isSellDefault === true)?.id)
+                  ?.price_value
+              }
               type='number'
               className='text-center no-spin'
               onChange={(e) => handleProductTable(row.index, 'product_price', e.target.value)}
@@ -507,11 +504,10 @@ const OrdersCreate = () => {
       )
   }
 
-  const getPriceList = useCallback(async() => {
+  const getPriceList = useCallback(async () => {
     try {
       const res = await PricePolicyService.getListPrice()
-      console.log(res.data)
-      setListPrice(res.data)
+      setListPrice(res.data.data)
     } catch (error) {
       console.log(error)
     }
