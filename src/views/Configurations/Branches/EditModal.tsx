@@ -55,6 +55,8 @@ const EditModal = ({ show, close, idBranch, data }: Props) => {
       }
     }
 
+    console.log(updatedFieldsWithApiKeys)
+
     try {
       AgencyBranchService.updateAgencyBranch(idBranch, updatedFieldsWithApiKeys)
         .then(() => {

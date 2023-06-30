@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import { ListGroup, Dropdown, Media } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import withReactContent from 'sweetalert2-react-content'
@@ -12,10 +12,19 @@ import avatar2 from '~/assets/images/user/avatar-2.jpg'
 import avatar3 from '~/assets/images/user/avatar-3.jpg'
 import avatar4 from '~/assets/images/user/avatar-4.jpg'
 import Swal from 'sweetalert2'
+import { axiosConfig } from '~/utils/configAxios'
+
+interface UserProps {
+  id?: string
+  staff_id?: string
+  user_code?: string
+  user_name?: string
+}
 
 const NavRight = () => {
   const [listOpen, setListOpen] = useState(false)
   const configContext: any = useContext(ConfigContext)
+  const [dataUser, setDataUser] = useState<UserProps>()
   const { logout } = useAuth()
 
   const { rtlLayout }: any = configContext.state
@@ -80,6 +89,17 @@ const NavRight = () => {
       click: handleSubmitLogOut
     }
   ]
+
+  useEffect(() => {
+    axiosConfig
+      .get('/auth/me')
+      .then((res) => {
+        setDataUser(res.data.data)
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }, [])
 
   return (
     <React.Fragment>
@@ -203,7 +223,7 @@ const NavRight = () => {
             <Dropdown.Menu alignRight className='profile-notification'>
               <div className='pro-head'>
                 <img src={avatar1} className='img-radius' alt='User Profile' />
-                <span>MHK</span>
+                <span>{dataUser ? dataUser.user_name : 'Unknown'}</span>
                 <Link onClick={handleSubmitLogOut} to='#' className='dud-logout' title='Logout'>
                   <i className='feather icon-log-out' />
                 </Link>

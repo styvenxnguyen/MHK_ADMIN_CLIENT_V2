@@ -69,7 +69,7 @@ function Addresses({ value }: Props) {
         Header: 'Chức năng',
         Cell: ({ row }: any) => {
           return (
-            <Button className='py-1 px-3 m-0' variant='primary' onClick={() => handleRowClick(row)}>
+            <Button size='sm' variant='primary' onClick={() => handleRowClick(row)}>
               <i className='feather icon-edit' />
               Cập nhật
             </Button>

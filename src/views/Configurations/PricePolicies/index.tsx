@@ -84,7 +84,7 @@ const PricePolicies = () => {
               </Button> */}
             </Card.Header>
             <Card.Body>
-              <CustomTable columns={columns} data={pricePoliciesList} handleRowClick={{}}></CustomTable>
+              <CustomTable columns={columns} data={pricePoliciesList}></CustomTable>
             </Card.Body>
           </Card>
         </Col>

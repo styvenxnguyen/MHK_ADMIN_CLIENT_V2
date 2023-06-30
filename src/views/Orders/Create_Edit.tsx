@@ -42,7 +42,7 @@ import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 import Swal from 'sweetalert2'
 import moment from 'moment'
 import InputTagMui from '~/components/InputTags/InputTagMui'
-import { PricePolicy, PricePolicyGetter } from '~/types/PricePolicy.type'
+import { PricePolicy } from '~/types/PricePolicy.type'
 import { PricePolicyService } from '~/services/pricepolicy.service'
 import DebtService from '~/services/debt.service'
 
