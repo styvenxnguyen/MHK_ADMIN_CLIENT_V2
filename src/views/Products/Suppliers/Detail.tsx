@@ -7,6 +7,7 @@ import Error from '~/views/Errors'
 import PageLoader from '~/components/Loader/PageLoader'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import Addresses from '~/components/AdditionalData/Addresses'
+import Debt from '~/components/AdditionalData/Debt'
 
 const SupplierDetail = () => {
   const [showTooltipEmail, setShowTooltipEmail] = useState(false)
@@ -268,10 +269,9 @@ const SupplierDetail = () => {
               </div>
             </Tab>
             <Tab eventKey='profile' title='Công nợ'>
-              <p className='text-center strong-title text-normal'>Chưa có dữ liệu về công nợ nhà cung cấp</p>
-            </Tab>
-            <Tab eventKey='contact' title='Liên hệ'>
-              <p className='text-center strong-title text-normal'>Chưa có dữ liệu về thông tin liên hệ nhà cung cấp</p>
+              <div className='px-3'>
+                <Debt id={id} value='supplier' />
+              </div>
             </Tab>
           </Tabs>
         </Col>

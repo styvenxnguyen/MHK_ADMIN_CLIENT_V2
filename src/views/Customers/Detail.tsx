@@ -9,6 +9,7 @@ import PageLoader from '~/components/Loader/PageLoader'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import Addresses from '../../components/AdditionalData/Addresses'
 import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
+import Debt from '~/components/AdditionalData/Debt'
 
 const CustomerDetail = () => {
   const [showTooltipEmail, setShowTooltipEmail] = useState(false)
@@ -431,10 +432,9 @@ const CustomerDetail = () => {
               </div>
             </Tab>
             <Tab eventKey='profile' title='Công nợ'>
-              <p className='text-center strong-title text-normal'>Chưa có dữ liệu về công nợ khách hàng</p>
-            </Tab>
-            <Tab eventKey='contact' title='Liên hệ'>
-              <p className='text-center strong-title text-normal'>Chưa có dữ liệu về thông tin liên hệ khách hàng</p>
+              <div className='px-3'>
+                <Debt id={id} value='customer' />
+              </div>
             </Tab>
           </Tabs>
         </Col>

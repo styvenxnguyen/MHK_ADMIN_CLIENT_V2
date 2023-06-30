@@ -115,7 +115,11 @@ const menuItems = {
           title: 'Ứng dụng',
           type: 'item',
           icon: 'feather icon-grid',
-          url: '/app/applications'
+          url: '/app/applications',
+          badge: {
+            title: 'Sắp ra mắt',
+            type: 'label-primary'
+          }
         },
         {
           id: 'configurations',

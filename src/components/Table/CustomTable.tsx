@@ -21,7 +21,7 @@ interface TableProps {
   columns: any
   data: any
   hiddenColumns?: any
-  handleRowClick: any
+  handleRowClick?: any
   selectedTitle?: any
   object?: any
   ButtonAdd?: any
