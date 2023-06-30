@@ -247,7 +247,7 @@ const UserDetail = () => {
         <span>
           <ButtonLoading
             onSubmit={handleSaveSubmit}
-            className='mb-0 mb-3'
+            className='mb-0 mb-3 mr-2'
             text={
               <span style={{ fontWeight: 600 }}>
                 <i className='feather icon-save mr-2'></i>
@@ -259,7 +259,7 @@ const UserDetail = () => {
             disabled={showLoader}
             variant='primary'
           ></ButtonLoading>
-          <Button className='m-0 mb-3' onClick={handleDeleteBtn} variant='outline-danger'>
+          <Button className='mb-3' onClick={handleDeleteBtn} variant='outline-danger'>
             <span style={{ fontWeight: 600 }}>
               <i className='feather icon-trash-2 mr-2'></i>
               Xoá nhân viên

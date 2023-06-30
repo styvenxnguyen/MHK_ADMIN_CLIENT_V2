@@ -2,7 +2,7 @@ import moment from 'moment'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Badge, Button, Card, Col, Row } from 'react-bootstrap'
 import { Helmet } from 'react-helmet'
-import { useHistory, useParams } from 'react-router-dom'
+import { Link, useHistory, useParams } from 'react-router-dom'
 import Select from 'react-select'
 
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
@@ -233,7 +233,7 @@ const OrdersDetail = () => {
   return (
     <div>
       <span className='flex-between'>
-        <BackPreviousPage path='/app/purchase_orders' text='Quay lại danh sách đơn hàng' />
+        <BackPreviousPage path='/app/orders' text='Quay lại danh sách đơn hàng' />
 
         <Button className='m-0 mb-3' onClick={() => history.push(`/app/orders/detail/${params.id}/edit`)}>
           <i className='feather icon-edit'></i>
@@ -250,8 +250,10 @@ const OrdersDetail = () => {
                 Thông tin khách hàng
               </h5>
               <div style={{ fontSize: '16px', marginTop: '10px' }}>
-                <span style={{ color: '#0088ff', fontWeight: '600' }}>{customer?.customer_name}</span> -{' '}
-                <span>{customer?.customer_phone}</span>
+                <Link to={`/app/customers/detail/${customer?.id}`} className='text-click mr-2'>
+                  {customer?.customer_name}
+                </Link>
+                -<span className='ml-2'>{customer?.customer_phone}</span>
               </div>
             </Card.Header>
             <Card.Body>

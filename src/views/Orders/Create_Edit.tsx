@@ -22,7 +22,7 @@ import CustomerService from '~/services/customer.service'
 
 import { Customer, CustomerList } from '~/types/Customer.type'
 import ProductService from '~/services/product.service'
-import { Product, ProductVariant } from '~/types/Product.type'
+import { Product, ProductPurchase, ProductVariant } from '~/types/Product.type'
 import CustomTable from '~/components/Table/CustomTable'
 import { OrderProduct } from '~/types/OrderProduct.type'
 import { formatCurrency } from '~/utils/common'
@@ -106,7 +106,7 @@ const OrdersCreate = () => {
   const [productList, setProductList] = useState<OrderProduct[]>([])
   const [canEdit, setCanEdit] = useState(true)
   const [activeButton, setActiveButton] = useState<number>(1)
-  const [listPrice, setListPrice] = useState<PricePolicy[]>([])
+  const [productPurchaseList, setProductPurchaseList] = useState<ProductPurchase[]>([])
   const [tagList, setTagList] = useState<string[]>()
 
   const handleListTags = (value: string[]) => {
@@ -187,13 +187,7 @@ const OrdersCreate = () => {
         Cell: ({ row, value }: any) =>
           canEdit ? (
             <FormControl
-              // value={value}
-              value={
-                selectedProduct?.productVariants
-                  .find((e) => e.id === row.original.product_variant_detail_id)
-                  ?.productPrices.find((e) => e.price_id === listPrice.find((e) => e.isSellDefault === true)?.id)
-                  ?.price_value
-              }
+              value={value}
               type='number'
               className='text-center no-spin'
               onChange={(e) => handleProductTable(row.index, 'product_price', e.target.value)}
@@ -280,7 +274,7 @@ const OrdersCreate = () => {
   const customPlaceholder = (value: string) => {
     return (
       <span className='flex-between'>
-        <span>{value === 'Customer' ? 'Tìm theo tên khách hàng' : 'Tìm theo tên sản phẩm'} </span>
+        <span>{value === 'Customer' ? 'Tìm theo tên khách hàng' : 'Tìm theo mã SKU hoặc tên sản phẩm'} </span>
         <i className='feather icon-search'></i>
       </span>
     )
@@ -361,6 +355,16 @@ const OrdersCreate = () => {
         value: product.id
       }))
       setOptionsProduct(options)
+    } catch (error) {
+      console.log(error)
+    }
+  }, [])
+
+  const getProductListPurchase = useCallback(async () => {
+    try {
+      const res = await ProductService.getListProductPurchase()
+      const result = res.data.data
+      setProductPurchaseList(result)
     } catch (error) {
       console.log(error)
     }
@@ -462,7 +466,6 @@ const OrdersCreate = () => {
   const selectedProductNew = useCallback(
     (e: any) => {
       const product = selectedProduct?.productVariants.find((item) => item.id === e.value)
-      console.log(product)
       if (product) {
         setProductList([
           ...productList,
@@ -504,15 +507,6 @@ const OrdersCreate = () => {
       )
   }
 
-  const getPriceList = useCallback(async () => {
-    try {
-      const res = await PricePolicyService.getListPrice()
-      setListPrice(res.data.data)
-    } catch (error) {
-      console.log(error)
-    }
-  }, [])
-
   useEffect(() => {
     if (params.id) {
       getSellOrderDetail()
@@ -530,7 +524,7 @@ const OrdersCreate = () => {
     getListStaff()
     getListPayment()
     getListTag()
-    getPriceList()
+    getProductListPurchase()
   }, [
     getSellOrderDetail,
     getListCustomer,
@@ -540,7 +534,7 @@ const OrdersCreate = () => {
     getListStaff,
     getListPayment,
     getListTag,
-    getPriceList,
+    getProductListPurchase,
     params.id
   ])
 

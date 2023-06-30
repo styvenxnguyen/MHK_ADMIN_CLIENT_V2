@@ -176,22 +176,11 @@ const CEPurchaseOrder = () => {
           canEdit ? (
             <>
               <FormControl
-                value={
-                  selectedProduct?.productVariants
-                    .find((e) => e.id === row.original.product_variant_detail_id)
-                    ?.productPrices.find((e) => e.price_id === priceList.find((e) => e.isSellDefault === true)?.id)
-                    ?.price_value
-                }
+                value={value}
                 type='number'
                 className='text-center no-spin'
                 onChange={(e) => handleProductTable(row.index, 'product_price', e.target.value)}
               />
-              {console.log(
-                selectedProduct?.productVariants
-                  .find((e) => e.id === row.original.product_variant_detail_id)
-                  ?.productPrices.find((e) => e.price_id === priceList.find((e) => e.isSellDefault === true)?.id)
-                  ?.price_value
-              )}
             </>
           ) : (
             formatCurrency(value)
@@ -257,7 +246,9 @@ const CEPurchaseOrder = () => {
   const customPlaceholder = (value: string) => {
     return (
       <span className='flex-between'>
-        <span>{value === 'Supplier' ? 'Tìm theo tên, SĐT, mã nhà cung cấp...(F4)' : 'Tìm theo tên sản phẩm'} </span>
+        <span>
+          {value === 'Supplier' ? 'Tìm theo tên, SĐT, mã nhà cung cấp...(F4)' : 'Tìm theo mã SKU hoặc tên sản phẩm'}{' '}
+        </span>
         <i className='feather icon-search'></i>
       </span>
     )
@@ -601,14 +592,16 @@ const CEPurchaseOrder = () => {
                       </p>
                       <p>Số điện thoại : {purchaseDetail?.supplier && purchaseDetail.supplier.phone}</p>
 
-                      {purchaseDetail?.supplier && purchaseDetail.supplier.addresses
-                        ? purchaseDetail.supplier.addresses.map((address: any, index: any) => (
-                            <p key={`addressSupplier_${index}`}>
-                              Địa chỉ {index + 1}:{' '}
-                              <span style={{ fontWeight: '500' }}>{address.user_specific_address}</span>
-                            </p>
-                          ))
-                        : 'Chưa cập nhật địa chỉ'}
+                      {purchaseDetail?.supplier && purchaseDetail.supplier.addresses ? (
+                        <p>
+                          Địa chỉ :
+                          <span className='ml-2' style={{ fontWeight: '500' }}>
+                            {purchaseDetail.supplier.addresses[0].user_specific_address}
+                          </span>
+                        </p>
+                      ) : (
+                        'Chưa cập nhật địa chỉ'
+                      )}
                     </div>
                   </Col>
 
@@ -651,14 +644,16 @@ const CEPurchaseOrder = () => {
                               </p>
                               <p>Số điện thoại : {dataSupplier.customer_phone}</p>
 
-                              {dataSupplier.address_list.length > 0
-                                ? dataSupplier.address_list.map((address: any, index: any) => (
-                                    <p key={`addressSupplier_${index}`}>
-                                      Địa chỉ {index + 1}:{' '}
-                                      <span style={{ fontWeight: '500' }}>{address.user_specific_address}</span>
-                                    </p>
-                                  ))
-                                : 'Chưa cập nhật địa chỉ'}
+                              {dataSupplier.address_list.length > 0 ? (
+                                <p>
+                                  Địa chỉ :
+                                  <span className='ml-2' style={{ fontWeight: '500' }}>
+                                    {dataSupplier.address_list[0].user_specific_address}
+                                  </span>
+                                </p>
+                              ) : (
+                                'Chưa cập nhật địa chỉ'
+                              )}
                             </div>
                           </Col>
 

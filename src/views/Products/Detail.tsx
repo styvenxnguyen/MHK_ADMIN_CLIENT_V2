@@ -21,7 +21,7 @@ interface priceItemsProp {
 }
 
 const ProductDetails = () => {
-  const getPriceItems = localStorage.getItem('price_items')
+  const getPriceItems = localStorage.getItem('price_items123')
   const initialPriceItems = getPriceItems !== null ? JSON.parse(getPriceItems) : null
   const [priceItems, setPriceItems] = useState<any>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -101,7 +101,6 @@ const ProductDetails = () => {
     const [reorderedItem] = itemsCopy.splice(result.source.index, 1)
     itemsCopy.splice(result.destination.index, 0, reorderedItem)
 
-    console.log(itemsCopy)
     setPriceItems(itemsCopy)
   }
 
@@ -376,7 +375,7 @@ const ProductDetails = () => {
                                 <Form.Label column>{price.type}</Form.Label>
                                 <Col sm={10} lg={8}>
                                   <FormLabel className='text-normal' column>
-                                    : {price.value ? formatCurrency(parseInt(price.value)) : '0'}
+                                    : {price.value ? price.value : '0'}
                                   </FormLabel>
                                 </Col>
                               </Form.Group>

@@ -12,6 +12,20 @@ export interface ProductVariant {
   productPrices: PricePolicyGetter[]
 }
 
+export interface ProductPurchase {
+  product_variant: {
+    id: string
+    name: string
+    sku: string
+    calculator_unit: string
+    price_sell: string
+    amount: {
+      inStock: number
+      available_to_sell: number
+    }
+  }
+}
+
 export interface Product {
   id: string
   order_product_item_id?: string

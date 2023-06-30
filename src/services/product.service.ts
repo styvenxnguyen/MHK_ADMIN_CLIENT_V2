@@ -5,11 +5,13 @@ const PRODUCT = {
   CREATE_PRODUCT: '/product/create',
   GET_ALL_BRAND: '/brand/get-all',
   GET_ALL_TYPE: '/type/get-all',
+  GET_ALL_PURCHASE: '/product/import/get-all',
   GET_DETAIL: (id: string) => `/product/get-by-id/${id}`
 }
 
 const ProductService = {
   getListProduct: () => axiosConfig.get(PRODUCT.GET_ALL),
+  getListProductPurchase: () => axiosConfig.get(PRODUCT.GET_ALL_PURCHASE),
   getListProductType: () => axiosConfig.get(PRODUCT.GET_ALL_TYPE),
   getListProductBrand: () => axiosConfig.get(PRODUCT.GET_ALL_BRAND),
   createProduct: (data: any) => axiosConfig.post(PRODUCT.CREATE_PRODUCT, data),
