@@ -95,7 +95,7 @@ const Branches = () => {
         Header: 'Chức năng',
         accessor: 'advance',
         Cell: ({ row }: any) => (
-          <Button className='' variant='outline-primary' onClick={() => handleRowClick(row)}>
+          <Button size='sm' onClick={() => handleRowClick(row)}>
             <i className='feather icon-edit' />
             Sửa
           </Button>
