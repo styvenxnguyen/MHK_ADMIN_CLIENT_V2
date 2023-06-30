@@ -48,7 +48,8 @@ body.datta-dark {
     background-color: lighten($dark-layout, 3%) !important;
   }
 
-  .text-white {
+  .text-white,
+  .text-normal {
     color: lighten($dark-layout-font, 10%) !important;
   }
 
