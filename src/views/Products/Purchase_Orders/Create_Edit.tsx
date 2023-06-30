@@ -60,6 +60,7 @@ const CEPurchaseOrder = () => {
   const loadingMessage = () => 'Đang tải dữ liệu...'
   const [priceList, setPriceList] = useState<PricePolicy[]>([])
   const [valueTags, setValueTags] = useState<string[]>([])
+  const [newTags, setNewTags] = useState<any>()
 
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
@@ -68,7 +69,10 @@ const CEPurchaseOrder = () => {
     0
   )
   const totalPayment = totalAmount - totalDiscount
-  console.log(priceList)
+
+  const handleListNewTags = useCallback((value: any) => {
+    setNewTags(value)
+  }, [])
 
   const dataPurchaseOrder = {
     supplier_id: idSelectedSupplier,
@@ -396,9 +400,14 @@ const CEPurchaseOrder = () => {
     delete data.payment_id
     delete data.shipper_id
 
+    const dataTags = {
+      tags: newTags
+    }
+
     OrderService.updatePurchaseOrderDetail(params.id, data)
       .then(() => {
         setTimeout(() => {
+          TagService.createTag(dataTags)
           setIsLoadingSave(false)
           handleAlertConfirm({
             text: order_status == '' ? 'Lưu đơn hàng nhập thành công' : 'Lưu và nhập đơn hàng thành công',
@@ -806,7 +815,7 @@ const CEPurchaseOrder = () => {
                   />
                   <p className='font-weight-bold mt-2'>Tags</p>
 
-                  <InputTagMui onChange={changeTags} list={optionsTag} />
+                  <InputTagMui onChange={changeTags} list={optionsTag} onChangeNewTags={handleListNewTags} />
 
                   {/* <Select
                     options={optionsTag}

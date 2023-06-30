@@ -108,10 +108,15 @@ const OrdersCreate = () => {
   const [activeButton, setActiveButton] = useState<number>(1)
   const [productPurchaseList, setProductPurchaseList] = useState<ProductPurchase[]>([])
   const [tagList, setTagList] = useState<string[]>()
+  const [newTags, setNewTags] = useState<any>()
 
-  const handleListTags = (value: string[]) => {
+  const handleListTags = useCallback((value: string[]) => {
     setTagList(value)
-  }
+  }, [])
+
+  const handleListNewTags = useCallback((value: any) => {
+    setNewTags(value)
+  }, [])
 
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
@@ -482,14 +487,19 @@ const OrdersCreate = () => {
         ])
       }
     },
+
     [selectedProduct?.productVariants, productList]
   )
 
   const handleCreateBtn = () => {
     setIsLoadingCreate(true)
+    const data = {
+      tags: newTags
+    }
 
     OrderService.createSellOrder(dataOrder)
       .then(() => {
+        TagService.createTag(data)
         setTimeout(() => {
           setIsLoadingCreate(false)
           handleAlertConfirm({
@@ -800,7 +810,7 @@ const OrdersCreate = () => {
                     onChange={(e: any) => setNote(e.target.value)}
                   />
                   <p className='font-weight-bold mt-2'>Tags</p>
-                  <InputTagMui list={optionsTag} onChange={handleListTags} />
+                  <InputTagMui list={optionsTag} onChange={handleListTags} onChangeNewTags={handleListNewTags} />
 
                   {/* <Select
                     options={optionsTag}
