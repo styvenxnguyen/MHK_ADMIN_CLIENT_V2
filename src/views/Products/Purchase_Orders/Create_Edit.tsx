@@ -53,12 +53,12 @@ const CEPurchaseOrder = () => {
   const [deliveryDate, setDeliveryDate] = useState('')
   const [note, setNote] = useState('')
   const [canEdit, setCanEdit] = useState(true)
-  const [selectedTags, setSelectedTags] = useState<SelectProps[]>([])
   const loadingMessage = () => 'Đang tải dữ liệu...'
   const [valueTags, setValueTags] = useState<string[]>([])
   const [newTags, setNewTags] = useState<any>()
   const [productsList, setProductsList] = useState<any>([])
   const [dataDebt, setDataDebt] = useState('0')
+  const [tagsDetail, setTagsDetail] = useState<{ label: string; value: string }[]>([])
 
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
@@ -72,8 +72,6 @@ const CEPurchaseOrder = () => {
     setNewTags(value)
   }, [])
 
-  console.log(selectedTags)
-
   const dataPurchaseOrder = {
     supplier_id: idSelectedSupplier,
     agency_branch_id: selectedBranch?.value || '',
@@ -82,7 +80,6 @@ const CEPurchaseOrder = () => {
     staff_id: selectedStaff?.value || '',
     order_delivery_date: deliveryDate,
     order_note: note,
-    tags: valueTags,
     products: productList.map((product) => ({
       p_variant_id: product.product_variant_detail_id,
       unit: product.product_unit,
@@ -261,7 +258,7 @@ const CEPurchaseOrder = () => {
   const getDataDebt = useCallback((id: string) => {
     DebtService.getTotal(id).then((res) => {
       const debtValue = res.data.data.debt_amount
-      setDataDebt(formatCurrency(debtValue))
+      setDataDebt(formatCurrency(Math.abs(debtValue)))
     })
   }, [])
 
@@ -405,8 +402,7 @@ const CEPurchaseOrder = () => {
           value: data.agency_branch.id
         })
         setDeliveryDate(moment(data.order_delivery_date).utcOffset(7).format('YYYY-MM-DD'))
-
-        setSelectedTags(
+        setTagsDetail(
           data.order_tags.map((tag: any) => ({
             label: tag.Tag.tag_title,
             value: tag.Tag.id
@@ -422,7 +418,7 @@ const CEPurchaseOrder = () => {
       })
   }, [params.id, getDataDebt])
 
-  const handleSaveBtn = (order_status: string) => {
+  const handleSaveBtn = async (order_status: string) => {
     setIsLoadingSave(true)
 
     const data = { ...dataPurchaseOrder, shipper_id: undefined, payment_id: undefined, agency_branch_id: undefined }
@@ -457,29 +453,40 @@ const CEPurchaseOrder = () => {
       )
   }
 
-  const handleCreateBtn = (order_status: string) => {
+  const handleCreateBtn = async () => {
     setIsLoadingCreate(true)
 
-    OrderService.createPurchaseOrder(dataPurchaseOrder)
-      .then(() => {
-        if (order_status === 'Nhập hàng') {
-          OrderService.updatePurchaseOrderStatus(params.id, { order_status: 'Nhập hàng' })
-        }
-        setTimeout(() => {
-          setIsLoadingCreate(false)
-          handleAlertConfirm({
-            text: order_status === '' ? 'Tạo đơn hàng nhập thành công' : 'Tạo và nhập đơn hàng thành công',
-            icon: 'success',
-            handleConfirmed: () => history.replace(`/app/purchase_orders`)
-          })
-        }, 1000)
-      })
-      .catch(() =>
-        setTimeout(() => {
-          Swal.fire('', order_status === '' ? 'Tạo đơn hàng nhập thất bại' : 'Tạo và nhập đơn hàng thất bại', 'error')
-          setIsLoadingCreate(false)
-        }, 1000)
-      )
+    const data = {
+      tags: newTags
+    }
+
+    const res = await TagService.createTag(data)
+
+    if (res.data.message === 'Success' && newTags) {
+      const res = await TagService.getListTag()
+      const arr: { tag_title: string; id: string }[] = res.data.data
+      const newArr = arr.filter((item1) => newTags.some((item2: any) => item2.tag_title === item1.tag_title))
+      const arrTag = valueTags?.concat(newArr.map((e) => e.id))
+
+      const data = { ...dataPurchaseOrder, tags: arrTag }
+      OrderService.createPurchaseOrder(data)
+        .then(() => {
+          setTimeout(() => {
+            setIsLoadingCreate(false)
+            handleAlertConfirm({
+              text: 'Tạo đơn hàng nhập thành công',
+              icon: 'success',
+              handleConfirmed: () => history.replace(`/app/purchase_orders`)
+            })
+          }, 1000)
+        })
+        .catch(() =>
+          setTimeout(() => {
+            Swal.fire('', 'Tạo đơn hàng nhập thất bại', 'error')
+            setIsLoadingCreate(false)
+          }, 1000)
+        )
+    }
   }
 
   const selectedProductNew = useCallback(
@@ -570,7 +577,7 @@ const CEPurchaseOrder = () => {
                 {params.id ? 'Lưu' : 'Tạo đơn'}
               </>
             }
-            onSubmit={params.id ? () => handleSaveBtn('') : () => handleCreateBtn('')}
+            onSubmit={params.id ? () => handleSaveBtn('') : handleCreateBtn}
           />
 
           {canEdit && params.id && (
@@ -819,6 +826,7 @@ const CEPurchaseOrder = () => {
                     onChange={changeTags}
                     list={optionsTag}
                     onChangeNewTags={handleListNewTags}
+                    tagsDetail={tagsDetail}
                     position='top'
                   />
                 </Col>

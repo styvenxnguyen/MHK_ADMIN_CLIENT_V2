@@ -95,6 +95,9 @@ const ProductCreate = () => {
     setNewTags(value)
   }, [])
 
+  const changeTags = useCallback((value: string[]) => {
+    setValueTags(value)
+  }, [])
   const DataAdditionalInformation = [
     {
       id: 'type_id',
@@ -140,47 +143,54 @@ const ProductCreate = () => {
     product_variant_prices: [{ price_id: '', price_value: '' }]
   }
 
-  const handleSubmit = (values: FormValues) => {
+  const handleSubmit = async (values: FormValues) => {
     setShowLoader(true)
 
-    try {
-      const dataSubmit = {
-        product_name: values.product_name,
-        product_classify: 'Sản phẩm thường',
-        product_weight: `${values.product_weight}`,
-        product_weight_calculator_unit: unitWeight,
-        type_id: valueType,
-        brand_id: valueBrand,
-        tagIDList: valueTags,
-        properties: listProperty,
-        product_variant_prices: listVariantPrice.filter((item) => item.price_value !== '')
+    const data = {
+      tags: newTags
+    }
+
+    const res = await TagService.createTag(data)
+    if (res.data.message === 'Success' && newTags) {
+      const res = await TagService.getListTag()
+      const arr: { tag_title: string; id: string }[] = res.data.data
+      const newArr = arr.filter((item1) => newTags.some((item2: any) => item2.tag_title === item1.tag_title))
+      const arrTag = valueTags?.concat(newArr.map((e) => e.id))
+      try {
+        const dataSubmit = {
+          product_name: values.product_name,
+          product_classify: 'Sản phẩm thường',
+          product_weight: `${values.product_weight}`,
+          product_weight_calculator_unit: unitWeight,
+          type_id: valueType,
+          brand_id: valueBrand,
+          tagIDList: arrTag,
+          properties: listProperty,
+          product_variant_prices: listVariantPrice.filter((item) => item.price_value !== '')
+        }
+        ProductService.createProduct(dataSubmit)
+          .then(() => {
+            setTimeout(() => {
+              setShowLoader(false)
+              handleAlertConfirm({
+                text: 'Thêm sản phẩm mới thành công',
+                icon: 'success',
+                handleConfirmed: () => history.replace('/app/products')
+              })
+            }, 1000)
+          })
+          .catch(() => {
+            setTimeout(() => {
+              setShowLoader(false)
+              handleAlertConfirm({
+                text: 'Thêm sản phẩm mới thất bại',
+                icon: 'error'
+              })
+            }, 1000)
+          })
+      } catch (error) {
+        Swal.fire('', 'Lỗi kết nối tới máy chủ', 'error')
       }
-      const data = {
-        tags: newTags
-      }
-      ProductService.createProduct(dataSubmit)
-        .then(() => {
-          TagService.createTag(data)
-          setTimeout(() => {
-            setShowLoader(false)
-            handleAlertConfirm({
-              text: 'Thêm sản phẩm mới thành công',
-              icon: 'success',
-              handleConfirmed: () => history.replace('/app/products')
-            })
-          }, 1000)
-        })
-        .catch(() => {
-          setTimeout(() => {
-            setShowLoader(false)
-            handleAlertConfirm({
-              text: 'Thêm sản phẩm mới thất bại',
-              icon: 'error'
-            })
-          }, 1000)
-        })
-    } catch (error) {
-      Swal.fire('', 'Lỗi kết nối tới máy chủ', 'error')
     }
   }
 
@@ -240,10 +250,6 @@ const ProductCreate = () => {
     }
     setListProperty(newList)
   }
-
-  const changeTags = useCallback((value: string[]) => {
-    setValueTags(value)
-  }, [])
 
   const handleChangeSelect = useCallback((e: any, option: any) => {
     switch (option.name) {

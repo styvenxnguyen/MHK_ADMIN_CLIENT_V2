@@ -1,17 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import {
-  Row,
-  Col,
-  Card,
-  FormControl,
-  Button,
-  CloseButton,
-  FormGroup,
-  FormLabel,
-  DropdownButton,
-  Dropdown,
-  Spinner
-} from 'react-bootstrap'
+import { Row, Col, Card, FormControl, Button, CloseButton, FormGroup, FormLabel, Spinner } from 'react-bootstrap'
 import Select, { SingleValue } from 'react-select'
 import { TbPackage } from 'react-icons/tb'
 import { FiTruck } from 'react-icons/fi'
@@ -99,6 +87,8 @@ const OrdersCreate = () => {
     setNewTags(value)
   }, [])
 
+  console.log(selectedTags)
+
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
   const totalDiscount = productList.reduce(
@@ -125,26 +115,6 @@ const OrdersCreate = () => {
       value: '0'
     }
   ]
-
-  console.log(selectedTags)
-
-  const dataOrder = {
-    supplier_id: valueCustomer?.value,
-    agency_branch_id: selectedBranch?.value,
-    shipper_id: selectedShipper?.value,
-    staff_id: selectedStaff?.value,
-    order_delivery_date: deliveryDate,
-    order_note: note,
-    payment_id: selectedPayment?.value,
-    tags: tagList,
-    products: productList.map((product) => ({
-      p_variant_id: product.product_variant_detail_id,
-      unit: product.product_unit,
-      amount: product.product_amount.toString(),
-      price: product.product_price,
-      discount: product.product_discount.toString()
-    }))
-  }
 
   const columns = React.useMemo(() => {
     const handleProductTable = (rowIndex: number, columnId: string, value: any) => {
@@ -294,7 +264,7 @@ const OrdersCreate = () => {
   const getDataDebt = useCallback((id: string) => {
     DebtService.getTotal(id).then((res) => {
       const debtValue = res.data.data.debt_amount
-      setDataDebt(formatCurrency(debtValue))
+      setDataDebt(formatCurrency(Math.abs(debtValue)))
     })
   }, [])
 
@@ -441,6 +411,10 @@ const OrdersCreate = () => {
         label: data.agency_branch.name,
         value: data.agency_branch.id
       })
+      setSelectedShipper({
+        label: data.shipper.shipper_unit,
+        value: data.shipper.id
+      })
       setValueCustomer({
         label: data.supplier.name,
         value: data.supplier.user_id
@@ -525,32 +499,54 @@ const OrdersCreate = () => {
     return option.data.text.toLowerCase().includes(inputValue.toLowerCase())
   }
 
-  const handleCreateBtn = () => {
+  const handleCreateBtn = async () => {
     setIsLoadingCreate(true)
     const data = {
       tags: newTags
     }
 
-    console.log(dataOrder)
+    const res = await TagService.createTag(data)
 
-    OrderService.createSellOrder(dataOrder)
-      .then(() => {
-        TagService.createTag(data)
-        setTimeout(() => {
-          setIsLoadingCreate(false)
-          handleAlertConfirm({
-            text: 'Tạo đơn hàng thành công',
-            icon: 'success',
-            handleConfirmed: () => history.replace(`/app/orders`)
-          })
-        }, 1000)
-      })
-      .catch(() =>
-        setTimeout(() => {
-          Swal.fire('', 'Tạo đơn hàng thất bại', 'error')
-          setIsLoadingCreate(false)
-        }, 1000)
-      )
+    if (res.data.message === 'Success' && newTags) {
+      const res = await TagService.getListTag()
+      const arr: { tag_title: string; id: string }[] = res.data.data
+      const newArr = arr.filter((item1) => newTags.some((item2: any) => item2.tag_title === item1.tag_title))
+      const arrTag = tagList?.concat(newArr.map((e) => e.id))
+      const dataOrder = {
+        supplier_id: valueCustomer?.value,
+        agency_branch_id: selectedBranch?.value,
+        shipper_id: selectedShipper?.value,
+        staff_id: selectedStaff?.value,
+        order_delivery_date: deliveryDate,
+        order_note: note,
+        payment_id: selectedPayment?.value,
+        tags: arrTag,
+        products: productList.map((product) => ({
+          p_variant_id: product.product_variant_detail_id,
+          unit: product.product_unit,
+          amount: product.product_amount.toString(),
+          price: product.product_price,
+          discount: product.product_discount.toString()
+        }))
+      }
+      OrderService.createSellOrder(dataOrder)
+        .then(() => {
+          setTimeout(() => {
+            setIsLoadingCreate(false)
+            handleAlertConfirm({
+              text: 'Tạo đơn hàng thành công',
+              icon: 'success',
+              handleConfirmed: () => history.replace(`/app/orders`)
+            })
+          }, 1000)
+        })
+        .catch(() =>
+          setTimeout(() => {
+            Swal.fire('', 'Tạo đơn hàng thất bại', 'error')
+            setIsLoadingCreate(false)
+          }, 1000)
+        )
+    }
   }
 
   useEffect(() => {
@@ -605,27 +601,20 @@ const OrdersCreate = () => {
           text={params.id ? 'Quay lại chi tiết đơn hàng' : 'Quay lại danh sách đơn hàng'}
           path={params.id ? `/app/orders/detail/${params.id}` : '/app/orders/'}
         />
-        <DropdownButton
-          disabled={isLoadingCreate}
-          id='create-order-dropdown'
-          className={isLoadingCreate || params.id ? 'hide-arrow' : ''}
-          title={
-            isLoadingCreate ? (
-              <span>
-                <Spinner size='sm' className='mr-2' animation='border' />
-                <span className={isLoadingCreate ? '' : 'mr-2'}>Đang tạo đơn...</span>
-              </span>
-            ) : (
-              <span>
-                <i className={params.id ? 'feather icon-save mr-2' : 'feather icon-plus-circle mr-2'} />
-                <span className={params.id ? '' : 'mr-2'}>{params.id ? 'Lưu đơn hàng' : 'Tạo đơn hàng'}</span>
-              </span>
-            )
-          }
-        >
-          <Dropdown.Item onClick={handleCreateBtn}>Tạo đơn</Dropdown.Item>
-          {/* <Dropdown.Item>Tạo đơn và duyệt</Dropdown.Item> */}
-        </DropdownButton>
+
+        <Button className='m-0 mb-3' disabled={isLoadingCreate} onClick={handleCreateBtn}>
+          {isLoadingCreate ? (
+            <span>
+              <Spinner size='sm' className='mr-2' animation='border' />
+              <span className={isLoadingCreate ? '' : 'mr-2'}>Đang tạo đơn...</span>
+            </span>
+          ) : (
+            <span>
+              <i className={params.id ? 'feather icon-save mr-2' : 'feather icon-plus-circle mr-2'} />
+              <span className={params.id ? '' : 'mr-2'}>{params.id ? 'Lưu đơn hàng' : 'Tạo đơn hàng'}</span>
+            </span>
+          )}
+        </Button>
       </div>
 
       <Row className='text-normal'>
@@ -881,7 +870,7 @@ const OrdersCreate = () => {
             <Card.Header>
               <h5>
                 <SlSocialDropbox className='mr-2' />
-                Đóng gói và giao hàng1
+                Đóng gói và giao hàng
               </h5>
               <div className='d-flex pt-4'>
                 {listButton.map((button, index) => (

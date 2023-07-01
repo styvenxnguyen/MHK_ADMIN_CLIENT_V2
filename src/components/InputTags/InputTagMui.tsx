@@ -5,11 +5,12 @@ import { TagService } from '~/services/tag.service'
 interface SelectProps {
   list: { label: string; value: string }[]
   onChange: (value: string[]) => void
+  tagsDetail?: { label: string; value: string }[]
   onChangeNewTags: (value: { tag_title: string; tag_description: string }[]) => void
   position: string
 }
 
-const InputTagMui: React.FC<SelectProps> = ({ onChange, list, onChangeNewTags, position }) => {
+const InputTagMui: React.FC<SelectProps> = ({ onChange, list, onChangeNewTags, position, tagsDetail }) => {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([])
   const [selectedOptionsValue, setSelectedOptionsValue] = useState<string[]>([])
   const [inputValue, setInputValue] = useState('')
@@ -33,16 +34,16 @@ const InputTagMui: React.FC<SelectProps> = ({ onChange, list, onChangeNewTags, p
           setInputValue('')
         } else {
           const newSelectedOptions = [...selectedOptions, newOption]
-          const value = [...selectedOptionsValue, newOption]
+          // const value = [...selectedOptionsValue, newOption]
           const tags = [...newTags, newOption]
           setNewTags(tags)
           setSelectedOptions(newSelectedOptions)
-          setSelectedOptionsValue(value)
+          // setSelectedOptionsValue(value)
           setInputValue('')
         }
       }
     },
-    [inputValue, selectedOptions, selectedOptionsValue, newTags]
+    [inputValue, selectedOptions, newTags]
   )
 
   const handleRemove = useCallback(
@@ -137,6 +138,13 @@ const InputTagMui: React.FC<SelectProps> = ({ onChange, list, onChangeNewTags, p
     getListTags()
   }, [getListTags])
 
+  useEffect(() => {
+    if (tagsDetail) {
+      setSelectedOptions(tagsDetail.map((e) => e.label))
+      setSelectedOptionsValue(tagsDetail.map((e) => e.value))
+    }
+  }, [tagsDetail])
+  
   return (
     <div className={` ${blurInput ? 'input-select-tags-blur' : 'input-select-tags'}`}>
       <div>
