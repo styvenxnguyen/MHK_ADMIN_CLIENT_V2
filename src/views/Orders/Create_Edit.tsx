@@ -22,7 +22,7 @@ import CustomerService from '~/services/customer.service'
 
 import { Customer, CustomerList } from '~/types/Customer.type'
 import ProductService from '~/services/product.service'
-import { ProductPurchase, ProductV2 } from '~/types/Product.type'
+import { ProductPurchase, ProductSell } from '~/types/Product.type'
 import CustomTable from '~/components/Table/CustomTable'
 import { OrderProduct } from '~/types/OrderProduct.type'
 import { formatCurrency } from '~/utils/common'
@@ -86,12 +86,11 @@ const OrdersCreate = () => {
   const [productList, setProductList] = useState<OrderProduct[]>([])
   const [canEdit, setCanEdit] = useState(true)
   const [activeButton, setActiveButton] = useState<number>(1)
-  const [productPurchaseList, setProductPurchaseList] = useState<ProductPurchase[]>([])
   const [dataDebt, setDataDebt] = useState('0')
   const [tagList, setTagList] = useState<string[]>()
   const [newTags, setNewTags] = useState<any>()
   const [priceList, setPriceList] = useState<PricePolicy[]>([])
-  const [productsList, setProductsList] = useState<ProductV2[]>([])
+  const [productsList, setProductsList] = useState<ProductSell[]>([])
   const [priceValueID, setPriceValueID] = useState()
   const handleListTags = useCallback((value: string[]) => {
     setTagList(value)
@@ -140,9 +139,9 @@ const OrdersCreate = () => {
     products: productList.map((product) => ({
       p_variant_id: product.product_variant_detail_id,
       unit: product.product_unit,
-      amount: product.product_amount,
+      amount: product.product_amount.toString(),
       price: product.product_price,
-      discount: product.product_discount
+      discount: product.product_discount.toString()
     }))
   }
 
@@ -283,7 +282,9 @@ const OrdersCreate = () => {
   const customPlaceholder = (value: string) => {
     return (
       <span className='flex-between'>
-        <span>{value === 'Customer' ? 'Tìm theo tên khách hàng' : 'Tìm theo mã SKU hoặc tên sản phẩm'} </span>
+        <span>
+          {value === 'Customer' ? 'Tìm theo tên hoặc số điện thoại khách hàng' : 'Tìm theo mã SKU hoặc tên sản phẩm'}{' '}
+        </span>
         <i className='feather icon-search'></i>
       </span>
     )
@@ -378,7 +379,7 @@ const OrdersCreate = () => {
         const res = await ProductService.getListProductSell(priceValueID)
         const result = res.data.data
         setProductsList(result)
-        const options = result.map((product: ProductV2) => ({
+        const options = result.map((product: ProductSell) => ({
           label: (
             <div
               style={{
@@ -390,7 +391,7 @@ const OrdersCreate = () => {
               <span>{`${product.product.sku} - ${product.product.name}`}</span>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ textAlign: 'end' }}>
-                  Giá nhập: <span style={{ color: 'black' }}>{formatCurrency(product.price.price_value)}</span>
+                  Giá nhập: <span>{formatCurrency(product.price.price_value)}</span>
                 </span>
                 <div>
                   <span>
@@ -420,15 +421,7 @@ const OrdersCreate = () => {
     }
   }, [priceValueID])
 
-  const getProductListPurchase = useCallback(async () => {
-    try {
-      const res = await ProductService.getListProductPurchase()
-      const result = res.data.data
-      setProductPurchaseList(result)
-    } catch (error) {
-      console.log(error)
-    }
-  }, [])
+  console.log(productList)
 
   const getSellOrderDetail = useCallback(async () => {
     try {
@@ -520,7 +513,7 @@ const OrdersCreate = () => {
             product_price: product?.price.price_value,
             product_unit: 'Cái',
             product_variant_detail_SKU: product?.product.sku,
-            product_variant_detail_id: product?.id,
+            product_variant_detail_id: product?.product.product_variant_id,
             product_variant_detail_name: product.product.name
           }
         ])
@@ -539,6 +532,8 @@ const OrdersCreate = () => {
     const data = {
       tags: newTags
     }
+
+    console.log(dataOrder)
 
     OrderService.createSellOrder(dataOrder)
       .then(() => {
@@ -577,7 +572,6 @@ const OrdersCreate = () => {
     getListStaff()
     getListPayment()
     getListTag()
-    getProductListPurchase()
     getListPrice()
   }, [
     getSellOrderDetail,
@@ -589,7 +583,6 @@ const OrdersCreate = () => {
     getListPayment,
     getListTag,
     getListPrice,
-    getProductListPurchase,
     params.id
   ])
 

@@ -249,7 +249,7 @@ const CEPurchaseOrder = () => {
     return (
       <span className='flex-between'>
         <span>
-          {value === 'Supplier' ? 'Tìm theo tên, SĐT, mã nhà cung cấp...(F4)' : 'Tìm theo mã SKU hoặc tên sản phẩm'}{' '}
+          {value === 'Supplier' ? 'Tìm theo tên hoặc số điện thoại nhà cung cấp' : 'Tìm theo mã SKU hoặc tên sản phẩm'}{' '}
         </span>
         <i className='feather icon-search'></i>
       </span>
@@ -320,8 +320,7 @@ const CEPurchaseOrder = () => {
             <span>{`${product.product_variant.sku} - ${product.product_variant.name}`}</span>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <span style={{ textAlign: 'end' }}>
-                Giá nhập:{' '}
-                <span style={{ color: 'black' }}>{formatCurrency(parseInt(product.product_variant.price_sell))}</span>
+                Giá nhập: <span>{formatCurrency(parseInt(product.product_variant.price_sell))}</span>
               </span>
               <div>
                 <span>
@@ -707,7 +706,7 @@ const CEPurchaseOrder = () => {
                               {dataDebtSupplier.map((debtSupplier, index) => (
                                 <span key={`debtSupplier_${index}`} className='flex-between m-2'>
                                   <span>{debtSupplier.data}</span>
-                                  <span className='text-c-blue font-weight-bold'>{debtSupplier.value}</span>
+                                  <span className='text-c-red font-weight-bold'>{debtSupplier.value}</span>
                                 </span>
                               ))}
                             </div>
@@ -847,17 +846,6 @@ const CEPurchaseOrder = () => {
                     onChangeNewTags={handleListNewTags}
                     position='top'
                   />
-
-                  {/* <Select
-                    options={optionsTag}
-                    isMulti
-                    placeholder='Chọn tags'
-                    noOptionsMessage={() => 'Đã chọn hết tags'}
-                    menuPlacement='top'
-                    defaultValue={selectedTags}
-                    loadingMessage={loadingMessage}
-                    onChange={(e: any) => setSelectedTags(e)}
-                  /> */}
                 </Col>
                 <Col lg={3}>
                   {totalProduct.map((total, index) => (

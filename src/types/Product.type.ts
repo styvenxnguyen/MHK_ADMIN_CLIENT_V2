@@ -64,7 +64,7 @@ export interface Product {
   }
 }
 
-export interface ProductV2 {
+export interface ProductSell {
   id: string
   available_quantity: number
   available_to_sell_quantity: number
