@@ -70,5 +70,5 @@ export interface ProductV2 {
   available_to_sell_quantity: number
   product_discount: number
   product: { product_variant_id: string; name: string; sku: string }
-  price: { id: string; price_value: string }
+  price: { id: string; price_value: number }
 }

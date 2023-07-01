@@ -55,7 +55,6 @@ const CEPurchaseOrder = () => {
   const [canEdit, setCanEdit] = useState(true)
   const [selectedTags, setSelectedTags] = useState<SelectProps[]>([])
   const loadingMessage = () => 'Đang tải dữ liệu...'
-  // const [priceList, setPriceList] = useState<PricePolicy[]>([])
   const [valueTags, setValueTags] = useState<string[]>([])
   const [newTags, setNewTags] = useState<any>()
   const [productsList, setProductsList] = useState<any>([])
@@ -146,7 +145,7 @@ const CEPurchaseOrder = () => {
     return [
       {
         Header: 'STT',
-        Cell: ({ row }: any) => productList.length - row.index
+        Cell: ({ row }: any) => row.index + 1
       },
       {
         Header: 'Mã SKU',
@@ -306,7 +305,7 @@ const CEPurchaseOrder = () => {
 
   const getProductList = useCallback(async () => {
     try {
-      const res = await ProductService.getListProductV2()
+      const res = await ProductService.getListProductPurchase()
       const result = res.data.data
       setProductsList(result.map((e: ProductPurchase) => e.product_variant))
       const options = result.map((product: ProductPurchase) => ({
@@ -436,7 +435,7 @@ const CEPurchaseOrder = () => {
       .catch(() => {
         setIsLoading(false)
       })
-  }, [params.id])
+  }, [params.id, getDataDebt])
 
   const handleSaveBtn = (order_status: string) => {
     setIsLoadingSave(true)
@@ -809,17 +808,6 @@ const CEPurchaseOrder = () => {
                   filterOption={filterOption}
                 />
               )}
-
-              {/* {selectedProduct && (
-                <Select
-                  className='mt-4'
-                  options={optionsProductVariant}
-                  onChange={(e: any) => {
-                   
-                  }}
-                  placeholder='Chọn phiên bản sản phẩm'
-                />
-              )} */}
             </Card.Header>
             <Card.Body>
               {productList.length === 0 ? (
