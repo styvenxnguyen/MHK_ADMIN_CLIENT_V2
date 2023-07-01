@@ -33,16 +33,16 @@ const InputTagMui: React.FC<SelectProps> = ({ onChange, list, onChangeNewTags, p
           setInputValue('')
         } else {
           const newSelectedOptions = [...selectedOptions, newOption]
-          const value = [...selectedOptionsValue, newOption]
+          // const value = [...selectedOptionsValue, newOption]
           const tags = [...newTags, newOption]
           setNewTags(tags)
           setSelectedOptions(newSelectedOptions)
-          setSelectedOptionsValue(value)
+          // setSelectedOptionsValue(value)
           setInputValue('')
         }
       }
     },
-    [inputValue, selectedOptions, selectedOptionsValue, newTags]
+    [inputValue, selectedOptions, newTags]
   )
 
   const handleRemove = useCallback(

@@ -82,7 +82,6 @@ const CEPurchaseOrder = () => {
     staff_id: selectedStaff?.value || '',
     order_delivery_date: deliveryDate,
     order_note: note,
-    tags: valueTags,
     products: productList.map((product) => ({
       p_variant_id: product.product_variant_detail_id,
       unit: product.product_unit,
@@ -457,29 +456,43 @@ const CEPurchaseOrder = () => {
       )
   }
 
-  const handleCreateBtn = (order_status: string) => {
+  const handleCreateBtn = async (order_status: string) => {
     setIsLoadingCreate(true)
 
-    OrderService.createPurchaseOrder(dataPurchaseOrder)
-      .then(() => {
-        if (order_status === 'Nhập hàng') {
-          OrderService.updatePurchaseOrderStatus(params.id, { order_status: 'Nhập hàng' })
-        }
-        setTimeout(() => {
-          setIsLoadingCreate(false)
-          handleAlertConfirm({
-            text: order_status === '' ? 'Tạo đơn hàng nhập thành công' : 'Tạo và nhập đơn hàng thành công',
-            icon: 'success',
-            handleConfirmed: () => history.replace(`/app/purchase_orders`)
-          })
-        }, 1000)
-      })
-      .catch(() =>
-        setTimeout(() => {
-          Swal.fire('', order_status === '' ? 'Tạo đơn hàng nhập thất bại' : 'Tạo và nhập đơn hàng thất bại', 'error')
-          setIsLoadingCreate(false)
-        }, 1000)
-      )
+    const data = {
+      tags: newTags
+    }
+
+    const res = await TagService.createTag(data)
+
+    if (res.data.message === 'Success' && newTags) {
+      const res = await TagService.getListTag()
+      const arr: { tag_title: string; id: string }[] = res.data.data
+      const newArr = arr.filter((item1) => newTags.some((item2: any) => item2.tag_title === item1.tag_title))
+      const arrTag = valueTags?.concat(newArr.map((e) => e.id))
+
+      const data = { ...dataPurchaseOrder, tags: arrTag }
+      OrderService.createPurchaseOrder(data)
+        .then(() => {
+          if (order_status === 'Nhập hàng') {
+            OrderService.updatePurchaseOrderStatus(params.id, { order_status: 'Nhập hàng' })
+          }
+          setTimeout(() => {
+            setIsLoadingCreate(false)
+            handleAlertConfirm({
+              text: order_status === '' ? 'Tạo đơn hàng nhập thành công' : 'Tạo và nhập đơn hàng thành công',
+              icon: 'success',
+              handleConfirmed: () => history.replace(`/app/purchase_orders`)
+            })
+          }, 1000)
+        })
+        .catch(() =>
+          setTimeout(() => {
+            Swal.fire('', order_status === '' ? 'Tạo đơn hàng nhập thất bại' : 'Tạo và nhập đơn hàng thất bại', 'error')
+            setIsLoadingCreate(false)
+          }, 1000)
+        )
+    }
   }
 
   const selectedProductNew = useCallback(

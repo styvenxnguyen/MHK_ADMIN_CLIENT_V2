@@ -128,24 +128,6 @@ const OrdersCreate = () => {
 
   console.log(selectedTags)
 
-  const dataOrder = {
-    supplier_id: valueCustomer?.value,
-    agency_branch_id: selectedBranch?.value,
-    shipper_id: selectedShipper?.value,
-    staff_id: selectedStaff?.value,
-    order_delivery_date: deliveryDate,
-    order_note: note,
-    payment_id: selectedPayment?.value,
-    tags: tagList,
-    products: productList.map((product) => ({
-      p_variant_id: product.product_variant_detail_id,
-      unit: product.product_unit,
-      amount: product.product_amount.toString(),
-      price: product.product_price,
-      discount: product.product_discount.toString()
-    }))
-  }
-
   const columns = React.useMemo(() => {
     const handleProductTable = (rowIndex: number, columnId: string, value: any) => {
       const updatedData: any = [...productList]
@@ -525,32 +507,54 @@ const OrdersCreate = () => {
     return option.data.text.toLowerCase().includes(inputValue.toLowerCase())
   }
 
-  const handleCreateBtn = () => {
+  const handleCreateBtn = async () => {
     setIsLoadingCreate(true)
     const data = {
       tags: newTags
     }
 
-    console.log(dataOrder)
+    const res = await TagService.createTag(data)
 
-    OrderService.createSellOrder(dataOrder)
-      .then(() => {
-        TagService.createTag(data)
-        setTimeout(() => {
-          setIsLoadingCreate(false)
-          handleAlertConfirm({
-            text: 'Tạo đơn hàng thành công',
-            icon: 'success',
-            handleConfirmed: () => history.replace(`/app/orders`)
-          })
-        }, 1000)
-      })
-      .catch(() =>
-        setTimeout(() => {
-          Swal.fire('', 'Tạo đơn hàng thất bại', 'error')
-          setIsLoadingCreate(false)
-        }, 1000)
-      )
+    if (res.data.message === 'Success' && newTags) {
+      const res = await TagService.getListTag()
+      const arr: { tag_title: string; id: string }[] = res.data.data
+      const newArr = arr.filter((item1) => newTags.some((item2: any) => item2.tag_title === item1.tag_title))
+      const arrTag = tagList?.concat(newArr.map((e) => e.id))
+      const dataOrder = {
+        supplier_id: valueCustomer?.value,
+        agency_branch_id: selectedBranch?.value,
+        shipper_id: selectedShipper?.value,
+        staff_id: selectedStaff?.value,
+        order_delivery_date: deliveryDate,
+        order_note: note,
+        payment_id: selectedPayment?.value,
+        tags: arrTag,
+        products: productList.map((product) => ({
+          p_variant_id: product.product_variant_detail_id,
+          unit: product.product_unit,
+          amount: product.product_amount.toString(),
+          price: product.product_price,
+          discount: product.product_discount.toString()
+        }))
+      }
+      OrderService.createSellOrder(dataOrder)
+        .then(() => {
+          setTimeout(() => {
+            setIsLoadingCreate(false)
+            handleAlertConfirm({
+              text: 'Tạo đơn hàng thành công',
+              icon: 'success',
+              handleConfirmed: () => history.replace(`/app/orders`)
+            })
+          }, 1000)
+        })
+        .catch(() =>
+          setTimeout(() => {
+            Swal.fire('', 'Tạo đơn hàng thất bại', 'error')
+            setIsLoadingCreate(false)
+          }, 1000)
+        )
+    }
   }
 
   useEffect(() => {
@@ -881,7 +885,7 @@ const OrdersCreate = () => {
             <Card.Header>
               <h5>
                 <SlSocialDropbox className='mr-2' />
-                Đóng gói và giao hàng1
+                Đóng gói và giao hàng
               </h5>
               <div className='d-flex pt-4'>
                 {listButton.map((button, index) => (
