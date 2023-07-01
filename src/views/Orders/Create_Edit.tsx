@@ -1,17 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import {
-  Row,
-  Col,
-  Card,
-  FormControl,
-  Button,
-  CloseButton,
-  FormGroup,
-  FormLabel,
-  DropdownButton,
-  Dropdown,
-  Spinner
-} from 'react-bootstrap'
+import { Row, Col, Card, FormControl, Button, CloseButton, FormGroup, FormLabel, Spinner } from 'react-bootstrap'
 import Select, { SingleValue } from 'react-select'
 import { TbPackage } from 'react-icons/tb'
 import { FiTruck } from 'react-icons/fi'
@@ -276,7 +264,7 @@ const OrdersCreate = () => {
   const getDataDebt = useCallback((id: string) => {
     DebtService.getTotal(id).then((res) => {
       const debtValue = res.data.data.debt_amount
-      setDataDebt(formatCurrency(debtValue))
+      setDataDebt(formatCurrency(Math.abs(debtValue)))
     })
   }, [])
 
@@ -422,6 +410,10 @@ const OrdersCreate = () => {
       setSelectedBranch({
         label: data.agency_branch.name,
         value: data.agency_branch.id
+      })
+      setSelectedShipper({
+        label: data.shipper.shipper_unit,
+        value: data.shipper.id
       })
       setValueCustomer({
         label: data.supplier.name,
@@ -609,27 +601,20 @@ const OrdersCreate = () => {
           text={params.id ? 'Quay lại chi tiết đơn hàng' : 'Quay lại danh sách đơn hàng'}
           path={params.id ? `/app/orders/detail/${params.id}` : '/app/orders/'}
         />
-        <DropdownButton
-          disabled={isLoadingCreate}
-          id='create-order-dropdown'
-          className={isLoadingCreate || params.id ? 'hide-arrow' : ''}
-          title={
-            isLoadingCreate ? (
-              <span>
-                <Spinner size='sm' className='mr-2' animation='border' />
-                <span className={isLoadingCreate ? '' : 'mr-2'}>Đang tạo đơn...</span>
-              </span>
-            ) : (
-              <span>
-                <i className={params.id ? 'feather icon-save mr-2' : 'feather icon-plus-circle mr-2'} />
-                <span className={params.id ? '' : 'mr-2'}>{params.id ? 'Lưu đơn hàng' : 'Tạo đơn hàng'}</span>
-              </span>
-            )
-          }
-        >
-          <Dropdown.Item onClick={handleCreateBtn}>Tạo đơn</Dropdown.Item>
-          {/* <Dropdown.Item>Tạo đơn và duyệt</Dropdown.Item> */}
-        </DropdownButton>
+
+        <Button className='m-0 mb-3' disabled={isLoadingCreate} onClick={handleCreateBtn}>
+          {isLoadingCreate ? (
+            <span>
+              <Spinner size='sm' className='mr-2' animation='border' />
+              <span className={isLoadingCreate ? '' : 'mr-2'}>Đang tạo đơn...</span>
+            </span>
+          ) : (
+            <span>
+              <i className={params.id ? 'feather icon-save mr-2' : 'feather icon-plus-circle mr-2'} />
+              <span className={params.id ? '' : 'mr-2'}>{params.id ? 'Lưu đơn hàng' : 'Tạo đơn hàng'}</span>
+            </span>
+          )}
+        </Button>
       </div>
 
       <Row className='text-normal'>

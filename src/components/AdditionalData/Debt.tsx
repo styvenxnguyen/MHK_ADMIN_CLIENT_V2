@@ -39,12 +39,12 @@ const Debt = ({ id, value }: DebtProps) => {
       {
         Header: 'Giá trị thay đổi',
         accessor: 'change_debt',
-        Cell: ({ value }: any) => formatCurrency(value)
+        Cell: ({ value }: any) => formatCurrency(value * -1)
       },
       {
         Header: 'Tổng công nợ',
         accessor: 'debt_amount',
-        Cell: ({ value }: any) => formatCurrency(value)
+        Cell: ({ value }: any) => formatCurrency(Math.abs(value))
       }
     ],
     []

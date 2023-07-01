@@ -8,7 +8,7 @@ interface CustomModalProps {
   body: any
   disabled: boolean
   handleSubmit: any
-  textSubmit: string
+  textSubmit: any
   deleteBtn?: boolean
   handleDelete?: any
   textDelete?: any

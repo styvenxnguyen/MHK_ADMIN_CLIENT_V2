@@ -260,7 +260,7 @@ const CEPurchaseOrder = () => {
   const getDataDebt = useCallback((id: string) => {
     DebtService.getTotal(id).then((res) => {
       const debtValue = res.data.data.debt_amount
-      setDataDebt(formatCurrency(debtValue))
+      setDataDebt(formatCurrency(Math.abs(debtValue)))
     })
   }, [])
 
@@ -433,6 +433,7 @@ const CEPurchaseOrder = () => {
       tags: newTags
     }
 
+
     OrderService.updatePurchaseOrderDetail(params.id, data)
       .then(() => {
         setTimeout(() => {
@@ -456,7 +457,7 @@ const CEPurchaseOrder = () => {
       )
   }
 
-  const handleCreateBtn = async (order_status: string) => {
+  const handleCreateBtn = async () => {
     setIsLoadingCreate(true)
 
     const data = {
@@ -474,13 +475,10 @@ const CEPurchaseOrder = () => {
       const data = { ...dataPurchaseOrder, tags: arrTag }
       OrderService.createPurchaseOrder(data)
         .then(() => {
-          if (order_status === 'Nhập hàng') {
-            OrderService.updatePurchaseOrderStatus(params.id, { order_status: 'Nhập hàng' })
-          }
           setTimeout(() => {
             setIsLoadingCreate(false)
             handleAlertConfirm({
-              text: order_status === '' ? 'Tạo đơn hàng nhập thành công' : 'Tạo và nhập đơn hàng thành công',
+              text: 'Tạo đơn hàng nhập thành công',
               icon: 'success',
               handleConfirmed: () => history.replace(`/app/purchase_orders`)
             })
@@ -488,7 +486,7 @@ const CEPurchaseOrder = () => {
         })
         .catch(() =>
           setTimeout(() => {
-            Swal.fire('', order_status === '' ? 'Tạo đơn hàng nhập thất bại' : 'Tạo và nhập đơn hàng thất bại', 'error')
+            Swal.fire('', 'Tạo đơn hàng nhập thất bại', 'error')
             setIsLoadingCreate(false)
           }, 1000)
         )
@@ -583,7 +581,7 @@ const CEPurchaseOrder = () => {
                 {params.id ? 'Lưu' : 'Tạo đơn'}
               </>
             }
-            onSubmit={params.id ? () => handleSaveBtn('') : () => handleCreateBtn('')}
+            onSubmit={params.id ? () => handleSaveBtn('') : handleCreateBtn}
           />
 
           {canEdit && params.id && (

@@ -162,7 +162,7 @@ const PurchaseOrderDetail = () => {
 
         DebtService.getTotal(data.supplier.user_id).then((res) => {
           const debtValue = res.data.data.debt_amount
-          setDataDebt(formatCurrency(debtValue))
+          setDataDebt(formatCurrency(Math.abs(debtValue)))
 
           setIsLoading(false)
           setIsFetched(true)
@@ -268,8 +268,9 @@ const PurchaseOrderDetail = () => {
 
         <Col lg={12}>
           <Payment
-            value='customer'
-            debt_payment_amount={dataDebt}
+            order_status={purchaseDetail?.order_status || ''}
+            value='supplier'
+            debt_payment_amount={totalPayment}
             user_id={purchaseDetail?.supplier?.user_id || ''}
             source_id={params.id}
           />

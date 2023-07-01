@@ -181,7 +181,7 @@ const OrdersDetail = () => {
     try {
       const res = await OrderService.getSellOrderDetail(params.id)
       DebtService.getTotal(res.data.data.supplier.user_id).then((res) => {
-        setDataDebt(formatCurrency(res.data.data.debt_amount))
+        setDataDebt(formatCurrency(Math.abs(res.data.data.debt_amount)))
       })
       setDetailOrder(res.data.data)
       setProductList(
@@ -341,8 +341,9 @@ const OrdersDetail = () => {
 
         <Col lg={12}>
           <Payment
+            order_status={detailOrder?.order_status || ''}
             value='customer'
-            debt_payment_amount={dataDebt}
+            debt_payment_amount={totalPayment}
             user_id={detailOrder?.supplier?.user_id || ''}
             source_id={params.id}
           />
