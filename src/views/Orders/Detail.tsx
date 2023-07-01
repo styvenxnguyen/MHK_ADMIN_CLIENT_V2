@@ -16,6 +16,7 @@ import { PurchaseOrder } from '~/types/PurchaseOrder.type'
 import { formatCurrency } from '~/utils/common'
 import Error from '../Errors'
 import DebtService from '~/services/debt.service'
+import Payment from '~/components/AdditionalData/Payment'
 
 const optionStatus = [
   {
@@ -336,6 +337,15 @@ const OrdersDetail = () => {
               ))}
             </Card.Body>
           </Card>
+        </Col>
+
+        <Col lg={12}>
+          <Payment
+            value='customer'
+            debt_payment_amount={dataDebt}
+            user_id={detailOrder?.supplier?.user_id || ''}
+            source_id={params.id}
+          />
         </Col>
 
         <Col>

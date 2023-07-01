@@ -22,10 +22,9 @@ const JWTLogin = ({ className, ...rest }: any) => {
           setStatus({ success: false })
           const errorCode = error.response.status
           if (errorCode === 500) {
-            setErrors({ submit: `Lỗi kết nối máy chủ (${errorCode})` })
+            setErrors({ submit: `Lỗi kết nối tới máy chủ (Mã lỗi: ${errorCode})` })
             setSubmitting(false)
-          }
-          if (errorCode === 404) {
+          } else if (errorCode === 404) {
             setErrors({ submit: 'Số điện thoại chưa được đăng ký' })
             setSubmitting(false)
           } else {

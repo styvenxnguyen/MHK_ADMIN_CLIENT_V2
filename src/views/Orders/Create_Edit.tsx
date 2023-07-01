@@ -22,7 +22,7 @@ import CustomerService from '~/services/customer.service'
 
 import { Customer, CustomerList } from '~/types/Customer.type'
 import ProductService from '~/services/product.service'
-import { ProductPurchase, ProductSell } from '~/types/Product.type'
+import { ProductSell } from '~/types/Product.type'
 import CustomTable from '~/components/Table/CustomTable'
 import { OrderProduct } from '~/types/OrderProduct.type'
 import { formatCurrency } from '~/utils/common'
@@ -89,7 +89,6 @@ const OrdersCreate = () => {
   const [dataDebt, setDataDebt] = useState('0')
   const [tagList, setTagList] = useState<string[]>()
   const [newTags, setNewTags] = useState<any>()
-  const [priceList, setPriceList] = useState<PricePolicy[]>([])
   const [productsList, setProductsList] = useState<ProductSell[]>([])
   const [priceValueID, setPriceValueID] = useState()
   const handleListTags = useCallback((value: string[]) => {
@@ -126,6 +125,8 @@ const OrdersCreate = () => {
       value: '0'
     }
   ]
+
+  console.log(selectedTags)
 
   const dataOrder = {
     supplier_id: valueCustomer?.value,
@@ -366,7 +367,6 @@ const OrdersCreate = () => {
   const getListPrice = useCallback(async () => {
     try {
       const res = await PricePolicyService.getListPrice()
-      setPriceList(res.data.data)
       setPriceValueID(res.data.data.find((item: PricePolicy) => item.isSellDefault === true)?.id)
     } catch (error) {
       console.log(error)
@@ -420,8 +420,6 @@ const OrdersCreate = () => {
       console.log(error)
     }
   }, [priceValueID])
-
-  console.log(productList)
 
   const getSellOrderDetail = useCallback(async () => {
     try {

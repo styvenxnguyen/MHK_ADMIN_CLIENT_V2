@@ -44,12 +44,6 @@ interface VariantPrice {
   price_type: string
 }
 
-interface TypeResponse {
-  id: string
-  tag_description: string
-  tag_title: string
-}
-
 interface ProductType {
   id: string
   type_description: string

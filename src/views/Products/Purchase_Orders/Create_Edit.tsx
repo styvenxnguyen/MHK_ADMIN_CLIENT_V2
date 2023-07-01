@@ -72,6 +72,8 @@ const CEPurchaseOrder = () => {
     setNewTags(value)
   }, [])
 
+  console.log(selectedTags)
+
   const dataPurchaseOrder = {
     supplier_id: idSelectedSupplier,
     agency_branch_id: selectedBranch?.value || '',
@@ -84,9 +86,9 @@ const CEPurchaseOrder = () => {
     products: productList.map((product) => ({
       p_variant_id: product.product_variant_detail_id,
       unit: product.product_unit,
-      amount: product.product_amount,
-      price: product.product_price,
-      discount: product.product_discount
+      amount: parseInt(product.product_amount),
+      price: parseInt(product.product_price),
+      discount: parseInt(product.product_discount)
     }))
   }
 
@@ -282,7 +284,7 @@ const CEPurchaseOrder = () => {
       const res = await SupplierService.getAllSupplier()
       const result = res.data.data
       const options = result.map((supplier: SupplierRes) => ({
-        label: supplier.customer_name,
+        label: supplier.customer_name + ' - ' + supplier.customer_phone,
         value: supplier.customer_id,
         id_supplier: supplier.id
       }))
@@ -352,22 +354,6 @@ const CEPurchaseOrder = () => {
   const filterOption = (option: any, inputValue: any) => {
     return option.data.text.toLowerCase().includes(inputValue.toLowerCase())
   }
-
-  // const getProductDetail = useCallback(async (id: string) => {
-  //   setSelectedProduct(undefined)
-  //   try {
-  //     const res = await ProductService.getDetailProduct(id)
-  //     const dataProduct: any = res.data.data
-  //     setSelectedProduct(dataProduct)
-  //     const options = dataProduct.productVariants.map((variant: ProductVariant) => ({
-  //       label: variant.product_variant_name,
-  //       value: variant.id
-  //     }))
-  //     setOptionsProductVariant(options)
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  // }, [])
 
   const getAgencyBranch = useCallback(async () => {
     try {
@@ -452,6 +438,9 @@ const CEPurchaseOrder = () => {
       .then(() => {
         setTimeout(() => {
           TagService.createTag(dataTags)
+          if (order_status === 'Nhập hàng') {
+            OrderService.updatePurchaseOrderStatus(params.id, { order_status: 'Nhập hàng' })
+          }
           setIsLoadingSave(false)
           handleAlertConfirm({
             text: order_status == '' ? 'Lưu đơn hàng nhập thành công' : 'Lưu và nhập đơn hàng thành công',
@@ -466,10 +455,6 @@ const CEPurchaseOrder = () => {
           setIsLoadingSave(false)
         }, 1000)
       )
-
-    if (order_status === 'Nhập hàng') {
-      OrderService.updatePurchaseOrderStatus(params.id, { order_status: 'Nhập hàng' })
-    }
   }
 
   const handleCreateBtn = (order_status: string) => {
@@ -477,10 +462,13 @@ const CEPurchaseOrder = () => {
 
     OrderService.createPurchaseOrder(dataPurchaseOrder)
       .then(() => {
+        if (order_status === 'Nhập hàng') {
+          OrderService.updatePurchaseOrderStatus(params.id, { order_status: 'Nhập hàng' })
+        }
         setTimeout(() => {
           setIsLoadingCreate(false)
           handleAlertConfirm({
-            text: order_status == '' ? 'Tạo đơn hàng nhập thành công' : 'Tạo và nhập đơn hàng thành công',
+            text: order_status === '' ? 'Tạo đơn hàng nhập thành công' : 'Tạo và nhập đơn hàng thành công',
             icon: 'success',
             handleConfirmed: () => history.replace(`/app/purchase_orders`)
           })
@@ -488,14 +476,10 @@ const CEPurchaseOrder = () => {
       })
       .catch(() =>
         setTimeout(() => {
-          Swal.fire('', order_status == '' ? 'Tạo đơn hàng nhập thất bại' : 'Tạo và nhập đơn hàng thất bại', 'error')
+          Swal.fire('', order_status === '' ? 'Tạo đơn hàng nhập thất bại' : 'Tạo và nhập đơn hàng thất bại', 'error')
           setIsLoadingCreate(false)
         }, 1000)
       )
-
-    if (order_status === 'Nhập hàng') {
-      OrderService.updatePurchaseOrderStatus(params.id, { order_status: 'Nhập hàng' })
-    }
   }
 
   const selectedProductNew = useCallback(
@@ -519,15 +503,6 @@ const CEPurchaseOrder = () => {
     },
     [productsList, productList]
   )
-
-  // const getListPrice = useCallback(async () => {
-  //   try {
-  //     const res = await PricePolicyService.getListPrice()
-  //     setPriceList(res.data.data)
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  // }, [])
 
   useEffect(() => {
     if (params.id) {
@@ -585,8 +560,8 @@ const CEPurchaseOrder = () => {
         )}
         <span>
           <ButtonLoading
-            className={canEdit ? 'm-0 mb-3 mr-2' : 'm-0 mb-3'}
-            variant={canEdit ? 'secondary' : 'primary'}
+            className={canEdit && params.id ? 'm-0 mb-3 mr-2' : 'm-0 mb-3'}
+            variant={canEdit && params.id ? 'secondary' : 'primary'}
             loading={isLoadingSave || isLoadingCreate}
             disabled={isLoadingSave || isLoadingCreate}
             text={
@@ -598,7 +573,7 @@ const CEPurchaseOrder = () => {
             onSubmit={params.id ? () => handleSaveBtn('') : () => handleCreateBtn('')}
           />
 
-          {canEdit && (
+          {canEdit && params.id && (
             <ButtonLoading
               className='m-0 mb-3'
               loading={isLoadingSave || isLoadingCreate}
@@ -606,10 +581,10 @@ const CEPurchaseOrder = () => {
               text={
                 <>
                   <i className={params.id ? 'feather icon-arrow-up-circle' : 'feather icon-upload'} />
-                  {params.id ? 'Lưu và nhập đơn' : 'Tạo và nhập đơn'}
+                  Lưu và nhập đơn
                 </>
               }
-              onSubmit={params.id ? () => handleSaveBtn('Nhập hàng') : () => handleCreateBtn('Nhập hàng')}
+              onSubmit={() => handleSaveBtn('Nhập hàng')}
             ></ButtonLoading>
           )}
         </span>
@@ -629,7 +604,7 @@ const CEPurchaseOrder = () => {
                   <Col lg={6}>
                     <div className='font-weight-bold'>
                       <p>
-                        <Link to={`/app/supplier/detail/${purchaseDetail?.supplier?.user_id}`}>
+                        <Link className='text-click' to={`/app/supplier/detail/${purchaseDetail?.supplier?.user_id}`}>
                           {purchaseDetail?.supplier && purchaseDetail.supplier.name}
                         </Link>
                       </p>
@@ -682,7 +657,7 @@ const CEPurchaseOrder = () => {
                           <Col lg={6}>
                             <div className='font-weight-bold'>
                               <p>
-                                <Link to={`/app/suppliers/detail/${dataSupplier.id}`}>
+                                <Link className='text-click' to={`/app/suppliers/detail/${dataSupplier.customer_id}`}>
                                   {dataSupplier.customer_name}
                                 </Link>
                               </p>

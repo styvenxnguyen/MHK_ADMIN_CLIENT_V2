@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Row, Col, Card, Form } from 'react-bootstrap'
 import { axiosConfig } from '~/utils/configAxios'
 import Swal from 'sweetalert2'
