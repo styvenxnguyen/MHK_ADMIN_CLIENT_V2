@@ -8,7 +8,7 @@ interface PageLoaderProps {
 const PageLoader = ({ option, className }: PageLoaderProps) => {
   return (
     <HashLoader
-      style={{ height: option ? option : '70vh' }}
+      style={{ height: option ? option : '80vh' }}
       className={className ? className : 'd-block m-auto'}
       color='#36d7b7'
     />

@@ -10,6 +10,7 @@ import Swal from 'sweetalert2'
 import CustomPagination from '../Pagination'
 import GlobalFilter from '../Filter/GlobalFilter'
 import { axiosConfig } from '~/utils/configAxios'
+import NoData from '~/views/Errors/svg/NoData.svg'
 
 type CustomInitialState = {
   pageIndex: number
@@ -148,6 +149,15 @@ function CustomTable({
   useEffect(() => {
     setCurrentPage(pageIndex + 1)
   }, [pageIndex])
+
+  if (data.length === 0) {
+    return (
+      <div className='d-flex justify-content-center align-items-center flex-column'>
+        <img src={NoData} alt='NoData' width={290} />
+        <h4 className='mt-5'>KHÔNG TÌM THẤY DỮ LIỆU PHÙ HỢP DO DANH SÁCH BỊ TRỐNG</h4>
+      </div>
+    )
+  }
 
   return (
     <>
