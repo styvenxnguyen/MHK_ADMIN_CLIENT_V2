@@ -22,7 +22,7 @@ import PageLoader from '~/components/Loader/PageLoader'
 import Error from '~/views/Errors'
 import { TagService } from '~/services/tag.service'
 import ProductService from '~/services/product.service'
-import { Product, ProductVariant } from '~/types/Product.type'
+import { ProductPurchase } from '~/types/Product.type'
 import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 import { ButtonLoading } from '~/components/Button/LoadingButton'
 import Swal from 'sweetalert2'
@@ -49,8 +49,6 @@ const CEPurchaseOrder = () => {
   const [optionsProduct, setOptionsProduct] = useState([])
   const [optionsBranch, setOptionsBranch] = useState([])
   const [optionsSupplier, setOptionsSupplier] = useState([])
-  const [selectedProduct, setSelectedProduct] = useState<Product>()
-  const [optionsProductVariant, setOptionsProductVariant] = useState([])
   const [idSelectedSupplier, setIdSelectedSupplier] = useState('')
   const [selectedStaff, setSelectedStaff] = useState<SelectProps>()
   const [selectedBranch, setSelectedBranch] = useState<SelectProps>()
@@ -59,8 +57,10 @@ const CEPurchaseOrder = () => {
   const [canEdit, setCanEdit] = useState(true)
   const [selectedTags, setSelectedTags] = useState<SelectProps[]>([])
   const loadingMessage = () => 'Đang tải dữ liệu...'
-  const [priceList, setPriceList] = useState<PricePolicy[]>([])
+  // const [priceList, setPriceList] = useState<PricePolicy[]>([])
   const [valueTags, setValueTags] = useState<string[]>([])
+  const [newTags, setNewTags] = useState<any>()
+  const [productsList, setProductsList] = useState<any>([])
   const [dataDebt, setDataDebt] = useState('0')
 
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
@@ -70,6 +70,10 @@ const CEPurchaseOrder = () => {
     0
   )
   const totalPayment = totalAmount - totalDiscount
+
+  const handleListNewTags = useCallback((value: any) => {
+    setNewTags(value)
+  }, [])
 
   const dataPurchaseOrder = {
     supplier_id: idSelectedSupplier,
@@ -304,11 +308,43 @@ const CEPurchaseOrder = () => {
 
   const getProductList = useCallback(async () => {
     try {
-      const res = await ProductService.getListProduct()
+      const res = await ProductService.getListProductV2()
       const result = res.data.data
-      const options = result.map((product: Product) => ({
-        label: `${product.product_SKU} - ${product.product_name}`,
-        value: product.id
+      setProductsList(result.map((e: ProductPurchase) => e.product_variant))
+      const options = result.map((product: ProductPurchase) => ({
+        label: (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+          >
+            <span>{`${product.product_variant.sku} - ${product.product_variant.name}`}</span>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ textAlign: 'end' }}>
+                Giá nhập:{' '}
+                <span style={{ color: 'black' }}>{formatCurrency(parseInt(product.product_variant.price_sell))}</span>
+              </span>
+              <div>
+                <span>
+                  Tồn:{' '}
+                  <span style={{ color: `${product.product_variant.amount.inStock === 0 ? 'red' : 'blue'}` }}>
+                    {product.product_variant.amount.inStock}
+                  </span>
+                </span>
+                {` `}|{` `}
+                <span>
+                  Có thể bán:{' '}
+                  <span style={{ color: `${product.product_variant.amount.inStock === 0 ? 'red' : 'blue'}` }}>
+                    {product.product_variant.amount.available_to_sell}
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        ),
+        value: product.product_variant.id
       }))
       setOptionsProduct(options)
     } catch (error) {
@@ -316,21 +352,21 @@ const CEPurchaseOrder = () => {
     }
   }, [])
 
-  const getProductDetail = useCallback(async (id: string) => {
-    setSelectedProduct(undefined)
-    try {
-      const res = await ProductService.getDetailProduct(id)
-      const dataProduct: any = res.data.data
-      setSelectedProduct(dataProduct)
-      const options = dataProduct.productVariants.map((variant: ProductVariant) => ({
-        label: variant.product_variant_name,
-        value: variant.id
-      }))
-      setOptionsProductVariant(options)
-    } catch (error) {
-      console.log(error)
-    }
-  }, [])
+  // const getProductDetail = useCallback(async (id: string) => {
+  //   setSelectedProduct(undefined)
+  //   try {
+  //     const res = await ProductService.getDetailProduct(id)
+  //     const dataProduct: any = res.data.data
+  //     setSelectedProduct(dataProduct)
+  //     const options = dataProduct.productVariants.map((variant: ProductVariant) => ({
+  //       label: variant.product_variant_name,
+  //       value: variant.id
+  //     }))
+  //     setOptionsProductVariant(options)
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  // }, [])
 
   const getAgencyBranch = useCallback(async () => {
     try {
@@ -407,9 +443,14 @@ const CEPurchaseOrder = () => {
     delete data.payment_id
     delete data.shipper_id
 
+    const dataTags = {
+      tags: newTags
+    }
+
     OrderService.updatePurchaseOrderDetail(params.id, data)
       .then(() => {
         setTimeout(() => {
+          TagService.createTag(dataTags)
           setIsLoadingSave(false)
           handleAlertConfirm({
             text: order_status == '' ? 'Lưu đơn hàng nhập thành công' : 'Lưu và nhập đơn hàng thành công',
@@ -458,7 +499,7 @@ const CEPurchaseOrder = () => {
 
   const selectedProductNew = useCallback(
     (e: any) => {
-      const product = selectedProduct?.productVariants.find((item) => item.id === e.value)
+      const product = productsList?.find((item: { id: string }) => item.id === e.value)
       if (product) {
         setProductList([
           ...productList,
@@ -466,26 +507,26 @@ const CEPurchaseOrder = () => {
             order_product_item_id: product?.id,
             product_amount: 1,
             product_discount: 0,
-            product_price: 0,
+            product_price: product?.price_sell,
             product_unit: 'Cái',
-            product_variant_detail_SKU: product?.product_variant_SKU,
+            product_variant_detail_SKU: product?.sku,
             product_variant_detail_id: product?.id,
-            product_variant_detail_name: product.product_variant_name
+            product_variant_detail_name: product?.name
           }
         ])
       }
     },
-    [selectedProduct?.productVariants, productList]
+    [productsList, productList]
   )
 
-  const getListPrice = useCallback(async () => {
-    try {
-      const res = await PricePolicyService.getListPrice()
-      setPriceList(res.data.data)
-    } catch (error) {
-      console.log(error)
-    }
-  }, [])
+  // const getListPrice = useCallback(async () => {
+  //   try {
+  //     const res = await PricePolicyService.getListPrice()
+  //     setPriceList(res.data.data)
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  // }, [])
 
   useEffect(() => {
     if (params.id) {
@@ -501,17 +542,7 @@ const CEPurchaseOrder = () => {
     getSupplierList()
     getProductList()
     getTagList()
-    getListPrice()
-  }, [
-    getPurchaseOrderDetail,
-    getStaffList,
-    getAgencyBranch,
-    getSupplierList,
-    getProductList,
-    getTagList,
-    getListPrice,
-    params.id
-  ])
+  }, [getPurchaseOrderDetail, getStaffList, getAgencyBranch, getSupplierList, getProductList, getTagList, params.id])
 
   useEffect(() => {
     TagService.getListTag().then((response) => {
@@ -769,22 +800,22 @@ const CEPurchaseOrder = () => {
                   className='mt-4'
                   options={optionsProduct}
                   onChange={(e: any) => {
-                    getProductDetail(e.value)
+                    selectedProductNew(e)
                   }}
                   placeholder={customPlaceholder('Product')}
                 />
               )}
 
-              {selectedProduct && (
+              {/* {selectedProduct && (
                 <Select
                   className='mt-4'
                   options={optionsProductVariant}
                   onChange={(e: any) => {
-                    selectedProductNew(e)
+                   
                   }}
                   placeholder='Chọn phiên bản sản phẩm'
                 />
-              )}
+              )} */}
             </Card.Header>
             <Card.Body>
               {productList.length === 0 ? (
@@ -818,7 +849,7 @@ const CEPurchaseOrder = () => {
                   />
                   <p className='font-weight-bold mt-2'>Tags</p>
 
-                  <InputTagMui onChange={changeTags} list={optionsTag} />
+                  <InputTagMui onChange={changeTags} list={optionsTag} onChangeNewTags={handleListNewTags} />
 
                   {/* <Select
                     options={optionsTag}
