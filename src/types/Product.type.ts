@@ -63,3 +63,12 @@ export interface Product {
     }
   }
 }
+
+export interface ProductSell {
+  id: string
+  available_quantity: number
+  available_to_sell_quantity: number
+  product_discount: number
+  product: { product_variant_id: string; name: string; sku: string }
+  price: { id: string; price_value: number }
+}

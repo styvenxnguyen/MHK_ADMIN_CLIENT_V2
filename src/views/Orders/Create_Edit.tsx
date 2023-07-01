@@ -22,7 +22,7 @@ import CustomerService from '~/services/customer.service'
 
 import { Customer, CustomerList } from '~/types/Customer.type'
 import ProductService from '~/services/product.service'
-import { Product, ProductPurchase, ProductVariant } from '~/types/Product.type'
+import { ProductSell } from '~/types/Product.type'
 import CustomTable from '~/components/Table/CustomTable'
 import { OrderProduct } from '~/types/OrderProduct.type'
 import { formatCurrency } from '~/utils/common'
@@ -75,9 +75,7 @@ const OrdersCreate = () => {
   const [optionsStaff, setOptionsStaff] = useState([])
   const [optionsPayment, setOptionsPayment] = useState([])
   const [optionsTag, setOptionsTag] = useState([])
-  const [optionsProductVariant, setOptionsProductVariant] = useState([])
   const [valueCustomer, setValueCustomer] = useState<SelectProps>()
-  const [selectedProduct, setSelectedProduct] = useState<Product>()
   const [selectedPayment, setSelectedPayment] = useState<SelectProps>()
   const [selectedStaff, setSelectedStaff] = useState<SelectProps>()
   const [selectedBranch, setSelectedBranch] = useState<SelectProps>()
@@ -88,14 +86,18 @@ const OrdersCreate = () => {
   const [productList, setProductList] = useState<OrderProduct[]>([])
   const [canEdit, setCanEdit] = useState(true)
   const [activeButton, setActiveButton] = useState<number>(1)
-  const [productPurchaseList, setProductPurchaseList] = useState<ProductPurchase[]>([])
   const [dataDebt, setDataDebt] = useState('0')
   const [tagList, setTagList] = useState<string[]>()
-  const [priceList, setPriceList] = useState<PricePolicy[]>([])
-
-  const handleListTags = (value: string[]) => {
+  const [newTags, setNewTags] = useState<any>()
+  const [productsList, setProductsList] = useState<ProductSell[]>([])
+  const [priceValueID, setPriceValueID] = useState()
+  const handleListTags = useCallback((value: string[]) => {
     setTagList(value)
-  }
+  }, [])
+
+  const handleListNewTags = useCallback((value: any) => {
+    setNewTags(value)
+  }, [])
 
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
@@ -124,6 +126,8 @@ const OrdersCreate = () => {
     }
   ]
 
+  console.log(selectedTags)
+
   const dataOrder = {
     supplier_id: valueCustomer?.value,
     agency_branch_id: selectedBranch?.value,
@@ -136,9 +140,9 @@ const OrdersCreate = () => {
     products: productList.map((product) => ({
       p_variant_id: product.product_variant_detail_id,
       unit: product.product_unit,
-      amount: product.product_amount,
+      amount: product.product_amount.toString(),
       price: product.product_price,
-      discount: product.product_discount
+      discount: product.product_discount.toString()
     }))
   }
 
@@ -189,23 +193,20 @@ const OrdersCreate = () => {
         accessor: 'product_price',
         Cell: ({ row, value }: any) =>
           canEdit ? (
-            <FormControl
-              value={
-                selectedProduct?.productVariants
-                  .find((e) => e.id === row.original.product_variant_detail_id)
-                  ?.productPrices.find((e) => e.price_id === priceList.find((e) => e.isSellDefault === true)?.id)
-                  ?.price_value
-              }
-              type='number'
-              className='text-center no-spin'
-              onChange={(e) => handleProductTable(row.index, 'product_price', e.target.value)}
-            />
+            <>
+              <FormControl
+                value={value}
+                type='number'
+                className='text-center no-spin'
+                onChange={(e) => handleProductTable(row.index, 'product_price', e.target.value)}
+              />
+            </>
           ) : (
             formatCurrency(value)
           )
       },
       {
-        Header: 'Chiết khấu',
+        Header: 'Chiết khấu(%)',
         accessor: 'product_discount',
         Cell: ({ row, value }: any) =>
           canEdit ? (
@@ -282,7 +283,9 @@ const OrdersCreate = () => {
   const customPlaceholder = (value: string) => {
     return (
       <span className='flex-between'>
-        <span>{value === 'Customer' ? 'Tìm theo tên khách hàng' : 'Tìm theo mã SKU hoặc tên sản phẩm'} </span>
+        <span>
+          {value === 'Customer' ? 'Tìm theo tên hoặc số điện thoại khách hàng' : 'Tìm theo mã SKU hoặc tên sản phẩm'}{' '}
+        </span>
         <i className='feather icon-search'></i>
       </span>
     )
@@ -361,47 +364,62 @@ const OrdersCreate = () => {
     })
   }, [])
 
+  const getListPrice = useCallback(async () => {
+    try {
+      const res = await PricePolicyService.getListPrice()
+      setPriceValueID(res.data.data.find((item: PricePolicy) => item.isSellDefault === true)?.id)
+    } catch (error) {
+      console.log(error)
+    }
+  }, [])
+
   const getProductList = useCallback(async () => {
     try {
-      const res = await ProductService.getListProduct()
-      const result = res.data.data
-      const options = result.map((product: Product) => ({
-        label: `${product.product_SKU} - ${product.product_name}`,
-        value: product.id
-      }))
-      setOptionsProduct(options)
-    } catch (error) {
-      console.log(error)
-    }
-  }, [])
-
-  const getProductListPurchase = useCallback(async () => {
-    try {
-      const res = await ProductService.getListProductPurchase()
-      const result = res.data.data
-      setProductPurchaseList(result)
-    } catch (error) {
-      console.log(error)
-    }
-  }, [])
-
-  const getProductDetail = useCallback(async (e: SingleValue<{ label: string; value: string }>) => {
-    setSelectedProduct(undefined)
-    try {
-      if (e) {
-        const res = await ProductService.getDetailProduct(e?.value)
-        const dataProduct: any = res.data.data
-        const options = dataProduct.productVariants.map((variant: ProductVariant) => ({
-          label: variant.product_variant_name,
-          value: variant.id
+      if (priceValueID) {
+        const res = await ProductService.getListProductSell(priceValueID)
+        const result = res.data.data
+        setProductsList(result)
+        const options = result.map((product: ProductSell) => ({
+          label: (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}
+            >
+              <span>{`${product.product.sku} - ${product.product.name}`}</span>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ textAlign: 'end' }}>
+                  Giá nhập: <span>{formatCurrency(product.price.price_value)}</span>
+                </span>
+                <div>
+                  <span>
+                    Tồn:{' '}
+                    <span style={{ color: `${product.available_quantity === 0 ? 'red' : 'blue'}` }}>
+                      {product.available_quantity}
+                    </span>
+                  </span>
+                  {` `}|{` `}
+                  <span>
+                    Có thể bán:{' '}
+                    <span style={{ color: `${product.available_to_sell_quantity === 0 ? 'red' : 'blue'}` }}>
+                      {product.available_to_sell_quantity}
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          ),
+          text: `${product.product.sku}${product.product.name}`,
+          value: product.id
         }))
-        setOptionsProductVariant(options)
-        setSelectedProduct(res.data.data)
+        setOptionsProduct(options)
       }
     } catch (error) {
       console.log(error)
     }
-  }, [])
+  }, [priceValueID])
 
   const getSellOrderDetail = useCallback(async () => {
     try {
@@ -452,7 +470,7 @@ const OrdersCreate = () => {
     } catch (error) {
       setIsLoading(false)
     }
-  }, [params.id, getCustomerDetail])
+  }, [params.id, getCustomerDetail, getDataDebt])
 
   const selectedCustomer = useCallback(
     (e: SingleValue<{ label: string; value: string; idCustomer: string }>) => {
@@ -479,18 +497,9 @@ const OrdersCreate = () => {
       })
   }, [])
 
-  const getListPrice = useCallback(async () => {
-    try {
-      const res = await PricePolicyService.getListPrice()
-      setPriceList(res.data.data)
-    } catch (error) {
-      console.log(error)
-    }
-  }, [])
-
   const selectedProductNew = useCallback(
     (e: any) => {
-      const product = selectedProduct?.productVariants.find((item) => item.id === e.value)
+      const product = productsList?.find((item: { id: string }) => item.id === e.value)
 
       if (product) {
         setProductList([
@@ -498,24 +507,35 @@ const OrdersCreate = () => {
           {
             order_product_item_id: product?.id,
             product_amount: 1,
-            product_discount: 0,
-            product_price: 0,
+            product_discount: product.product_discount,
+            product_price: product?.price.price_value,
             product_unit: 'Cái',
-            product_variant_detail_SKU: product?.product_variant_SKU,
-            product_variant_detail_id: product?.id,
-            product_variant_detail_name: product.product_variant_name
+            product_variant_detail_SKU: product?.product.sku,
+            product_variant_detail_id: product?.product.product_variant_id,
+            product_variant_detail_name: product.product.name
           }
         ])
       }
     },
-    [selectedProduct?.productVariants, productList]
+
+    [productList, productsList]
   )
+
+  const filterOption = (option: any, inputValue: any) => {
+    return option.data.text.toLowerCase().includes(inputValue.toLowerCase())
+  }
 
   const handleCreateBtn = () => {
     setIsLoadingCreate(true)
+    const data = {
+      tags: newTags
+    }
+
+    console.log(dataOrder)
 
     OrderService.createSellOrder(dataOrder)
       .then(() => {
+        TagService.createTag(data)
         setTimeout(() => {
           setIsLoadingCreate(false)
           handleAlertConfirm({
@@ -550,7 +570,6 @@ const OrdersCreate = () => {
     getListStaff()
     getListPayment()
     getListTag()
-    getProductListPurchase()
     getListPrice()
   }, [
     getSellOrderDetail,
@@ -562,7 +581,6 @@ const OrdersCreate = () => {
     getListPayment,
     getListTag,
     getListPrice,
-    getProductListPurchase,
     params.id
   ])
 
@@ -785,13 +803,14 @@ const OrdersCreate = () => {
               <Select
                 className='mt-4'
                 options={optionsProduct}
-                onChange={(e) => {
-                  getProductDetail(e)
+                onChange={(e: any) => {
+                  selectedProductNew(e)
                 }}
                 placeholder={customPlaceholder('Product')}
+                filterOption={filterOption}
               />
 
-              {selectedProduct && (
+              {/* {selectedProduct && (
                 <Select
                   className='mt-4'
                   options={optionsProductVariant}
@@ -800,7 +819,7 @@ const OrdersCreate = () => {
                   }}
                   placeholder='Chọn phiên bản sản phẩm'
                 />
-              )}
+              )} */}
             </Card.Header>
 
             <Card.Body>
@@ -833,18 +852,12 @@ const OrdersCreate = () => {
                     onChange={(e: any) => setNote(e.target.value)}
                   />
                   <p className='font-weight-bold mt-2'>Tags</p>
-                  <InputTagMui list={optionsTag} onChange={handleListTags} />
-
-                  {/* <Select
-                    options={optionsTag}
-                    isMulti
-                    placeholder='Chọn tags'
-                    noOptionsMessage={() => 'Đã chọn hết tags'}
-                    menuPlacement='top'
-                    defaultValue={selectedTags}
-                    loadingMessage={() => 'Đang tải dữ liệu ...'}
-                    onChange={(e: any) => setSelectedTags(e)}
-                  /> */}
+                  <InputTagMui
+                    list={optionsTag}
+                    onChange={handleListTags}
+                    onChangeNewTags={handleListNewTags}
+                    position='top'
+                  />
                 </Col>
                 <Col lg={3}>
                   {totalProduct.map((total, index) => (
@@ -868,7 +881,7 @@ const OrdersCreate = () => {
             <Card.Header>
               <h5>
                 <SlSocialDropbox className='mr-2' />
-                Đóng gói và giao hàng
+                Đóng gói và giao hàng1
               </h5>
               <div className='d-flex pt-4'>
                 {listButton.map((button, index) => (

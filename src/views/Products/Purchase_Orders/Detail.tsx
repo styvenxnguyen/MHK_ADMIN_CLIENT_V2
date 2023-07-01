@@ -1,8 +1,9 @@
 import moment from 'moment'
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Badge, Button, Card, Col, Row } from 'react-bootstrap'
 import { Helmet } from 'react-helmet'
 import { Link, useHistory, useParams } from 'react-router-dom'
+import Payment from '~/components/AdditionalData/Payment'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import PageLoader from '~/components/Loader/PageLoader'
 import CustomTable from '~/components/Table/CustomTable'
@@ -264,6 +265,16 @@ const PurchaseOrderDetail = () => {
             </Card.Body>
           </Card>
         </Col>
+
+        <Col lg={12}>
+          <Payment
+            value='customer'
+            debt_payment_amount={dataDebt}
+            user_id={purchaseDetail?.supplier?.user_id || ''}
+            source_id={params.id}
+          />
+        </Col>
+
         <Col>
           <Card>
             <Card.Header>

@@ -44,12 +44,6 @@ interface VariantPrice {
   price_type: string
 }
 
-interface TypeResponse {
-  id: string
-  tag_description: string
-  tag_title: string
-}
-
 interface ProductType {
   id: string
   type_description: string
@@ -95,6 +89,11 @@ const ProductCreate = () => {
       values: []
     }
   ])
+  const [newTags, setNewTags] = useState<any>()
+
+  const handleListNewTags = useCallback((value: any) => {
+    setNewTags(value)
+  }, [])
 
   const DataAdditionalInformation = [
     {
@@ -156,8 +155,12 @@ const ProductCreate = () => {
         properties: listProperty,
         product_variant_prices: listVariantPrice.filter((item) => item.price_value !== '')
       }
+      const data = {
+        tags: newTags
+      }
       ProductService.createProduct(dataSubmit)
         .then(() => {
+          TagService.createTag(data)
           setTimeout(() => {
             setShowLoader(false)
             handleAlertConfirm({
@@ -618,7 +621,12 @@ const ProductCreate = () => {
                     {DataAdditionalInformation.slice(2, 3).map((item, index) => (
                       <FormGroup key={index}>
                         <Form.Label>{item.title}</Form.Label>
-                        <InputTagMui onChange={changeTags} list={optionsTag} />
+                        <InputTagMui
+                          onChange={changeTags}
+                          list={optionsTag}
+                          onChangeNewTags={handleListNewTags}
+                          position='top'
+                        />
                       </FormGroup>
                     ))}
                   </Card.Body>

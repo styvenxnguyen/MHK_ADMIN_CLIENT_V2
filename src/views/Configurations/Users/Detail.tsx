@@ -131,7 +131,6 @@ const UserDetail = () => {
 
   const handleModalUpdateSubmit = (values: any) => {
     setShowLoader(true)
-    console.log(values)
     const keyMapping: any = {
       staff_name: 'user_name',
       staff_phone: 'user_phone',

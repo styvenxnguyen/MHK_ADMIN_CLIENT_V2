@@ -5,9 +5,11 @@ import { TagService } from '~/services/tag.service'
 interface SelectProps {
   list: { label: string; value: string }[]
   onChange: (value: string[]) => void
+  onChangeNewTags: (value: { tag_title: string; tag_description: string }[]) => void
+  position: string
 }
 
-const InputTagMui: React.FC<SelectProps> = ({ onChange, list }) => {
+const InputTagMui: React.FC<SelectProps> = ({ onChange, list, onChangeNewTags, position }) => {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([])
   const [selectedOptionsValue, setSelectedOptionsValue] = useState<string[]>([])
   const [inputValue, setInputValue] = useState('')
@@ -15,6 +17,8 @@ const InputTagMui: React.FC<SelectProps> = ({ onChange, list }) => {
   const [blurInput, setBlurInput] = useState<boolean>(true)
   const [listTag, setListTag] = useState<any>([])
   const myRef = useRef<HTMLDivElement>(null)
+  const [options, setOptions] = useState<{ label: string; value: string }[]>([])
+  const [newTags, setNewTags] = useState<string[]>([])
 
   const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value)
@@ -30,20 +34,22 @@ const InputTagMui: React.FC<SelectProps> = ({ onChange, list }) => {
         } else {
           const newSelectedOptions = [...selectedOptions, newOption]
           const value = [...selectedOptionsValue, newOption]
+          const tags = [...newTags, newOption]
+          setNewTags(tags)
           setSelectedOptions(newSelectedOptions)
           setSelectedOptionsValue(value)
           setInputValue('')
         }
       }
     },
-    [inputValue, selectedOptions, selectedOptionsValue]
+    [inputValue, selectedOptions, selectedOptionsValue, newTags]
   )
 
   const handleRemove = useCallback(
     (option: string) => {
       const newSelectedOptions = selectedOptions.filter((selectedOption) => selectedOption !== option)
       const value = selectedOptionsValue.filter(
-        (selectedOption) => selectedOption !== listTag.find((e: any) => e.tag_title === option).id
+        (selectedOption) => selectedOption !== listTag.find((e: any) => e.tag_title === option)?.id
       )
       setSelectedOptions(newSelectedOptions)
       setSelectedOptionsValue(value)
@@ -100,6 +106,24 @@ const InputTagMui: React.FC<SelectProps> = ({ onChange, list }) => {
   }, [])
 
   useEffect(() => {
+    setOptions(list)
+  }, [list])
+
+  useEffect(() => {
+    const arr = newTags.map((e) => ({
+      tag_title: e,
+      tag_description: 'Nothing'
+    }))
+    onChangeNewTags(arr)
+  }, [newTags, onChangeNewTags])
+
+  useEffect(() => {
+    if (selectedOptionsValue) {
+      setOptions(list.filter((itemA) => !selectedOptionsValue.some((itemB) => itemB === itemA.value)))
+    }
+  }, [list, selectedOptionsValue])
+
+  useEffect(() => {
     setInputValue('')
   }, [selectedOptions])
 
@@ -135,8 +159,8 @@ const InputTagMui: React.FC<SelectProps> = ({ onChange, list }) => {
         style={{ backgroundColor: `${blurInput ? 'white' : '#f4f7fa'}` }}
       />
       {isSelectVisible && (
-        <div ref={myRef} className='select-multiple'>
-          {list.map((option) => (
+        <div ref={myRef} className={` ${position === 'top' ? 'select-multiple-top' : 'select-multiple-bottom'}`}>
+          {options.map((option) => (
             <span
               id='selected-input'
               onClick={() => handleSelect(option.label, option.value)}
