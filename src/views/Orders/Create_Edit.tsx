@@ -87,6 +87,8 @@ const OrdersCreate = () => {
     setNewTags(value)
   }, [])
 
+  console.log(selectedTags)
+
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
   const totalDiscount = productList.reduce(

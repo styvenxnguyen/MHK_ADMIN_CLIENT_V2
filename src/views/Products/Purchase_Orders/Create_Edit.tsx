@@ -562,7 +562,7 @@ const CEPurchaseOrder = () => {
         />
         {params.id && (
           <h4>
-            Sửa đơn nhập1 <span className='font-weight-bold'>{purchaseDetail?.order_code}</span>
+            Sửa đơn nhập <span className='font-weight-bold'>{purchaseDetail?.order_code}</span>
           </h4>
         )}
         <span>
