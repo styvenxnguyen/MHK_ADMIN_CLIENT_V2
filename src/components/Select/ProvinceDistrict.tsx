@@ -27,7 +27,8 @@ const ProvinceDistrictSelect = ({ onChange, initialValues }: any) => {
     axios
       .get('https://provinces.open-api.vn/api/?depth=2')
       .then((response) => {
-        const options = response.data.map((province: any) => ({
+        const data = response.data
+        const options = data.map((province: any) => ({
           value: province.code,
           label: province.name,
           districts: province.districts

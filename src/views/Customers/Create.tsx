@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Row, Col, Card, Form } from 'react-bootstrap'
 import { axiosConfig } from '~/utils/configAxios'
 import Swal from 'sweetalert2'
@@ -12,10 +12,14 @@ import Select from 'react-select'
 import { validationSchemaCustomerCreate } from '~/hooks/useValidation'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
+import PageLoader from '~/components/Loader/PageLoader'
+import Error from '../Errors'
 
 const CustomerCreate = () => {
   const history = useHistory()
   const [showLoader, setShowLoader] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isFetched, setIsFetched] = useState(false)
   const [optionsStaff, setOptionsStaff] = useState([])
   const [optionsTag, setOptionsTag] = useState([])
   const [selectedTags, setSelectedTags] = useState([])
@@ -31,22 +35,26 @@ const CustomerCreate = () => {
           value: staff.staff_id
         }))
         setOptionsStaff(options)
-      })
-      .catch(() => {})
-  }, [])
 
-  useEffect(() => {
-    axiosConfig
-      .get('/tag/get-all')
-      .then((res) => {
-        const result = res.data.data
-        const options = result.map((tag: any) => ({
-          label: tag.tag_title,
-          value: tag.id
-        }))
-        setOptionsTag(options)
+        axiosConfig
+          .get('/tag/get-all')
+          .then((res) => {
+            const result = res.data.data
+            const options = result.map((tag: any) => ({
+              label: tag.tag_title,
+              value: tag.id
+            }))
+            setOptionsTag(options)
+            setIsFetched(true)
+            setIsLoading(false)
+          })
+          .catch(() => {
+            setIsLoading(false)
+          })
       })
-      .catch(() => {})
+      .catch(() => {
+        setIsLoading(false)
+      })
   }, [])
 
   const handleSubmit = (values: any) => {
@@ -121,6 +129,20 @@ const CustomerCreate = () => {
         Swal.fire('Thất bại', 'Đã xảy ra lỗi kết nối tới máy chủ', 'error')
       }, 1000)
     }
+  }
+
+  if (isLoading)
+    return (
+      <React.Fragment>
+        <Helmet>
+          <title>Thêm khách hàng mới</title>
+        </Helmet>
+        <PageLoader />
+      </React.Fragment>
+    )
+
+  if (!isFetched) {
+    return <Error errorCode='500' />
   }
 
   return (

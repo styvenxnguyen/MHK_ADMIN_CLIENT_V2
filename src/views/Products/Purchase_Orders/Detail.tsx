@@ -1,5 +1,5 @@
 import moment from 'moment'
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Badge, Button, Card, Col, Row } from 'react-bootstrap'
 import { Helmet } from 'react-helmet'
 import { Link, useHistory, useParams } from 'react-router-dom'
