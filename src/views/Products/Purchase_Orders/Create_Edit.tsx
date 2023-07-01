@@ -57,7 +57,6 @@ const CEPurchaseOrder = () => {
   const [canEdit, setCanEdit] = useState(true)
   const [selectedTags, setSelectedTags] = useState<SelectProps[]>([])
   const loadingMessage = () => 'Đang tải dữ liệu...'
-  // const [priceList, setPriceList] = useState<PricePolicy[]>([])
   const [valueTags, setValueTags] = useState<string[]>([])
   const [newTags, setNewTags] = useState<any>()
   const [productsList, setProductsList] = useState<any>([])
@@ -148,7 +147,7 @@ const CEPurchaseOrder = () => {
     return [
       {
         Header: 'STT',
-        Cell: ({ row }: any) => productList.length - row.index
+        Cell: ({ row }: any) => row.index + 1
       },
       {
         Header: 'Mã SKU',
@@ -308,7 +307,7 @@ const CEPurchaseOrder = () => {
 
   const getProductList = useCallback(async () => {
     try {
-      const res = await ProductService.getListProductV2()
+      const res = await ProductService.getListProductPurchase()
       const result = res.data.data
       setProductsList(result.map((e: ProductPurchase) => e.product_variant))
       const options = result.map((product: ProductPurchase) => ({
@@ -351,22 +350,6 @@ const CEPurchaseOrder = () => {
       console.log(error)
     }
   }, [])
-
-  // const getProductDetail = useCallback(async (id: string) => {
-  //   setSelectedProduct(undefined)
-  //   try {
-  //     const res = await ProductService.getDetailProduct(id)
-  //     const dataProduct: any = res.data.data
-  //     setSelectedProduct(dataProduct)
-  //     const options = dataProduct.productVariants.map((variant: ProductVariant) => ({
-  //       label: variant.product_variant_name,
-  //       value: variant.id
-  //     }))
-  //     setOptionsProductVariant(options)
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  // }, [])
 
   const getAgencyBranch = useCallback(async () => {
     try {
@@ -433,7 +416,7 @@ const CEPurchaseOrder = () => {
       .catch(() => {
         setIsLoading(false)
       })
-  }, [params.id])
+  }, [params.id, getDataDebt])
 
   const handleSaveBtn = (order_status: string) => {
     setIsLoadingSave(true)
@@ -805,17 +788,6 @@ const CEPurchaseOrder = () => {
                   placeholder={customPlaceholder('Product')}
                 />
               )}
-
-              {/* {selectedProduct && (
-                <Select
-                  className='mt-4'
-                  options={optionsProductVariant}
-                  onChange={(e: any) => {
-                   
-                  }}
-                  placeholder='Chọn phiên bản sản phẩm'
-                />
-              )} */}
             </Card.Header>
             <Card.Body>
               {productList.length === 0 ? (
