@@ -53,12 +53,12 @@ const CEPurchaseOrder = () => {
   const [deliveryDate, setDeliveryDate] = useState('')
   const [note, setNote] = useState('')
   const [canEdit, setCanEdit] = useState(true)
-  const [selectedTags, setSelectedTags] = useState<SelectProps[]>([])
   const loadingMessage = () => 'Đang tải dữ liệu...'
   const [valueTags, setValueTags] = useState<string[]>([])
   const [newTags, setNewTags] = useState<any>()
   const [productsList, setProductsList] = useState<any>([])
   const [dataDebt, setDataDebt] = useState('0')
+  const [tagsDetail, setTagsDetail] = useState<{ label: string; value: string }[]>([])
 
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
@@ -71,8 +71,6 @@ const CEPurchaseOrder = () => {
   const handleListNewTags = useCallback((value: any) => {
     setNewTags(value)
   }, [])
-
-  console.log(selectedTags)
 
   const dataPurchaseOrder = {
     supplier_id: idSelectedSupplier,
@@ -129,6 +127,8 @@ const CEPurchaseOrder = () => {
   const changeTags = useCallback((value: string[]) => {
     setValueTags(value)
   }, [])
+
+  console.log(valueTags)
 
   const columns = React.useMemo(() => {
     const handleProductTable = (rowIndex: number, columnId: string, value: any) => {
@@ -404,8 +404,7 @@ const CEPurchaseOrder = () => {
           value: data.agency_branch.id
         })
         setDeliveryDate(moment(data.order_delivery_date).utcOffset(7).format('YYYY-MM-DD'))
-
-        setSelectedTags(
+        setTagsDetail(
           data.order_tags.map((tag: any) => ({
             label: tag.Tag.tag_title,
             value: tag.Tag.id
@@ -421,7 +420,7 @@ const CEPurchaseOrder = () => {
       })
   }, [params.id, getDataDebt])
 
-  const handleSaveBtn = (order_status: string) => {
+  const handleSaveBtn = async (order_status: string) => {
     setIsLoadingSave(true)
 
     const data = { ...dataPurchaseOrder, shipper_id: undefined, payment_id: undefined, agency_branch_id: undefined }
@@ -433,27 +432,37 @@ const CEPurchaseOrder = () => {
       tags: newTags
     }
 
-    OrderService.updatePurchaseOrderDetail(params.id, data)
-      .then(() => {
-        setTimeout(() => {
-          TagService.createTag(dataTags)
-          if (order_status === 'Nhập hàng') {
-            OrderService.updatePurchaseOrderStatus(params.id, { order_status: 'Nhập hàng' })
-          }
-          setIsLoadingSave(false)
-          handleAlertConfirm({
-            text: order_status == '' ? 'Lưu đơn hàng nhập thành công' : 'Lưu và nhập đơn hàng thành công',
-            icon: 'success',
-            handleConfirmed: () => history.replace(`/app/purchase_orders/detail/${params.id}`)
-          })
-        }, 1000)
-      })
-      .catch(() =>
-        setTimeout(() => {
-          Swal.fire('', order_status == '' ? 'Lưu đơn hàng nhập thất bại' : 'Lưu và nhập đơn hàng thất bại', 'error')
-          setIsLoadingSave(false)
-        }, 1000)
-      )
+    const res = await TagService.createTag(dataTags)
+    if (res.data.message === 'Success' && newTags) {
+      const res = await TagService.getListTag()
+      const arr: { tag_title: string; id: string }[] = res.data.data
+      const newArr = arr.filter((item1) => newTags.some((item2: any) => item2.tag_title === item1.tag_title))
+      const arrTag = valueTags?.concat(newArr.map((e) => e.id))
+
+      const data = { ...dataPurchaseOrder, tags: arrTag }
+
+      OrderService.updatePurchaseOrderDetail(params.id, data)
+        .then(() => {
+          setTimeout(() => {
+            TagService.createTag(dataTags)
+            if (order_status === 'Nhập hàng') {
+              OrderService.updatePurchaseOrderStatus(params.id, { order_status: 'Nhập hàng' })
+            }
+            setIsLoadingSave(false)
+            handleAlertConfirm({
+              text: order_status == '' ? 'Lưu đơn hàng nhập thành công' : 'Lưu và nhập đơn hàng thành công',
+              icon: 'success',
+              handleConfirmed: () => history.replace(`/app/purchase_orders/detail/${params.id}`)
+            })
+          }, 1000)
+        })
+        .catch(() =>
+          setTimeout(() => {
+            Swal.fire('', order_status == '' ? 'Lưu đơn hàng nhập thất bại' : 'Lưu và nhập đơn hàng thất bại', 'error')
+            setIsLoadingSave(false)
+          }, 1000)
+        )
+    }
   }
 
   const handleCreateBtn = async (order_status: string) => {
@@ -568,7 +577,7 @@ const CEPurchaseOrder = () => {
         />
         {params.id && (
           <h4>
-            Sửa đơn nhập <span className='font-weight-bold'>{purchaseDetail?.order_code}</span>
+            Sửa đơn nhập1 <span className='font-weight-bold'>{purchaseDetail?.order_code}</span>
           </h4>
         )}
         <span>
@@ -832,6 +841,7 @@ const CEPurchaseOrder = () => {
                     onChange={changeTags}
                     list={optionsTag}
                     onChangeNewTags={handleListNewTags}
+                    tagsDetail={tagsDetail}
                     position='top'
                   />
                 </Col>
