@@ -168,7 +168,6 @@ const ProductCreate = () => {
           properties: listProperty,
           product_variant_prices: listVariantPrice.filter((item) => item.price_value !== '')
         }
-        console.log(dataSubmit)
         ProductService.createProduct(dataSubmit)
           .then(() => {
             setTimeout(() => {

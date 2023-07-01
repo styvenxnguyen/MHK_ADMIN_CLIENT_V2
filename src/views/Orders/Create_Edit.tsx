@@ -126,8 +126,6 @@ const OrdersCreate = () => {
     }
   ]
 
-  console.log(selectedTags)
-
   const columns = React.useMemo(() => {
     const handleProductTable = (rowIndex: number, columnId: string, value: any) => {
       const updatedData: any = [...productList]
