@@ -92,7 +92,7 @@ const OrdersCreate = () => {
   const [newTags, setNewTags] = useState<any>()
   const [priceList, setPriceList] = useState<PricePolicy[]>([])
   const [productsList, setProductsList] = useState<ProductV2[]>([])
-
+  const [priceValueID, setPriceValueID] = useState()
   const handleListTags = useCallback((value: string[]) => {
     setTagList(value)
   }, [])
@@ -362,11 +362,20 @@ const OrdersCreate = () => {
     })
   }, [])
 
+  const getListPrice = useCallback(async () => {
+    try {
+      const res = await PricePolicyService.getListPrice()
+      setPriceList(res.data.data)
+      setPriceValueID(res.data.data.find((item: PricePolicy) => item.isSellDefault === true)?.id)
+    } catch (error) {
+      console.log(error)
+    }
+  }, [])
+
   const getProductList = useCallback(async () => {
     try {
-      const priceID = priceList.find((item) => item.isSellDefault === true)?.id
-      if (priceID) {
-        const res = await ProductService.getListProductSell(priceID)
+      if (priceValueID) {
+        const res = await ProductService.getListProductSell(priceValueID)
         const result = res.data.data
         setProductsList(result)
         const options = result.map((product: ProductV2) => ({
@@ -409,7 +418,7 @@ const OrdersCreate = () => {
     } catch (error) {
       console.log(error)
     }
-  }, [priceList])
+  }, [priceValueID])
 
   const getProductListPurchase = useCallback(async () => {
     try {
@@ -495,15 +504,6 @@ const OrdersCreate = () => {
       .catch((error) => {
         console.log(error)
       })
-  }, [])
-
-  const getListPrice = useCallback(async () => {
-    try {
-      const res = await PricePolicyService.getListPrice()
-      setPriceList(res.data.data)
-    } catch (error) {
-      console.log(error)
-    }
   }, [])
 
   const selectedProductNew = useCallback(
