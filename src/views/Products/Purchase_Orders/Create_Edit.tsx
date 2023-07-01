@@ -28,8 +28,6 @@ import { ButtonLoading } from '~/components/Button/LoadingButton'
 import Swal from 'sweetalert2'
 import { SelectProps } from '~/types/Select.type'
 import moment from 'moment'
-import { PricePolicy } from '~/types/PricePolicy.type'
-import { PricePolicyService } from '~/services/pricepolicy.service'
 import InputTagMui from '~/components/InputTags/InputTagMui'
 import DebtService from '~/services/debt.service'
 
@@ -344,13 +342,18 @@ const CEPurchaseOrder = () => {
             </div>
           </div>
         ),
-        value: product.product_variant.id
+        value: product.product_variant.id,
+        text: `${product.product_variant.sku}${product.product_variant.name}`
       }))
       setOptionsProduct(options)
     } catch (error) {
       console.log(error)
     }
   }, [])
+
+  const filterOption = (option: any, inputValue: any) => {
+    return option.data.text.toLowerCase().includes(inputValue.toLowerCase())
+  }
 
   // const getProductDetail = useCallback(async (id: string) => {
   //   setSelectedProduct(undefined)
@@ -803,6 +806,7 @@ const CEPurchaseOrder = () => {
                     selectedProductNew(e)
                   }}
                   placeholder={customPlaceholder('Product')}
+                  filterOption={filterOption}
                 />
               )}
 
@@ -849,7 +853,12 @@ const CEPurchaseOrder = () => {
                   />
                   <p className='font-weight-bold mt-2'>Tags</p>
 
-                  <InputTagMui onChange={changeTags} list={optionsTag} onChangeNewTags={handleListNewTags} />
+                  <InputTagMui
+                    onChange={changeTags}
+                    list={optionsTag}
+                    onChangeNewTags={handleListNewTags}
+                    position='top'
+                  />
 
                   {/* <Select
                     options={optionsTag}

@@ -371,7 +371,38 @@ const OrdersCreate = () => {
       const res = await ProductService.getListProduct()
       const result = res.data.data
       const options = result.map((product: Product) => ({
-        label: `${product.product_SKU} - ${product.product_name}`,
+        label: (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+          >
+            <span>{`${product.product_variant.sku} - ${product.product_variant.name}`}</span>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ textAlign: 'end' }}>
+                Giá nhập:{' '}
+                <span style={{ color: 'black' }}>{formatCurrency(parseInt(product.product_variant.price_sell))}</span>
+              </span>
+              <div>
+                <span>
+                  Tồn:{' '}
+                  <span style={{ color: `${product.product_variant.amount.inStock === 0 ? 'red' : 'blue'}` }}>
+                    {product.product_variant.amount.inStock}
+                  </span>
+                </span>
+                {` `}|{` `}
+                <span>
+                  Có thể bán:{' '}
+                  <span style={{ color: `${product.product_variant.amount.inStock === 0 ? 'red' : 'blue'}` }}>
+                    {product.product_variant.amount.available_to_sell}
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        ),
         value: product.id
       }))
       setOptionsProduct(options)
@@ -795,13 +826,14 @@ const OrdersCreate = () => {
               <Select
                 className='mt-4'
                 options={optionsProduct}
-                onChange={(e) => {
-                  getProductDetail(e)
+                onChange={(e: any) => {
+                  selectedProductNew(e)
                 }}
                 placeholder={customPlaceholder('Product')}
+                filterOption={filterOption}
               />
 
-              {selectedProduct && (
+              {/* {selectedProduct && (
                 <Select
                   className='mt-4'
                   options={optionsProductVariant}
@@ -810,7 +842,7 @@ const OrdersCreate = () => {
                   }}
                   placeholder='Chọn phiên bản sản phẩm'
                 />
-              )}
+              )} */}
             </Card.Header>
 
             <Card.Body>
@@ -843,7 +875,12 @@ const OrdersCreate = () => {
                     onChange={(e: any) => setNote(e.target.value)}
                   />
                   <p className='font-weight-bold mt-2'>Tags</p>
-                  <InputTagMui list={optionsTag} onChange={handleListTags} onChangeNewTags={handleListNewTags} />
+                  <InputTagMui
+                    list={optionsTag}
+                    onChange={handleListTags}
+                    onChangeNewTags={handleListNewTags}
+                    position='top'
+                  />
 
                   {/* <Select
                     options={optionsTag}

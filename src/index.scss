@@ -966,7 +966,7 @@ input::placeholder {
   }
 }
 
-.select-multiple {
+.select-multiple-bottom {
   width: auto;
   position: absolute;
   display: flex;
@@ -975,6 +975,36 @@ input::placeholder {
   right: 0;
   left: 0;
   top: 102%;
+  background-color: white;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  padding: 8px 0;
+  border-radius: 3px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 10;
+  span {
+    padding: 8px 16px;
+    cursor: pointer;
+    margin: 0px 6px;
+    color: rgb(15, 24, 36);
+  }
+  span:hover {
+    background: #c9e1f6;
+    transition-duration: 200ms;
+    border-radius: 4px;
+    color: #0088ff;
+  }
+}
+
+.select-multiple-top {
+  width: auto;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  right: 0;
+  left: 0;
+  bottom: 110%;
   background-color: white;
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
   padding: 8px 0;

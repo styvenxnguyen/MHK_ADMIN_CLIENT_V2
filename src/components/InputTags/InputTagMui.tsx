@@ -6,9 +6,10 @@ interface SelectProps {
   list: { label: string; value: string }[]
   onChange: (value: string[]) => void
   onChangeNewTags: (value: { tag_title: string; tag_description: string }[]) => void
+  position: string
 }
 
-const InputTagMui: React.FC<SelectProps> = ({ onChange, list, onChangeNewTags }) => {
+const InputTagMui: React.FC<SelectProps> = ({ onChange, list, onChangeNewTags, position }) => {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([])
   const [selectedOptionsValue, setSelectedOptionsValue] = useState<string[]>([])
   const [inputValue, setInputValue] = useState('')
@@ -158,7 +159,7 @@ const InputTagMui: React.FC<SelectProps> = ({ onChange, list, onChangeNewTags })
         style={{ backgroundColor: `${blurInput ? 'white' : '#f4f7fa'}` }}
       />
       {isSelectVisible && (
-        <div ref={myRef} className='select-multiple'>
+        <div ref={myRef} className={` ${position === 'top' ? 'select-multiple-top' : 'select-multiple-bottom'}`}>
           {options.map((option) => (
             <span
               id='selected-input'
