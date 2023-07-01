@@ -627,7 +627,12 @@ const ProductCreate = () => {
                     {DataAdditionalInformation.slice(2, 3).map((item, index) => (
                       <FormGroup key={index}>
                         <Form.Label>{item.title}</Form.Label>
-                        <InputTagMui onChange={changeTags} list={optionsTag} onChangeNewTags={handleListNewTags} />
+                        <InputTagMui
+                          onChange={changeTags}
+                          list={optionsTag}
+                          onChangeNewTags={handleListNewTags}
+                          position='top'
+                        />
                       </FormGroup>
                     ))}
                   </Card.Body>
