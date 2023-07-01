@@ -1,11 +1,12 @@
 import moment from 'moment'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Badge, Button, Card, Col, Row } from 'react-bootstrap'
 import { Helmet } from 'react-helmet'
 import { Link, useHistory, useParams } from 'react-router-dom'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import PageLoader from '~/components/Loader/PageLoader'
 import CustomTable from '~/components/Table/CustomTable'
+import DebtService from '~/services/debt.service'
 import OrderService from '~/services/order.service'
 import { OrderProduct } from '~/types/OrderProduct.type'
 import { PurchaseOrder } from '~/types/PurchaseOrder.type'
@@ -19,6 +20,7 @@ const PurchaseOrderDetail = () => {
   const [productList, setProductList] = useState<OrderProduct[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isFetched, setIsFetched] = useState(false)
+  const [dataDebt, setDataDebt] = useState('0')
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
   const totalDiscount = productList.reduce(
@@ -87,7 +89,7 @@ const PurchaseOrderDetail = () => {
   const dataDebtSupplier = [
     {
       data: 'Công nợ',
-      value: '0'
+      value: dataDebt
     },
     {
       data: 'Tổng đơn nhập',
@@ -157,8 +159,13 @@ const PurchaseOrderDetail = () => {
           })
         )
 
-        setIsLoading(false)
-        setIsFetched(true)
+        DebtService.getTotal(data.supplier.user_id).then((res) => {
+          const debtValue = res.data.data.debt_amount
+          setDataDebt(formatCurrency(debtValue))
+
+          setIsLoading(false)
+          setIsFetched(true)
+        })
       })
       .catch(() => {
         setIsFetched(false)
@@ -230,7 +237,7 @@ const PurchaseOrderDetail = () => {
                     {dataDebtSupplier.map((debtSupplier, index) => (
                       <span key={`debtSupplier_${index}`} className='flex-between m-2'>
                         <span>{debtSupplier.data}</span>
-                        <span className='text-c-blue font-weight-bold'>{debtSupplier.value}</span>
+                        <span className='text-c-red font-weight-bold'>{debtSupplier.value}</span>
                       </span>
                     ))}
                   </div>

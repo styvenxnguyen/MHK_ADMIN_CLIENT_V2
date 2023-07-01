@@ -64,8 +64,20 @@ function Addresses({ value }: Props) {
       {
         Header: 'Tỉnh - Thành phố',
         accessor: 'user_province'
+      },
+      {
+        Header: 'Chức năng',
+        Cell: ({ row }: any) => {
+          return (
+            <Button size='sm' variant='primary' onClick={() => handleRowClick(row)}>
+              <i className='feather icon-edit' />
+              Cập nhật
+            </Button>
+          )
+        }
       }
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
 
@@ -350,7 +362,13 @@ function Addresses({ value }: Props) {
           </p>
         </div>
       ) : (
-        <CustomTable columns={columns} data={addressList} handleRowClick={handleRowClick} ButtonAdd={ButtonAdd} />
+        <CustomTable
+          columns={columns}
+          data={addressList}
+          handleRowClick={handleRowClick}
+          ButtonAdd={ButtonAdd}
+          hiddenColumns={['id', 'selection']}
+        />
       )}
     </>
   )

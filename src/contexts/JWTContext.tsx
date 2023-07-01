@@ -68,13 +68,13 @@ export const JWTProvider = ({ children }: any) => {
         const accessToken = window.localStorage.getItem('access_token')
         if (accessToken && verifyToken(accessToken)) {
           setSession(accessToken)
-          // const response = await services.get('');
-          // const { user } = response.data;
+          const response = await axiosConfig.get('/auth/me')
+          const userData = response.data.data
           dispatch({
             type: ACCOUNT_INITIALISE,
             payload: {
               isLoggedIn: true,
-              user: 'user'
+              user: userData
             }
           })
         } else {

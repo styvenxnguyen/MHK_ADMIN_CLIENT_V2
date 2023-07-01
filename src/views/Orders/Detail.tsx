@@ -15,21 +15,7 @@ import { OrderProduct } from '~/types/OrderProduct.type'
 import { PurchaseOrder } from '~/types/PurchaseOrder.type'
 import { formatCurrency } from '~/utils/common'
 import Error from '../Errors'
-
-const dataDebtSupplier = [
-  {
-    data: 'Công nợ',
-    value: '0'
-  },
-  {
-    data: 'Tổng đơn nhập',
-    value: '0'
-  },
-  {
-    data: 'Trả hàng',
-    value: '0'
-  }
-]
+import DebtService from '~/services/debt.service'
 
 const optionStatus = [
   {
@@ -57,6 +43,7 @@ const OrdersDetail = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [isFetched, setIsFetched] = useState(false)
   const [customer, setCustomer] = useState<Customer>()
+  const [dataDebt, setDataDebt] = useState('0')
   const [productList, setProductList] = useState<OrderProduct[]>([])
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
@@ -65,6 +52,25 @@ const OrdersDetail = () => {
     0
   )
   const totalPayment = totalAmount - totalDiscount
+
+  const dataDebtSupplier = [
+    {
+      data: 'Nợ phải thu',
+      value: dataDebt
+    },
+    {
+      data: 'Tổng chi tiêu',
+      value: '0'
+    },
+    {
+      data: 'Trả hàng',
+      value: '0'
+    },
+    {
+      data: 'Giao hàng thất bại',
+      value: '0'
+    }
+  ]
 
   const totalProduct = [
     {
@@ -173,6 +179,9 @@ const OrdersDetail = () => {
   const getDetailOrder = useCallback(async () => {
     try {
       const res = await OrderService.getSellOrderDetail(params.id)
+      DebtService.getTotal(res.data.data.supplier.user_id).then((res) => {
+        setDataDebt(formatCurrency(res.data.data.debt_amount))
+      })
       setDetailOrder(res.data.data)
       setProductList(
         res.data.data.order_product_list.map((purchase: PurchaseOrder, index: number) => {
@@ -289,7 +298,7 @@ const OrdersDetail = () => {
                     {dataDebtSupplier.map((debtSupplier, index) => (
                       <span key={`debtSupplier_${index}`} className='flex-between m-2'>
                         <span>{debtSupplier.data}</span>
-                        <span className='text-c-blue font-weight-bold'>{debtSupplier.value}</span>
+                        <span className='text-c-red font-weight-bold'>{debtSupplier.value}</span>
                       </span>
                     ))}
                   </div>

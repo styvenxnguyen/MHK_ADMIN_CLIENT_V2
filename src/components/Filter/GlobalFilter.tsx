@@ -5,7 +5,7 @@ const GlobalFilter = ({ filter, setFilter, setValueInputPagination, setShowError
   const [value, setValue] = useState(filter)
   const onChange = useAsyncDebounce((value) => {
     setFilter(value || undefined)
-  }, 1000)
+  }, 0)
   return (
     <span className='d-flex align-items-center justify-content-end'>
       Tìm kiếm:{' '}

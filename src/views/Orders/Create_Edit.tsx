@@ -34,7 +34,7 @@ import AgencyBranchService from '~/services/agencybranch.service'
 import StaffService from '~/services/staff.service'
 import PaymentService from '~/services/payment.service'
 import OrderService from '~/services/order.service'
-import { useHistory, useParams } from 'react-router-dom'
+import { Link, useHistory, useParams } from 'react-router-dom'
 import { PurchaseOrder } from '~/types/PurchaseOrder.type'
 import { SelectProps } from '~/types/Select.type'
 import { TagService } from '~/services/tag.service'
@@ -44,25 +44,7 @@ import moment from 'moment'
 import InputTagMui from '~/components/InputTags/InputTagMui'
 import { PricePolicy } from '~/types/PricePolicy.type'
 import { PricePolicyService } from '~/services/pricepolicy.service'
-
-const dataDebtSupplier = [
-  {
-    data: 'Nợ phải thu',
-    value: '0'
-  },
-  {
-    data: 'Tổng chi tiêu',
-    value: '0'
-  },
-  {
-    data: 'Trả hàng',
-    value: '0'
-  },
-  {
-    data: 'Giao hàng thất bại',
-    value: '0'
-  }
-]
+import DebtService from '~/services/debt.service'
 
 const listButton = [
   { label: 'Đẩy qua hãng vận chuyển', value: 1, icon: <FiTruck style={{ fontSize: '18px', marginBottom: '2px' }} /> }
@@ -107,8 +89,10 @@ const OrdersCreate = () => {
   const [canEdit, setCanEdit] = useState(true)
   const [activeButton, setActiveButton] = useState<number>(1)
   const [productPurchaseList, setProductPurchaseList] = useState<ProductPurchase[]>([])
+  const [dataDebt, setDataDebt] = useState('0')
   const [tagList, setTagList] = useState<string[]>()
   const [newTags, setNewTags] = useState<any>()
+  const [priceList, setPriceList] = useState<PricePolicy[]>([])
 
   const handleListTags = useCallback((value: string[]) => {
     setTagList(value)
@@ -125,6 +109,25 @@ const OrdersCreate = () => {
     0
   )
   const totalPayment = totalAmount - totalDiscount
+
+  const dataDebtSupplier = [
+    {
+      data: 'Nợ phải thu',
+      value: dataDebt
+    },
+    {
+      data: 'Tổng chi tiêu',
+      value: '0'
+    },
+    {
+      data: 'Trả hàng',
+      value: '0'
+    },
+    {
+      data: 'Giao hàng thất bại',
+      value: '0'
+    }
+  ]
 
   const dataOrder = {
     supplier_id: valueCustomer?.value,
@@ -192,7 +195,12 @@ const OrdersCreate = () => {
         Cell: ({ row, value }: any) =>
           canEdit ? (
             <FormControl
-              value={value}
+              value={
+                selectedProduct?.productVariants
+                  .find((e) => e.id === row.original.product_variant_detail_id)
+                  ?.productPrices.find((e) => e.price_id === priceList.find((e) => e.isSellDefault === true)?.id)
+                  ?.price_value
+              }
               type='number'
               className='text-center no-spin'
               onChange={(e) => handleProductTable(row.index, 'product_price', e.target.value)}
@@ -284,6 +292,13 @@ const OrdersCreate = () => {
       </span>
     )
   }
+
+  const getDataDebt = useCallback((id: string) => {
+    DebtService.getTotal(id).then((res) => {
+      const debtValue = res.data.data.debt_amount
+      setDataDebt(formatCurrency(debtValue))
+    })
+  }, [])
 
   const getListCustomer = useCallback(async () => {
     try {
@@ -429,6 +444,7 @@ const OrdersCreate = () => {
       })
 
       setDeliveryDate(moment(data.order_delivery_date).utcOffset(7).format('YYYY-MM-DD'))
+      getDataDebt(data.supplier.user_id)
       getCustomerDetail(data.supplier.user_id)
         .then(() => {
           setIsLoading(false)
@@ -468,9 +484,19 @@ const OrdersCreate = () => {
       })
   }, [])
 
+  const getListPrice = useCallback(async () => {
+    try {
+      const res = await PricePolicyService.getListPrice()
+      setPriceList(res.data.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }, [])
+
   const selectedProductNew = useCallback(
     (e: any) => {
       const product = selectedProduct?.productVariants.find((item) => item.id === e.value)
+
       if (product) {
         setProductList([
           ...productList,
@@ -535,6 +561,7 @@ const OrdersCreate = () => {
     getListPayment()
     getListTag()
     getProductListPurchase()
+    getListPrice()
   }, [
     getSellOrderDetail,
     getListCustomer,
@@ -544,6 +571,7 @@ const OrdersCreate = () => {
     getListStaff,
     getListPayment,
     getListTag,
+    getListPrice,
     getProductListPurchase,
     params.id
   ])
@@ -604,9 +632,13 @@ const OrdersCreate = () => {
                   </Card.Title>
                   {customerDetail && (
                     <div className='d-flex align-items-center mt-2'>
-                      <span style={{ fontSize: '17px', color: '#0088FF', fontWeight: '600' }} className='mr-1'>
+                      <Link
+                        to={`/app/customers/detail/${customerDetail.id}`}
+                        style={{ fontSize: '17px' }}
+                        className='mr-1 text-click'
+                      >
                         {customerDetail.customer_name}
-                      </span>
+                      </Link>
                       <span style={{ fontSize: '17px' }} className='ml-1'>
                         - {customerDetail.customer_phone}{' '}
                       </span>
@@ -642,7 +674,7 @@ const OrdersCreate = () => {
                           {dataDebtSupplier.map((debtSupplier, index) => (
                             <span key={`debtSupplier_${index}`} className='flex-between m-2'>
                               <span>{debtSupplier.data}</span>
-                              <span className='text-c-blue font-weight-bold'>{debtSupplier.value}</span>
+                              <span className='text-c-red font-weight-bold'>{debtSupplier.value}</span>
                             </span>
                           ))}
                         </div>
@@ -664,6 +696,7 @@ const OrdersCreate = () => {
                           onChange={(e: any) => {
                             selectedCustomer(e)
                             setValueCustomer(e)
+                            getDataDebt(e.idCustomer)
                           }}
                           placeholder={customPlaceholder('Customer')}
                         />

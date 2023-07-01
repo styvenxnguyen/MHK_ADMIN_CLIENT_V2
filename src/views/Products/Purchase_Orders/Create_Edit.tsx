@@ -31,6 +31,7 @@ import moment from 'moment'
 import { PricePolicy } from '~/types/PricePolicy.type'
 import { PricePolicyService } from '~/services/pricepolicy.service'
 import InputTagMui from '~/components/InputTags/InputTagMui'
+import DebtService from '~/services/debt.service'
 
 const CEPurchaseOrder = () => {
   const history = useHistory()
@@ -60,6 +61,7 @@ const CEPurchaseOrder = () => {
   const [valueTags, setValueTags] = useState<string[]>([])
   const [newTags, setNewTags] = useState<any>()
   const [productsList, setProductsList] = useState<any>([])
+  const [dataDebt, setDataDebt] = useState('0')
 
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
@@ -94,7 +96,7 @@ const CEPurchaseOrder = () => {
   const dataDebtSupplier = [
     {
       data: 'Công nợ',
-      value: '0'
+      value: dataDebt
     },
     {
       data: 'Tổng đơn nhập',
@@ -257,6 +259,13 @@ const CEPurchaseOrder = () => {
     )
   }
 
+  const getDataDebt = useCallback((id: string) => {
+    DebtService.getTotal(id).then((res) => {
+      const debtValue = res.data.data.debt_amount
+      setDataDebt(formatCurrency(debtValue))
+    })
+  }, [])
+
   const getStaffList = useCallback(async () => {
     try {
       const res = await StaffService.getListStaff()
@@ -385,42 +394,45 @@ const CEPurchaseOrder = () => {
     })
   }, [])
 
-  const getPurchaseOrderDetail = useCallback(async () => {
-    try {
-      const res = await OrderService.getPurchaseOrderDetail(params.id)
-      const data = res.data.data
-      setPurchaseDetail(data)
-      setProductList(
-        data.order_product_list.map((purchase: PurchaseOrder) => {
-          return { ...purchase }
-        })
-      )
-      if (data.order_status !== 'Tạo đơn') {
-        setCanEdit(false)
-      }
-      setIdSelectedSupplier(data.supplier.id)
-      setSelectedStaff({
-        label: data.staff.name,
-        value: data.staff.id
-      })
-      setSelectedBranch({
-        label: data.agency_branch.name,
-        value: data.agency_branch.id
-      })
-      setDeliveryDate(moment(data.order_delivery_date).utcOffset(7).format('YYYY-MM-DD'))
+  const getPurchaseOrderDetail = useCallback(() => {
+    OrderService.getPurchaseOrderDetail(params.id)
+      .then((res) => {
+        const data = res.data.data
+        setPurchaseDetail(data)
 
-      setSelectedTags(
-        data.order_tags.map((tag: any) => ({
-          label: tag.Tag.tag_title,
-          value: tag.Tag.id
-        }))
-      )
-      setNote(data.order_note)
-      setIsLoading(false)
-      setIsFetched(true)
-    } catch (error) {
-      setIsLoading(false)
-    }
+        setProductList(
+          data.order_product_list.map((purchase: PurchaseOrder) => {
+            return { ...purchase }
+          })
+        )
+        if (data.order_status !== 'Tạo đơn') {
+          setCanEdit(false)
+        }
+        setIdSelectedSupplier(data.supplier.id)
+        setSelectedStaff({
+          label: data.staff.name,
+          value: data.staff.id
+        })
+        setSelectedBranch({
+          label: data.agency_branch.name,
+          value: data.agency_branch.id
+        })
+        setDeliveryDate(moment(data.order_delivery_date).utcOffset(7).format('YYYY-MM-DD'))
+
+        setSelectedTags(
+          data.order_tags.map((tag: any) => ({
+            label: tag.Tag.tag_title,
+            value: tag.Tag.id
+          }))
+        )
+        setNote(data.order_note)
+        getDataDebt(data.supplier.user_id)
+        setIsLoading(false)
+        setIsFetched(true)
+      })
+      .catch(() => {
+        setIsLoading(false)
+      })
   }, [params.id])
 
   const handleSaveBtn = (order_status: string) => {
@@ -640,7 +652,7 @@ const CEPurchaseOrder = () => {
                       {dataDebtSupplier.map((debtSupplier, index) => (
                         <span key={`debtSupplier_${index}`} className='flex-between m-2'>
                           <span>{debtSupplier.data}</span>
-                          <span className='text-c-blue font-weight-bold'>{debtSupplier.value}</span>
+                          <span className='text-c-red font-weight-bold'>{debtSupplier.value}</span>
                         </span>
                       ))}
                     </div>
@@ -654,6 +666,7 @@ const CEPurchaseOrder = () => {
                     onChange={(e: any) => {
                       setIdSelectedSupplier(e.value)
                       getSupplierDetail(e.id_supplier)
+                      getDataDebt(e.id_supplier)
                     }}
                     placeholder={customPlaceholder('Supplier')}
                   />
