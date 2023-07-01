@@ -53,12 +53,12 @@ const CEPurchaseOrder = () => {
   const [deliveryDate, setDeliveryDate] = useState('')
   const [note, setNote] = useState('')
   const [canEdit, setCanEdit] = useState(true)
-  const [selectedTags, setSelectedTags] = useState<SelectProps[]>([])
   const loadingMessage = () => 'Đang tải dữ liệu...'
   const [valueTags, setValueTags] = useState<string[]>([])
   const [newTags, setNewTags] = useState<any>()
   const [productsList, setProductsList] = useState<any>([])
   const [dataDebt, setDataDebt] = useState('0')
+  const [tagsDetail, setTagsDetail] = useState<{ label: string; value: string }[]>([])
 
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
@@ -71,8 +71,6 @@ const CEPurchaseOrder = () => {
   const handleListNewTags = useCallback((value: any) => {
     setNewTags(value)
   }, [])
-
-  console.log(selectedTags)
 
   const dataPurchaseOrder = {
     supplier_id: idSelectedSupplier,
@@ -404,8 +402,7 @@ const CEPurchaseOrder = () => {
           value: data.agency_branch.id
         })
         setDeliveryDate(moment(data.order_delivery_date).utcOffset(7).format('YYYY-MM-DD'))
-
-        setSelectedTags(
+        setTagsDetail(
           data.order_tags.map((tag: any) => ({
             label: tag.Tag.tag_title,
             value: tag.Tag.id
@@ -421,7 +418,7 @@ const CEPurchaseOrder = () => {
       })
   }, [params.id, getDataDebt])
 
-  const handleSaveBtn = (order_status: string) => {
+  const handleSaveBtn = async (order_status: string) => {
     setIsLoadingSave(true)
 
     const data = { ...dataPurchaseOrder, shipper_id: undefined, payment_id: undefined, agency_branch_id: undefined }
@@ -432,7 +429,6 @@ const CEPurchaseOrder = () => {
     const dataTags = {
       tags: newTags
     }
-
 
     OrderService.updatePurchaseOrderDetail(params.id, data)
       .then(() => {
@@ -566,7 +562,7 @@ const CEPurchaseOrder = () => {
         />
         {params.id && (
           <h4>
-            Sửa đơn nhập <span className='font-weight-bold'>{purchaseDetail?.order_code}</span>
+            Sửa đơn nhập1 <span className='font-weight-bold'>{purchaseDetail?.order_code}</span>
           </h4>
         )}
         <span>
@@ -830,6 +826,7 @@ const CEPurchaseOrder = () => {
                     onChange={changeTags}
                     list={optionsTag}
                     onChangeNewTags={handleListNewTags}
+                    tagsDetail={tagsDetail}
                     position='top'
                   />
                 </Col>
