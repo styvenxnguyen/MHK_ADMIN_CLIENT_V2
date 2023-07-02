@@ -107,7 +107,7 @@ const OrdersCreate = () => {
     order_delivery_date: deliveryDate,
     order_note: note,
     payment_id: selectedPayment?.value,
-    tags: [],
+    // tags: [],
     products: productList.map((product) => ({
       p_variant_id: product.product_variant_detail_id,
       unit: product.product_unit,
@@ -539,7 +539,13 @@ const OrdersCreate = () => {
       const newArr = arr.filter((item1) => newTags.some((item2: any) => item2.tag_title === item1.tag_title))
       const arrTag = tagList?.concat(newArr.map((e) => e.id))
 
-      const dataUpdate = { ...dataOrder, agency_branch_id: undefined, shipper_id: undefined, payment_id: undefined}
+      const dataUpdate = {
+        ...dataOrder,
+        tags: arrTag,
+        agency_branch_id: undefined,
+        shipper_id: undefined,
+        payment_id: undefined
+      }
       delete dataUpdate.agency_branch_id
       delete dataUpdate.shipper_id
       delete dataUpdate.payment_id
@@ -578,7 +584,9 @@ const OrdersCreate = () => {
       const newArr = arr.filter((item1) => newTags.some((item2: any) => item2.tag_title === item1.tag_title))
       const arrTag = tagList?.concat(newArr.map((e) => e.id))
 
-      OrderService.createSellOrder(dataOrder)
+      const dataSubmit = { ...dataOrder, tags: arrTag }
+
+      OrderService.createSellOrder(dataSubmit)
         .then(() => {
           setTimeout(() => {
             setShowLoader(false)
