@@ -383,7 +383,6 @@ const CEPurchaseOrder = () => {
       .then((res) => {
         const data = res.data.data
         setPurchaseDetail(data)
-
         setProductList(
           data.order_product_list.map((purchase: PurchaseOrder) => {
             return { ...purchase }
@@ -430,27 +429,36 @@ const CEPurchaseOrder = () => {
       tags: newTags
     }
 
-    OrderService.updatePurchaseOrderDetail(params.id, data)
-      .then(() => {
-        setTimeout(() => {
-          TagService.createTag(dataTags)
-          if (order_status === 'Nhập hàng') {
-            OrderService.updatePurchaseOrderStatus(params.id, { order_status: 'Nhập hàng' })
-          }
-          setIsLoadingSave(false)
-          handleAlertConfirm({
-            text: order_status == '' ? 'Lưu đơn hàng nhập thành công' : 'Lưu và nhập đơn hàng thành công',
-            icon: 'success',
-            handleConfirmed: () => history.replace(`/app/purchase_orders/detail/${params.id}`)
-          })
-        }, 1000)
-      })
-      .catch(() =>
-        setTimeout(() => {
-          Swal.fire('', order_status == '' ? 'Lưu đơn hàng nhập thất bại' : 'Lưu và nhập đơn hàng thất bại', 'error')
-          setIsLoadingSave(false)
-        }, 1000)
-      )
+    const res = await TagService.createTag(dataTags)
+
+    if (res.data.message === 'Success' && newTags) {
+      const res = await TagService.getListTag()
+      const arr: { tag_title: string; id: string }[] = res.data.data
+      const newArr = arr.filter((item1) => newTags.some((item2: any) => item2.tag_title === item1.tag_title))
+      const arrTag = valueTags?.concat(newArr.map((e) => e.id))
+      const dataSubmit = { ...data, tags: arrTag }
+      OrderService.updatePurchaseOrderDetail(params.id, dataSubmit)
+        .then(() => {
+          setTimeout(() => {
+            TagService.createTag(dataTags)
+            if (order_status === 'Nhập hàng') {
+              OrderService.updatePurchaseOrderStatus(params.id, { order_status: 'Nhập hàng' })
+            }
+            setIsLoadingSave(false)
+            handleAlertConfirm({
+              text: order_status == '' ? 'Lưu đơn hàng nhập thành công' : 'Lưu và nhập đơn hàng thành công',
+              icon: 'success',
+              handleConfirmed: () => history.replace(`/app/purchase_orders/detail/${params.id}`)
+            })
+          }, 1000)
+        })
+        .catch(() =>
+          setTimeout(() => {
+            Swal.fire('', order_status == '' ? 'Lưu đơn hàng nhập thất bại' : 'Lưu và nhập đơn hàng thất bại', 'error')
+            setIsLoadingSave(false)
+          }, 1000)
+        )
+    }
   }
 
   const handleCreateBtn = async () => {

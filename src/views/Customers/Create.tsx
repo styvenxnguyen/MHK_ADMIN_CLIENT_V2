@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Row, Col, Card, Form } from 'react-bootstrap'
 import { axiosConfig } from '~/utils/configAxios'
 import Swal from 'sweetalert2'
@@ -14,6 +14,8 @@ import BackPreviousPage from '~/components/Button/BackPreviousPage'
 import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 import PageLoader from '~/components/Loader/PageLoader'
 import Error from '../Errors'
+import InputTagMui from '~/components/InputTags/InputTagMui'
+import { TagService } from '~/services/tag.service'
 
 const CustomerCreate = () => {
   const history = useHistory()
@@ -22,8 +24,18 @@ const CustomerCreate = () => {
   const [isFetched, setIsFetched] = useState(false)
   const [optionsStaff, setOptionsStaff] = useState([])
   const [optionsTag, setOptionsTag] = useState([])
-  const [selectedTags, setSelectedTags] = useState([])
+  const [newTags, setNewTags] = useState<any>()
+  const [tagList, setTagList] = useState<string[]>()
+
   const noOptionMessage = () => 'Đang tải dữ liệu ...'
+
+  const handleListTags = useCallback((value: string[]) => {
+    setTagList(value)
+  }, [])
+
+  const handleListNewTags = useCallback((value: any) => {
+    setNewTags(value)
+  }, [])
 
   useEffect(() => {
     axiosConfig
@@ -57,8 +69,12 @@ const CustomerCreate = () => {
       })
   }, [])
 
-  const handleSubmit = (values: any) => {
+  const handleSubmit = async (values: any) => {
     setShowLoader(true)
+    const data = {
+      tags: newTags
+    }
+    const res = await TagService.createTag(data)
     const addressList = [
       {
         user_province: values.province,
@@ -66,68 +82,70 @@ const CustomerCreate = () => {
         user_specific_address: values.address
       }
     ]
-
-    const tags = selectedTags.map((tag: any) => tag.value)
-
-    const newCustomer = {
-      user_code: values.code,
-      user_name: values.name,
-      user_email: values.email,
-      user_phone: values.phone,
-      customer_status: 'Đang giao dịch',
-      address_list: addressList,
-      staff_id: values.staff.value,
-      staff_in_charge_note: values.note,
-      tags: tags
-    }
-
-    try {
-      axiosConfig
-        .post('/customer/create', newCustomer)
-        .then(() => {
-          setShowLoader(true)
-          setTimeout(() => {
-            setShowLoader(false)
-            handleAlertConfirm({
-              html: `Thêm khách hàng <b>${newCustomer.user_name}</b> thành công`,
-              showCancelButton: false,
-              confirmText: 'Xác nhận',
-              icon: 'success',
-              handleConfirmed: () => history.push('/app/customers')
-            })
-          }, 1000)
-        })
-        .catch((errors) => {
-          const errorResponses = errors.response.data.data
-          const errorMessages = errorResponses.map((error: any) => {
-            if (error.includes('name')) {
-              return `Tên KH: <b>${values.name}</b> đã tồn tại`
-            } else if (error.includes('phone')) {
-              return `Số điện thoại KH: <b>${values.phone}</b> đã tồn tại`
-            } else if (error.includes('email')) {
-              return `Email: <b>${values.email}</b> đã tồn tại`
-            } else return `Mã KH: <b>${values.code}</b> đã tồn tại`
-          })
-
-          if (errorMessages) {
+    if (res.data.message === 'Success' && newTags) {
+      const res = await TagService.getListTag()
+      const arr: { tag_title: string; id: string }[] = res.data.data
+      const newArr = arr.filter((item1) => newTags.some((item2: any) => item2.tag_title === item1.tag_title))
+      const arrTag = tagList?.concat(newArr.map((e) => e.id))
+      const newCustomer = {
+        user_code: values.code,
+        user_name: values.name,
+        user_email: values.email,
+        user_phone: values.phone,
+        customer_status: 'Đang giao dịch',
+        address_list: addressList,
+        staff_id: values.staff.value,
+        staff_in_charge_note: values.note,
+        tags: arrTag
+      }
+      try {
+        axiosConfig
+          .post('/customer/create', newCustomer)
+          .then(() => {
+            setShowLoader(true)
             setTimeout(() => {
               setShowLoader(false)
-              Swal.fire({
-                title: 'Thất bại',
-                html: errorMessages.join('<br>'),
-                icon: 'warning',
-                confirmButtonText: 'Xác nhận'
+              handleAlertConfirm({
+                html: `Thêm khách hàng <b>${newCustomer.user_name}</b> thành công`,
+                showCancelButton: false,
+                confirmText: 'Xác nhận',
+                icon: 'success',
+                handleConfirmed: () => history.push('/app/customers')
               })
             }, 1000)
-          } else {
-            console.log('CANNOT GET ERROR RESPONSE')
-          }
-        })
-    } catch (error) {
-      setTimeout(() => {
-        setShowLoader(false)
-        Swal.fire('Thất bại', 'Đã xảy ra lỗi kết nối tới máy chủ', 'error')
-      }, 1000)
+          })
+          .catch((errors) => {
+            const errorResponses = errors.response.data.data
+            const errorMessages = errorResponses.map((error: any) => {
+              if (error.includes('name')) {
+                return `Tên KH: <b>${values.name}</b> đã tồn tại`
+              } else if (error.includes('phone')) {
+                return `Số điện thoại KH: <b>${values.phone}</b> đã tồn tại`
+              } else if (error.includes('email')) {
+                return `Email: <b>${values.email}</b> đã tồn tại`
+              } else return `Mã KH: <b>${values.code}</b> đã tồn tại`
+            })
+
+            if (errorMessages) {
+              setTimeout(() => {
+                setShowLoader(false)
+                Swal.fire({
+                  title: 'Thất bại',
+                  html: errorMessages.join('<br>'),
+                  icon: 'warning',
+                  confirmButtonText: 'Xác nhận'
+                })
+              }, 1000)
+            } else {
+              console.log('CANNOT GET ERROR RESPONSE')
+            }
+          })
+      } catch (error) {
+        setTimeout(() => {
+          setShowLoader(false)
+          Swal.fire('Thất bại', 'Đã xảy ra lỗi kết nối tới máy chủ', 'error')
+        }, 1000)
+      }
     }
   }
 
@@ -379,13 +397,12 @@ const CustomerCreate = () => {
                         </Form.Group>
                         <Form.Group>
                           <Form.Label>Tags</Form.Label>
-                          <Select
-                            options={optionsTag}
-                            placeholder='Chọn tags'
-                            isMulti
-                            noOptionsMessage={noOptionMessage}
-                            onChange={(tag: any) => setSelectedTags(tag)}
-                          ></Select>
+                          <InputTagMui
+                            list={optionsTag}
+                            onChange={handleListTags}
+                            onChangeNewTags={handleListNewTags}
+                            position='top'
+                          />
                         </Form.Group>
                       </Card.Body>
                     </Card>
