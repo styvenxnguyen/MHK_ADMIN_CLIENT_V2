@@ -75,7 +75,7 @@ const UpdateStatus = ({ id, order_status, order_type }: UpdateStatusProps) => {
             setTimeout(() => {
               setShowLoader(false)
               handleAlertConfirm({
-                text: `Cập nhật trạng thái đơn ${order_type === 'Đơn nhập' && 'nhập '}hàng thành công`,
+                text: `Cập nhật trạng thái đơn ${order_type === 'Đơn nhập' ? 'nhập ' : ''}hàng thành công`,
                 icon: 'success'
               })
             }, 1000)
@@ -83,7 +83,7 @@ const UpdateStatus = ({ id, order_status, order_type }: UpdateStatusProps) => {
           .catch(() => {
             setTimeout(() => {
               setShowLoader(false)
-              Swal.fire('', `Cập nhật trạng thái đơn ${order_type === 'Đơn nhập' && 'nhập '}hàng thất bại`, 'error')
+              Swal.fire('', `Cập nhật trạng thái đơn ${order_type === 'Đơn nhập' ? 'nhập ' : ''}hàng thất bại`, 'error')
             }, 1000)
           })
       }
