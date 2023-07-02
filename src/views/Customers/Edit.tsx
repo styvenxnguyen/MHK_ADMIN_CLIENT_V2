@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Row, Col, Card, Form } from 'react-bootstrap'
 import { axiosConfig } from '~/utils/configAxios'
 import Swal from 'sweetalert2'
@@ -12,6 +12,8 @@ import Error from '~/views/Errors'
 import { validationSchemaCustomerEdit } from '~/hooks/useValidation'
 import PageLoader from '~/components/Loader/PageLoader'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
+import InputTagMui from '~/components/InputTags/InputTagMui'
+import { TagService } from '~/services/tag.service'
 
 const CustomerEdit = () => {
   const [showLoader, setShowLoader] = useState(false)
@@ -24,6 +26,9 @@ const CustomerEdit = () => {
     label: 'Chọn nhân viên',
     value: ''
   })
+  const [tagsDetail, setTagsDetail] = useState<{ label: string; value: string }[]>([])
+  const [tagList, setTagList] = useState<string[]>()
+  const [newTags, setNewTags] = useState<any>()
 
   const history = useHistory()
   const { id }: any = useParams()
@@ -41,6 +46,14 @@ const CustomerEdit = () => {
     tags: []
   })
 
+  const handleListTags = useCallback((value: string[]) => {
+    setTagList(value)
+  }, [])
+
+  const handleListNewTags = useCallback((value: any) => {
+    setNewTags(value)
+  }, [])
+
   const keyMapping: any = {
     name: 'user_name',
     code: 'user_code',
@@ -55,6 +68,7 @@ const CustomerEdit = () => {
       .get(`/customer/get-by-id/${id}`)
       .then((response) => {
         const data = response.data.data
+        console.log(data)
         setCustomerData({
           name: data.customer_name,
           code: data.user_code,
@@ -68,7 +82,7 @@ const CustomerEdit = () => {
             value: data.staff_in_charge.staff_id
           })
         }
-        setSelectedTags(
+        setTagsDetail(
           data.tags.map((tag: any) => ({
             label: tag.tag_title,
             value: tag.id
@@ -122,7 +136,7 @@ const CustomerEdit = () => {
 
   const filteredOptionsTag = filterSelectedOptions(optionsTag, selectedTags)
 
-  const handleSubmit = (values: any) => {
+  const handleSubmit = async (values: any) => {
     setShowLoader(true)
     //Vòng lặp for sẽ duyệt các giá trị trong values so sánh với các giá trị của Customer
     //Nếu trường nào có giá trị không thay đổi thì không được gửi lên server
@@ -143,49 +157,60 @@ const CustomerEdit = () => {
       }
     }
 
-    const updateCustomer = {
-      ...updatedFieldsWithApiKeys,
-      staff_id: selectedStaff.value,
-      tags: selectedTags.map((tag: any) => tag.value)
+    const dataTags = {
+      tags: newTags
     }
 
-    try {
-      //Cập nhật khách hàng
-      axiosConfig
-        .patch(`/customer/update-personalInfo-by-id/${id}`, updateCustomer)
-        .then(() => {
-          setTimeout(() => {
-            setShowLoader(false)
-            history.push(`/app/customers/detail/${id}`)
-            Swal.fire('', `Cập nhật thông tin khách hàng thành công`, 'success')
-          }, 1000)
-        })
-        .catch((errors) => {
-          const errorResponses = errors.response.data.data
-          const errorMessages = errorResponses.map((error: any) => {
-            if (error.includes('name')) {
-              return `Tên KH: <b>${values.name}</b> đã tồn tại`
-            } else if (error.includes('phone')) {
-              return `Số điện thoại KH: <b>${values.phone}</b> đã tồn tại`
-            } else if (error.includes('email')) {
-              return `Email: <b>${values.email}</b> đã tồn tại`
-            } else return `Mã KH: <b>${values.code}</b> đã tồn tại`
+    const res = await TagService.createTag(dataTags)
+    if (res.data.message === 'Success' && newTags) {
+      const res = await TagService.getListTag()
+      const arr: { tag_title: string; id: string }[] = res.data.data
+      const newArr = arr.filter((item1) => newTags.some((item2: any) => item2.tag_title === item1.tag_title))
+      const arrTag = tagList?.concat(newArr.map((e) => e.id))
+
+      const updateCustomer = {
+        ...updatedFieldsWithApiKeys,
+        staff_id: selectedStaff.value,
+        tags: arrTag
+      }
+      try {
+        //Cập nhật khách hàng
+        axiosConfig
+          .patch(`/customer/update-personalInfo-by-id/${id}`, updateCustomer)
+          .then(() => {
+            setTimeout(() => {
+              setShowLoader(false)
+              history.push(`/app/customers/detail/${id}`)
+              Swal.fire('', `Cập nhật thông tin khách hàng thành công`, 'success')
+            }, 1000)
           })
-          setTimeout(() => {
-            setShowLoader(false)
-            Swal.fire({
-              title: 'Thất bại',
-              html: errorMessages.join('<br>'),
-              icon: 'warning',
-              confirmButtonText: 'Xác nhận'
+          .catch((errors) => {
+            const errorResponses = errors.response.data.data
+            const errorMessages = errorResponses.map((error: any) => {
+              if (error.includes('name')) {
+                return `Tên KH: <b>${values.name}</b> đã tồn tại`
+              } else if (error.includes('phone')) {
+                return `Số điện thoại KH: <b>${values.phone}</b> đã tồn tại`
+              } else if (error.includes('email')) {
+                return `Email: <b>${values.email}</b> đã tồn tại`
+              } else return `Mã KH: <b>${values.code}</b> đã tồn tại`
             })
-          }, 1000)
-        })
-    } catch (error) {
-      setTimeout(() => {
-        setShowLoader(false)
-        Swal.fire('', 'Đã xảy ra lỗi khi kết nối tới máy chủ', 'error')
-      }, 1000)
+            setTimeout(() => {
+              setShowLoader(false)
+              Swal.fire({
+                title: 'Thất bại',
+                html: errorMessages.join('<br>'),
+                icon: 'warning',
+                confirmButtonText: 'Xác nhận'
+              })
+            }, 1000)
+          })
+      } catch (error) {
+        setTimeout(() => {
+          setShowLoader(false)
+          Swal.fire('', 'Đã xảy ra lỗi khi kết nối tới máy chủ', 'error')
+        }, 1000)
+      }
     }
   }
 
@@ -394,17 +419,13 @@ const CustomerEdit = () => {
                         </Form.Group>
                         <Form.Group controlId='tag'>
                           <Form.Label>Tags</Form.Label>
-                          <Select
-                            name='tags'
-                            options={filteredOptionsTag}
-                            value={selectedTags}
-                            placeholder='Chọn tags'
-                            isMulti
-                            onChange={(tag: any) => {
-                              setFieldValue('tags', tag)
-                              setSelectedTags(tag)
-                            }}
-                          ></Select>
+                          <InputTagMui
+                            onChange={handleListTags}
+                            list={optionsTag}
+                            onChangeNewTags={handleListNewTags}
+                            tagsDetail={tagsDetail}
+                            position='top'
+                          />
                         </Form.Group>
                       </Card.Body>
                     </Card>

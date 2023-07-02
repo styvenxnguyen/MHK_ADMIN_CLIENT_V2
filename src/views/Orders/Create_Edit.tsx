@@ -79,6 +79,8 @@ const OrdersCreate = () => {
   const [newTags, setNewTags] = useState<any>()
   const [productsList, setProductsList] = useState<ProductSell[]>([])
   const [priceValueID, setPriceValueID] = useState()
+  const [tagsDetail, setTagsDetail] = useState<{ label: string; value: string }[]>([])
+
   const handleListTags = useCallback((value: string[]) => {
     setTagList(value)
   }, [])
@@ -438,6 +440,12 @@ const OrdersCreate = () => {
         value: data.supplier.user_id
       })
       setSelectedTags(
+        data.order_tags.map((tag: any) => ({
+          label: tag.Tag.tag_title,
+          value: tag.Tag.id
+        }))
+      )
+      setTagsDetail(
         data.order_tags.map((tag: any) => ({
           label: tag.Tag.tag_title,
           value: tag.Tag.id
@@ -887,6 +895,7 @@ const OrdersCreate = () => {
                     onChange={handleListTags}
                     onChangeNewTags={handleListNewTags}
                     position='top'
+                    tagsDetail={tagsDetail}
                   />
                 </Col>
                 <Col lg={3}>
