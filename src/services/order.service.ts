@@ -1,4 +1,4 @@
-import { OrderStatus, OrderUpdate, PurchaseOrder } from '~/types/Order.type'
+import { OrderStatus, PurchaseOrder } from '~/types/Order.type'
 import { axiosConfig } from '~/utils/configAxios'
 
 const ORDER = {

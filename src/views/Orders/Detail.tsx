@@ -157,8 +157,8 @@ const OrdersDetail = () => {
       value: optionStatus
     },
     {
-      data: 'Chính sách giá',
-      value: '---'
+      data: 'Trạng thái đơn',
+      value: detailOrder && detailOrder.order_status ? detailOrder.order_status : '---'
     },
     {
       data: 'Bán tại',
@@ -350,7 +350,6 @@ const OrdersDetail = () => {
         <Col lg={12}>
           <Payment
             order_total={detailOrder?.order_total || 0}
-            order_status={detailOrder?.order_status || ''}
             value='customer'
             debt_payment_amount={totalPayment}
             user_id={detailOrder?.supplier?.user_id || ''}

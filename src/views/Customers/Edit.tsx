@@ -21,7 +21,6 @@ const CustomerEdit = () => {
   const [isFetched, setIsFetched] = useState(false)
   const [optionsStaff, setOptionsStaff] = useState([])
   const [optionsTag, setOptionsTag] = useState([])
-  const [selectedTags, setSelectedTags] = useState([])
   const [selectedStaff, setSelectedStaff] = useState({
     label: 'Chọn nhân viên',
     value: ''
@@ -128,13 +127,11 @@ const CustomerEdit = () => {
       })
   }, [])
 
-  const filterSelectedOptions = (options: any, selectedOptions: any) => {
-    return options.filter(
-      (option: any) => !selectedOptions.find((selectedOption: any) => selectedOption.value === option.value)
-    )
-  }
-
-  const filteredOptionsTag = filterSelectedOptions(optionsTag, selectedTags)
+  // const filterSelectedOptions = (options: any, selectedOptions: any) => {
+  //   return options.filter(
+  //     (option: any) => !selectedOptions.find((selectedOption: any) => selectedOption.value === option.value)
+  //   )
+  // }
 
   const handleSubmit = async (values: any) => {
     setShowLoader(true)

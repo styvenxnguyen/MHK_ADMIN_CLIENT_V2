@@ -20,11 +20,16 @@ const UpdateStatus = ({ id, order_status, order_type }: UpdateStatusProps) => {
   const updateStatusBasedOnOrderStatus = () => {
     const listStatus = order_type === 'Đơn bán' ? listStatusSellOrder : listStatusPurchaseOrder
     const currentIndex = listStatus.indexOf(order_status)
-    if (currentIndex === -1 || currentIndex === listStatus.length - 1) {
-      return
+    // if (currentIndex === -1 || currentIndex === listStatus.length - 1) {
+    //   return
+    // }
+    if (order_status === 'Hoàn thành') {
+      const nextStatus = listStatus[listStatus.length - 1]
+      setUpdateStatus(nextStatus)
+    } else {
+      const nextStatus = listStatus[currentIndex + 1]
+      setUpdateStatus(nextStatus)
     }
-    const nextStatus = listStatus[currentIndex + 1]
-    setUpdateStatus(nextStatus)
   }
 
   useEffect(() => {

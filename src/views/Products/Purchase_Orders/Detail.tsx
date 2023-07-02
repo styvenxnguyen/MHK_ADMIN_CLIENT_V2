@@ -277,7 +277,6 @@ const PurchaseOrderDetail = () => {
         <Col lg={12}>
           <Payment
             order_total={orderDetail?.order_total || 0}
-            order_status={orderDetail?.order_status || ''}
             value='supplier'
             debt_payment_amount={totalPayment}
             user_id={orderDetail?.supplier?.user_id || ''}

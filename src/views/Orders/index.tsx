@@ -21,7 +21,7 @@ function OrdersList() {
   const [isFetched, setIsFetched] = useState(false)
   const BadgeStatus = ({ label, variant }: badgeStatusProps) => {
     return (
-      <Badge className='p-2' variant={variant} style={{ fontSize: 12 }}>
+      <Badge pill className='py-2 px-3' variant={variant} style={{ fontSize: 12 }}>
         {label}
       </Badge>
     )
@@ -75,8 +75,8 @@ function OrdersList() {
       {
         Header: 'Trạng thái thanh toán',
         accessor: 'isPaymentSuccess',
-        Cell: ({ value }: any) =>
-          value === true ? (
+        Cell: ({ row }: any) =>
+          row.values.order_total === 0 ? (
             <BadgeStatus variant='success' label='Đã thanh toán' />
           ) : (
             <BadgeStatus variant='warning' label='Chưa thanh toán' />
