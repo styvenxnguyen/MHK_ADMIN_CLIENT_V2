@@ -69,7 +69,6 @@ const OrdersCreate = () => {
   const [selectedBranch, setSelectedBranch] = useState<SelectProps>()
   const [selectedShipper, setSelectedShipper] = useState<SelectProps>()
   const [note, setNote] = useState('')
-  const [selectedTags, setSelectedTags] = useState<SelectProps[]>([])
   const [deliveryDate, setDeliveryDate] = useState('')
   const [productList, setProductList] = useState<OrderProduct[]>([])
   const [canEdit, setCanEdit] = useState(true)
@@ -89,8 +88,6 @@ const OrdersCreate = () => {
     setNewTags(value)
   }, [])
 
-  console.log(selectedTags)
-
   const totalQuantity = productList.reduce((acc: number, item: any) => acc + parseInt(item.product_amount), 0)
   const totalAmount = productList.reduce((acc: number, item: any) => acc + item.product_amount * item.product_price, 0)
   const totalDiscount = productList.reduce(
@@ -107,7 +104,6 @@ const OrdersCreate = () => {
     order_delivery_date: deliveryDate,
     order_note: note,
     payment_id: selectedPayment?.value,
-    // tags: [],
     products: productList.map((product) => ({
       p_variant_id: product.product_variant_detail_id,
       unit: product.product_unit,
@@ -420,7 +416,7 @@ const OrdersCreate = () => {
           return { ...purchase }
         })
       )
-      if (data.order_status !== 'Tạo đơn') {
+      if (data.order_status !== 'Đặt hàng') {
         setCanEdit(false)
       }
       setSelectedStaff({
@@ -439,12 +435,6 @@ const OrdersCreate = () => {
         label: data.supplier.name,
         value: data.supplier.user_id
       })
-      setSelectedTags(
-        data.order_tags.map((tag: any) => ({
-          label: tag.Tag.tag_title,
-          value: tag.Tag.id
-        }))
-      )
       setTagsDetail(
         data.order_tags.map((tag: any) => ({
           label: tag.Tag.tag_title,
@@ -549,6 +539,8 @@ const OrdersCreate = () => {
       delete dataUpdate.agency_branch_id
       delete dataUpdate.shipper_id
       delete dataUpdate.payment_id
+
+      console.log(dataUpdate)
 
       OrderService.updateOrderDetail(params.id, dataUpdate)
         .then(() => {
@@ -696,14 +688,16 @@ const OrdersCreate = () => {
                       <span style={{ fontSize: '17px' }} className='ml-1'>
                         - {customerDetail.customer_phone}{' '}
                       </span>
-                      <CloseButton
-                        style={{ float: 'initial' }}
-                        className='m-0 ml-2'
-                        onClick={() => {
-                          setValueCustomer(undefined)
-                          setCustomerDetail(undefined)
-                        }}
-                      />
+                      {canEdit && (
+                        <CloseButton
+                          style={{ float: 'initial' }}
+                          className='m-0 ml-2'
+                          onClick={() => {
+                            setValueCustomer(undefined)
+                            setCustomerDetail(undefined)
+                          }}
+                        />
+                      )}
                     </div>
                   )}
                 </Card.Header>
@@ -779,6 +773,7 @@ const OrdersCreate = () => {
                       <span>Bán tại:</span>
                       <div style={{ width: '65%' }}>
                         <Select
+                          isDisabled={!canEdit}
                           menuPortalTarget={document.body}
                           menuPlacement='auto'
                           placeholder='Chọn chi nhánh'
@@ -792,6 +787,7 @@ const OrdersCreate = () => {
                       <span>Bán bởi:</span>
                       <div style={{ width: '65%' }}>
                         <Select
+                          isDisabled={!canEdit}
                           name='staff'
                           menuPortalTarget={document.body}
                           menuPlacement='auto'
@@ -806,6 +802,7 @@ const OrdersCreate = () => {
                       <span>Hẹn giao: </span>
                       <div style={{ width: '65%' }}>
                         <FormControl
+                          disabled={!canEdit}
                           type='date'
                           defaultValue={deliveryDate}
                           onChange={(e: any) => setDeliveryDate(e.target.value)}
@@ -822,6 +819,7 @@ const OrdersCreate = () => {
                       <span style={{ width: '30%' }}>Thanh toán dự kiến: </span>
                       <div style={{ width: '65%' }}>
                         <Select
+                          isDisabled={!canEdit}
                           name='payment'
                           menuPortalTarget={document.body}
                           menuPlacement='auto'
@@ -846,15 +844,17 @@ const OrdersCreate = () => {
                 <i className='feather icon-archive mr-2'></i>
                 Thông tin sản phẩm
               </h5>
-              <Select
-                className='mt-4'
-                options={optionsProduct}
-                onChange={(e: any) => {
-                  selectedProductNew(e)
-                }}
-                placeholder={customPlaceholder('Product')}
-                filterOption={filterOption}
-              />
+              {canEdit && (
+                <Select
+                  className='mt-4'
+                  options={optionsProduct}
+                  onChange={(e: any) => {
+                    selectedProductNew(e)
+                  }}
+                  placeholder={customPlaceholder('Product')}
+                  filterOption={filterOption}
+                />
+              )}
 
               {/* {selectedProduct && (
                 <Select
@@ -950,6 +950,7 @@ const OrdersCreate = () => {
                   <FormGroup className='d-flex align-items-center'>
                     <FormLabel>Chọn nhân viên vận chuyển: </FormLabel>
                     <Select
+                      isDisabled={!canEdit}
                       options={optionsShipper}
                       placeholder='Chọn đối tác'
                       menuPlacement='auto'
