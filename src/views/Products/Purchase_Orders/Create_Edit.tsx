@@ -429,16 +429,14 @@ const CEPurchaseOrder = () => {
       tags: newTags
     }
 
-    OrderService.updatePurchaseOrderDetail(params.id, data)
+    OrderService.updateOrderDetail(params.id, data)
       .then(() => {
         setTimeout(() => {
           TagService.createTag(dataTags)
-          if (order_status === 'Nhập hàng') {
-            OrderService.updatePurchaseOrderStatus(params.id, { order_status: 'Nhập hàng' })
-          }
+
           setIsLoadingSave(false)
           handleAlertConfirm({
-            text: order_status == '' ? 'Lưu đơn hàng nhập thành công' : 'Lưu và nhập đơn hàng thành công',
+            text: 'Lưu đơn hàng nhập thành công',
             icon: 'success',
             handleConfirmed: () => history.replace(`/app/purchase_orders/detail/${params.id}`)
           })
@@ -446,7 +444,7 @@ const CEPurchaseOrder = () => {
       })
       .catch(() =>
         setTimeout(() => {
-          Swal.fire('', order_status == '' ? 'Lưu đơn hàng nhập thất bại' : 'Lưu và nhập đơn hàng thất bại', 'error')
+          Swal.fire('', 'Lưu đơn hàng nhập thất bại', 'error')
           setIsLoadingSave(false)
         }, 1000)
       )
