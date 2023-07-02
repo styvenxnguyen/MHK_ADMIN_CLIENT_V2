@@ -5,19 +5,20 @@ import { Helmet } from 'react-helmet'
 import { Link, useHistory, useParams } from 'react-router-dom'
 import Payment from '~/components/AdditionalData/Payment'
 import BackPreviousPage from '~/components/Button/BackPreviousPage'
+import UpdateStatus from '~/components/Button/Orders/UpdateStatus'
 import PageLoader from '~/components/Loader/PageLoader'
 import CustomTable from '~/components/Table/CustomTable'
 import DebtService from '~/services/debt.service'
 import OrderService from '~/services/order.service'
 import { OrderProduct } from '~/types/OrderProduct.type'
-import { PurchaseOrder } from '~/types/PurchaseOrder.type'
+import { PurchaseOrder } from '~/types/Order.type'
 import { formatCurrency } from '~/utils/common'
 import Error from '~/views/Errors'
 
 const PurchaseOrderDetail = () => {
   const params: { id: string } = useParams()
   const history = useHistory()
-  const [purchaseDetail, setPurchaseDetail] = useState<PurchaseOrder>()
+  const [orderDetail, setOrderDetail] = useState<PurchaseOrder>()
   const [productList, setProductList] = useState<OrderProduct[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isFetched, setIsFetched] = useState(false)
@@ -125,23 +126,23 @@ const PurchaseOrderDetail = () => {
   const dataPurchaseOrders = [
     {
       data: 'Chi nhánh',
-      value: purchaseDetail && purchaseDetail.agency_branch ? purchaseDetail.agency_branch.name : '---'
+      value: orderDetail && orderDetail.agency_branch ? orderDetail.agency_branch.name : '---'
     },
     {
-      data: 'Chính sách giá',
-      value: '---'
+      data: 'Trạng thái đơn',
+      value: orderDetail && orderDetail.order_status ? orderDetail.order_status : '---'
     },
     {
       data: 'Nhân viên phụ trách',
-      value: purchaseDetail && purchaseDetail.staff ? purchaseDetail.staff.name : '---'
+      value: orderDetail && orderDetail.staff ? orderDetail.staff.name : '---'
     },
     {
       data: 'Ngày hẹn giao',
-      value: purchaseDetail ? moment(purchaseDetail.order_delivery_date).utcOffset(7).format('DD/MM/YYYY') : '---'
+      value: orderDetail ? moment(orderDetail.order_delivery_date).utcOffset(7).format('DD/MM/YYYY') : '---'
     },
     {
       data: 'Ngày nhập',
-      value: purchaseDetail ? moment(purchaseDetail.createdAt).utcOffset(7).format('DD/MM/YYYY') : '---'
+      value: orderDetail ? moment(orderDetail.createdAt).utcOffset(7).format('DD/MM/YYYY') : '---'
     },
     {
       data: 'Tham chiếu',
@@ -153,7 +154,7 @@ const PurchaseOrderDetail = () => {
     OrderService.getPurchaseOrderDetail(params.id)
       .then((response) => {
         const data = response.data.data
-        setPurchaseDetail(data)
+        setOrderDetail(data)
         setProductList(
           data.order_product_list.map((purchase: PurchaseOrder, index: number) => {
             return { ...purchase, index: data.order_product_list.length - index }
@@ -192,12 +193,19 @@ const PurchaseOrderDetail = () => {
       <span className='flex-between'>
         <BackPreviousPage path='/app/purchase_orders' text='Quay lại danh sách đơn nhập hàng' />
         <h4>
-          Chi tiết đơn nhập <span className='font-weight-bold'>{purchaseDetail?.order_code}</span>
+          Chi tiết đơn nhập <span className='font-weight-bold'>{orderDetail?.order_code}</span>
         </h4>
-        <Button className='m-0 mb-3' onClick={() => history.push(`/app/purchase_orders/detail/${params.id}/edit`)}>
-          <i className='feather icon-edit'></i>
-          Sửa đơn nhập
-        </Button>
+        <span>
+          <Button
+            className='m-0 mb-3'
+            variant='outline-primary'
+            onClick={() => history.push(`/app/purchase_orders/detail/${params.id}/edit`)}
+          >
+            <i className='feather icon-edit'></i>
+            Sửa đơn
+          </Button>
+          <UpdateStatus id={params.id} order_status={orderDetail?.order_status || ''} order_type='Đơn nhập' />
+        </span>
       </span>
 
       <Row className='text-normal'>
@@ -214,17 +222,17 @@ const PurchaseOrderDetail = () => {
                 <Col lg={6}>
                   <div className='font-weight-bold'>
                     <p>
-                      <Link className='text-click' to={`/app/suppliers/detail/${purchaseDetail?.supplier?.user_id}`}>
-                        {purchaseDetail?.supplier && purchaseDetail.supplier.name}
+                      <Link className='text-click' to={`/app/suppliers/detail/${orderDetail?.supplier?.user_id}`}>
+                        {orderDetail?.supplier && orderDetail.supplier.name}
                       </Link>
                     </p>
-                    <p>Số điện thoại : {purchaseDetail?.supplier && purchaseDetail.supplier.phone}</p>
+                    <p>Số điện thoại : {orderDetail?.supplier && orderDetail.supplier.phone}</p>
 
-                    {purchaseDetail?.supplier && purchaseDetail.supplier.addresses ? (
+                    {orderDetail?.supplier && orderDetail.supplier.addresses ? (
                       <p>
                         Địa chỉ :
                         <span style={{ fontWeight: '500' }} className='ml-2'>
-                          {purchaseDetail.supplier.addresses[0].user_specific_address}
+                          {orderDetail.supplier.addresses[0].user_specific_address}
                         </span>
                       </p>
                     ) : (
@@ -268,10 +276,11 @@ const PurchaseOrderDetail = () => {
 
         <Col lg={12}>
           <Payment
-            order_status={purchaseDetail?.order_status || ''}
+            order_total={orderDetail?.order_total || 0}
+            order_status={orderDetail?.order_status || ''}
             value='supplier'
             debt_payment_amount={totalPayment}
-            user_id={purchaseDetail?.supplier?.user_id || ''}
+            user_id={orderDetail?.supplier?.user_id || ''}
             source_id={params.id}
           />
         </Col>
@@ -291,11 +300,11 @@ const PurchaseOrderDetail = () => {
               <Row className='justify-content-between'>
                 <Col lg={3}>
                   <p className='font-weight-bold'>Ghi chú đơn</p>
-                  <p>{purchaseDetail?.order_note && purchaseDetail.order_note}</p>
+                  <p>{orderDetail?.order_note && orderDetail.order_note}</p>
                   <p className='font-weight-bold mt-2'>Tags</p>
                   <p>
-                    {purchaseDetail?.order_tags &&
-                      purchaseDetail.order_tags.map((tag: any, index: number) => (
+                    {orderDetail?.order_tags &&
+                      orderDetail.order_tags.map((tag: any, index: number) => (
                         <Badge className='p-2 mr-2 mb-2' key={`tagsProduct_${index}`} variant='warning'>
                           {tag.Tag.tag_title}
                         </Badge>

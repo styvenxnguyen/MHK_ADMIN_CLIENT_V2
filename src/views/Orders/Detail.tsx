@@ -12,11 +12,12 @@ import CustomerService from '~/services/customer.service'
 import OrderService from '~/services/order.service'
 import { Customer } from '~/types/Customer.type'
 import { OrderProduct } from '~/types/OrderProduct.type'
-import { PurchaseOrder } from '~/types/PurchaseOrder.type'
+import { PurchaseOrder } from '~/types/Order.type'
 import { formatCurrency } from '~/utils/common'
 import Error from '../Errors'
 import DebtService from '~/services/debt.service'
 import Payment from '~/components/AdditionalData/Payment'
+import UpdateStatus from '~/components/Button/Orders/UpdateStatus'
 
 const optionStatus = [
   {
@@ -245,10 +246,17 @@ const OrdersDetail = () => {
       <span className='flex-between'>
         <BackPreviousPage path='/app/orders' text='Quay lại danh sách đơn hàng' />
 
-        <Button className='m-0 mb-3' onClick={() => history.push(`/app/orders/detail/${params.id}/edit`)}>
-          <i className='feather icon-edit'></i>
-          Sửa đơn hàng
-        </Button>
+        <span>
+          <Button
+            className='m-0 mb-3'
+            variant='outline-primary'
+            onClick={() => history.push(`/app/orders/detail/${params.id}/edit`)}
+          >
+            <i className='feather icon-edit'></i>
+            Sửa đơn hàng
+          </Button>
+          <UpdateStatus id={params.id} order_status={detailOrder?.order_status || ''} order_type='Đơn bán' />
+        </span>
       </span>
 
       <Row className='text-normal'>
@@ -341,6 +349,7 @@ const OrdersDetail = () => {
 
         <Col lg={12}>
           <Payment
+            order_total={detailOrder?.order_total || 0}
             order_status={detailOrder?.order_status || ''}
             value='customer'
             debt_payment_amount={totalPayment}

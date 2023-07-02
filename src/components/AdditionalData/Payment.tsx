@@ -16,9 +16,10 @@ interface PaymentProps {
   debt_payment_amount: number
   value: string
   order_status: string
+  order_total: number
 }
 
-const Payment = ({ value, user_id, source_id, debt_payment_amount, order_status }: PaymentProps) => {
+const Payment = ({ value, user_id, source_id, debt_payment_amount, order_status, order_total }: PaymentProps) => {
   const [showModal, setShowModal] = useState(false)
   const [showLoader, setShowLoader] = useState(false)
   const [listPayment, setListPayment] = useState<Payment[]>([])
@@ -104,11 +105,13 @@ const Payment = ({ value, user_id, source_id, debt_payment_amount, order_status 
             </span>
             <span>
               {value === 'supplier' ? 'Đã trả: ' : 'Đã thanh toán: '}{' '}
-              <span className='font-weight-bold'>{orderComplete ? formatCurrency(debt_payment_amount) : 0}</span>
+              <span className='font-weight-bold'>
+                {orderComplete ? formatCurrency(debt_payment_amount - order_total) : 0}
+              </span>
             </span>
             <span>
               Còn phải trả:
-              <span className='font-weight-bold'> {orderComplete ? 0 : formatCurrency(debt_payment_amount)}</span>
+              <span className='font-weight-bold text-c-red'> {formatCurrency(order_total)}</span>
             </span>
           </div>
         </Card.Body>

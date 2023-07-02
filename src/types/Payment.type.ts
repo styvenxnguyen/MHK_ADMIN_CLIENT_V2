@@ -7,7 +7,7 @@ export interface Payment {
 }
 
 export interface PaymentPay {
-  user_id: string 
+  user_id: string
   source_id: string
   debt_payment_amount: number
 }

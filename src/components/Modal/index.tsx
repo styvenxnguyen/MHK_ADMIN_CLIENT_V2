@@ -13,10 +13,12 @@ interface CustomModalProps {
   handleDelete?: any
   textDelete?: any
   isDelete?: boolean
+  centered?: boolean
 }
 
 function CustomModal(props: CustomModalProps) {
   const {
+    centered = false,
     size,
     show,
     handleClose,
@@ -32,7 +34,7 @@ function CustomModal(props: CustomModalProps) {
   } = props
 
   return (
-    <Modal size={size} show={show} onHide={handleClose}>
+    <Modal centered={centered} size={size} show={show} onHide={handleClose}>
       <Modal.Header closeButton>
         <Modal.Title as='h5'>{title}</Modal.Title>
       </Modal.Header>

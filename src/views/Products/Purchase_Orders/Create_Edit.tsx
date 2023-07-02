@@ -12,7 +12,7 @@ import OrderService from '~/services/order.service'
 import StaffService from '~/services/staff.service'
 import AgencyBranchService from '~/services/agencybranch.service'
 import { AgencyBranch } from '~/types/AgencyBranch.type'
-import { PurchaseOrder } from '~/types/PurchaseOrder.type'
+import { PurchaseOrder } from '~/types/Order.type'
 import { OrderProduct } from '~/types/OrderProduct.type'
 import { Staff } from '~/types/Staff.type'
 import SupplierService from '~/services/supplier.service'
@@ -418,7 +418,7 @@ const CEPurchaseOrder = () => {
       })
   }, [params.id, getDataDebt])
 
-  const handleSaveBtn = async (order_status: string) => {
+  const handleSaveBtn = () => {
     setIsLoadingSave(true)
 
     const data = { ...dataPurchaseOrder, shipper_id: undefined, payment_id: undefined, agency_branch_id: undefined }
@@ -430,16 +430,13 @@ const CEPurchaseOrder = () => {
       tags: newTags
     }
 
-    OrderService.updatePurchaseOrderDetail(params.id, data)
+    OrderService.updateOrderDetail(params.id, data)
       .then(() => {
         setTimeout(() => {
           TagService.createTag(dataTags)
-          if (order_status === 'Nhập hàng') {
-            OrderService.updatePurchaseOrderStatus(params.id, { order_status: 'Nhập hàng' })
-          }
           setIsLoadingSave(false)
           handleAlertConfirm({
-            text: order_status == '' ? 'Lưu đơn hàng nhập thành công' : 'Lưu và nhập đơn hàng thành công',
+            text: 'Lưu đơn hàng nhập thành công',
             icon: 'success',
             handleConfirmed: () => history.replace(`/app/purchase_orders/detail/${params.id}`)
           })
@@ -447,7 +444,7 @@ const CEPurchaseOrder = () => {
       })
       .catch(() =>
         setTimeout(() => {
-          Swal.fire('', order_status == '' ? 'Lưu đơn hàng nhập thất bại' : 'Lưu và nhập đơn hàng thất bại', 'error')
+          Swal.fire('', 'Lưu đơn hàng nhập thất bại', 'error')
           setIsLoadingSave(false)
         }, 1000)
       )
@@ -567,8 +564,7 @@ const CEPurchaseOrder = () => {
         )}
         <span>
           <ButtonLoading
-            className={canEdit && params.id ? 'm-0 mb-3 mr-2' : 'm-0 mb-3'}
-            variant={canEdit && params.id ? 'secondary' : 'primary'}
+            className='m-0 mb-3'
             loading={isLoadingSave || isLoadingCreate}
             disabled={isLoadingSave || isLoadingCreate}
             text={
@@ -577,23 +573,8 @@ const CEPurchaseOrder = () => {
                 {params.id ? 'Lưu' : 'Tạo đơn'}
               </>
             }
-            onSubmit={params.id ? () => handleSaveBtn('') : handleCreateBtn}
+            onSubmit={params.id ? handleSaveBtn : handleCreateBtn}
           />
-
-          {canEdit && params.id && (
-            <ButtonLoading
-              className='m-0 mb-3'
-              loading={isLoadingSave || isLoadingCreate}
-              disabled={isLoadingSave || isLoadingCreate}
-              text={
-                <>
-                  <i className={params.id ? 'feather icon-arrow-up-circle' : 'feather icon-upload'} />
-                  Lưu và nhập đơn
-                </>
-              }
-              onSubmit={() => handleSaveBtn('Nhập hàng')}
-            ></ButtonLoading>
-          )}
         </span>
       </div>
       <Row className='text-normal'>
