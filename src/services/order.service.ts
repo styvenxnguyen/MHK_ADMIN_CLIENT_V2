@@ -1,4 +1,4 @@
-import { PurchaseOrder } from '~/types/PurchaseOrder.type'
+import { OrderStatus, PurchaseOrder } from '~/types/Order.type'
 import { axiosConfig } from '~/utils/configAxios'
 
 const ORDER = {
@@ -17,8 +17,8 @@ const OrderService = {
   getSellOrderDetail: (id: string) => axiosConfig.get(ORDER.SELLORDER_DETAIL(id)),
   createPurchaseOrder: (data: PurchaseOrder) => axiosConfig.post(ORDER.CREATE_PURCHASEORDER, data),
   createSellOrder: (data: PurchaseOrder) => axiosConfig.post(ORDER.CREATE_SELLORDER, data),
-  updatePurchaseOrderDetail: (id: string, data: PurchaseOrder) => axiosConfig.patch(ORDER.UPDATE_ORDER(id), data),
-  updatePurchaseOrderStatus: (id: string, data: object) => axiosConfig.patch(ORDER.UPDATE_ORDER_STATUS(id), data)
+  updateOrderDetail: (id: string, data: PurchaseOrder) => axiosConfig.patch(ORDER.UPDATE_ORDER(id), data),
+  updateOrderStatus: (id: string, data: OrderStatus) => axiosConfig.patch(ORDER.UPDATE_ORDER_STATUS(id), data)
 }
 
 export default OrderService

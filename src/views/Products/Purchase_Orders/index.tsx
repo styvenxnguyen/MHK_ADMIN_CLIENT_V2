@@ -9,11 +9,23 @@ import PageLoader from '~/components/Loader/PageLoader'
 import { formatCurrency } from '~/utils/common'
 import OrderService from '~/services/order.service'
 
+interface badgeStatusProps {
+  label: string
+  variant: string
+}
+
 function PurchaseOrdersList() {
   const history = useHistory()
   const [listPurchaseOrders, setListPurchaseOrders] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [isFetched, setIsFetched] = useState(false)
+  const BadgeStatus = ({ label, variant }: badgeStatusProps) => {
+    return (
+      <Badge pill className='py-2 px-3' variant={variant} style={{ fontSize: 12 }}>
+        {label}
+      </Badge>
+    )
+  }
 
   useEffect(() => {
     OrderService.getAllOrder('Đơn nhập')
@@ -50,39 +62,27 @@ function PurchaseOrdersList() {
         accessor: 'order_status',
         Cell: ({ value }: any) => {
           switch (value) {
+            case 'Hủy':
+              return <BadgeStatus variant='danger' label='Đã huỷ' />
+            case 'Tạo đơn':
+              return <BadgeStatus variant='primary' label='Tạo đơn' />
             case 'Nhập hàng':
-              return (
-                <Badge className='p-2' variant='primary' style={{ fontSize: 12 }}>
-                  Nhập hàng
-                </Badge>
-              )
+              return <BadgeStatus variant='warning' label='Nhập hàng' />
             case 'Hoàn thành':
-              return (
-                <Badge className='p-2' variant='success' style={{ fontSize: 12 }}>
-                  Hoàn thành
-                </Badge>
-              )
-            default:
-              return (
-                <Badge className='p-2' variant='info' style={{ fontSize: 12 }}>
-                  Tạo đơn hàng
-                </Badge>
-              )
+              return <BadgeStatus variant='success' label='Hoàn thành' />
+            case 'Hoàn trả':
+              return <BadgeStatus variant='secondary' label='Hoàn trả' />
           }
         }
       },
       {
         Header: 'Trạng thái thanh toán',
         accessor: 'isPaymentSuccess',
-        Cell: ({ value }: any) =>
-          value === true ? (
-            <Badge className='p-2' variant='success' style={{ fontSize: 12 }}>
-              Đã thanh toán
-            </Badge>
+        Cell: ({ row }: any) =>
+          row.values.order_total === 0 ? (
+            <BadgeStatus variant='success' label='Đã thanh toán' />
           ) : (
-            <Badge className='p-2' style={{ fontSize: 12 }} variant='warning'>
-              Chưa thanh toán
-            </Badge>
+            <BadgeStatus variant='warning' label='Chưa thanh toán' />
           )
       },
       {

@@ -8,23 +8,22 @@ import PaymentService from '~/services/payment.service'
 import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
 import Swal from 'sweetalert2'
 import { formatCurrency } from '~/utils/common'
-import { FcOk, FcMediumPriority } from 'react-icons/fc'
+import { FcOk, FcMediumPriority, FcLowPriority } from 'react-icons/fc'
 
 interface PaymentProps {
   user_id: string
   source_id: string
   debt_payment_amount: number
   value: string
-  order_status: string
+  order_total: number
 }
 
-const Payment = ({ value, user_id, source_id, debt_payment_amount, order_status }: PaymentProps) => {
+const Payment = ({ value, user_id, source_id, debt_payment_amount, order_total }: PaymentProps) => {
   const [showModal, setShowModal] = useState(false)
   const [showLoader, setShowLoader] = useState(false)
   const [listPayment, setListPayment] = useState<Payment[]>([])
-  const [orderComplete, setOrderComplete] = useState(false)
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<SelectProps>()
-  const [valuePayment, setValuePayment] = useState(debt_payment_amount)
+  const [valuePayment, setValuePayment] = useState(order_total)
 
   const inputForm = [
     {
@@ -40,9 +39,6 @@ const Payment = ({ value, user_id, source_id, debt_payment_amount, order_status 
   ]
 
   useEffect(() => {
-    if (order_status === 'Hoàn thành') {
-      setOrderComplete(true)
-    }
     PaymentService.getAllPayment().then((res) => {
       const data = res.data.data
       setListPayment(
@@ -70,7 +66,7 @@ const Payment = ({ value, user_id, source_id, debt_payment_amount, order_status 
       .catch(() => {
         setTimeout(() => {
           setShowLoader(false)
-          Swal.fire('', 'Xác nhận thanh toán thất bại', 'error')
+          Swal.fire('', 'Số tiền bạn đã nhập vượt quá số tiền cần thanh toán cho hoá đơn', 'error')
         }, 1000)
       })
   }
@@ -80,17 +76,21 @@ const Payment = ({ value, user_id, source_id, debt_payment_amount, order_status 
       <Card>
         <Card.Header className='flex-between'>
           <h5>
-            {orderComplete ? (
+            {order_total === debt_payment_amount ? (
+              <FcMediumPriority style={{ fontSize: '24px' }} className='mr-2' />
+            ) : order_total === 0 ? (
               <FcOk style={{ fontSize: '24px' }} className='mr-2' />
             ) : (
-              <FcMediumPriority style={{ fontSize: '24px' }} className='mr-2' />
+              <FcLowPriority style={{ fontSize: '24px' }} className='mr-2' />
             )}
-            {orderComplete === false && value === 'supplier' && 'Đơn nhập hàng chưa thanh toán'}
-            {orderComplete === false && value === 'customer' && 'Đơn hàng chờ thanh toán'}
-            {orderComplete === true && value === 'supplier' && 'Đơn nhập hàng đã được thanh toán'}
-            {orderComplete === true && value === 'customer' && 'Đơn hàng đã được thanh toán'}
+            {order_total === debt_payment_amount &&
+              `Đơn hàng ${value === 'supplier' ? 'nhập ' : ''}chưa được thanh toán`}
+            {order_total !== debt_payment_amount &&
+              order_total !== 0 &&
+              `Đơn hàng ${value === 'supplier' ? 'nhập ' : ''}đã được thanh toán một phần`}
+            {order_total === 0 && `Đơn hàng ${value === 'supplier' ? 'nhập ' : ''}đã được thanh toán toàn bộ`}
           </h5>
-          {orderComplete === false && (
+          {order_total !== 0 && (
             <Button className='m-0' onClick={handleShowModal}>
               Thanh toán
             </Button>
@@ -104,11 +104,11 @@ const Payment = ({ value, user_id, source_id, debt_payment_amount, order_status 
             </span>
             <span>
               {value === 'supplier' ? 'Đã trả: ' : 'Đã thanh toán: '}{' '}
-              <span className='font-weight-bold'>{orderComplete ? formatCurrency(debt_payment_amount) : 0}</span>
+              <span className='font-weight-bold'>{formatCurrency(debt_payment_amount - order_total)}</span>
             </span>
             <span>
               Còn phải trả:
-              <span className='font-weight-bold'> {orderComplete ? 0 : formatCurrency(debt_payment_amount)}</span>
+              <span className='font-weight-bold text-c-red'> {formatCurrency(order_total)}</span>
             </span>
           </div>
         </Card.Body>

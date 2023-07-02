@@ -12,7 +12,7 @@ import OrderService from '~/services/order.service'
 import StaffService from '~/services/staff.service'
 import AgencyBranchService from '~/services/agencybranch.service'
 import { AgencyBranch } from '~/types/AgencyBranch.type'
-import { PurchaseOrder } from '~/types/PurchaseOrder.type'
+import { PurchaseOrder } from '~/types/Order.type'
 import { OrderProduct } from '~/types/OrderProduct.type'
 import { Staff } from '~/types/Staff.type'
 import SupplierService from '~/services/supplier.service'
@@ -383,7 +383,6 @@ const CEPurchaseOrder = () => {
       .then((res) => {
         const data = res.data.data
         setPurchaseDetail(data)
-
         setProductList(
           data.order_product_list.map((purchase: PurchaseOrder) => {
             return { ...purchase }
@@ -418,39 +417,49 @@ const CEPurchaseOrder = () => {
       })
   }, [params.id, getDataDebt])
 
-  const handleSaveBtn = async (order_status: string) => {
+  const handleSaveBtn = async () => {
     setIsLoadingSave(true)
-
-    const data = { ...dataPurchaseOrder, shipper_id: undefined, payment_id: undefined, agency_branch_id: undefined }
-    delete data.agency_branch_id
-    delete data.payment_id
-    delete data.shipper_id
 
     const dataTags = {
       tags: newTags
     }
+    const res = await TagService.createTag(dataTags)
+    if (res.data.message === 'Success' && newTags) {
+      const res = await TagService.getListTag()
+      const arr: { tag_title: string; id: string }[] = res.data.data
+      const newArr = arr.filter((item1) => newTags.some((item2: any) => item2.tag_title === item1.tag_title))
+      const arrTag = valueTags?.concat(newArr.map((e) => e.id))
 
-    OrderService.updatePurchaseOrderDetail(params.id, data)
-      .then(() => {
-        setTimeout(() => {
-          TagService.createTag(dataTags)
-          if (order_status === 'Nhập hàng') {
-            OrderService.updatePurchaseOrderStatus(params.id, { order_status: 'Nhập hàng' })
-          }
-          setIsLoadingSave(false)
-          handleAlertConfirm({
-            text: order_status == '' ? 'Lưu đơn hàng nhập thành công' : 'Lưu và nhập đơn hàng thành công',
-            icon: 'success',
-            handleConfirmed: () => history.replace(`/app/purchase_orders/detail/${params.id}`)
-          })
-        }, 1000)
-      })
-      .catch(() =>
-        setTimeout(() => {
-          Swal.fire('', order_status == '' ? 'Lưu đơn hàng nhập thất bại' : 'Lưu và nhập đơn hàng thất bại', 'error')
-          setIsLoadingSave(false)
-        }, 1000)
-      )
+      const data = {
+        ...dataPurchaseOrder,
+        tags: arrTag,
+        shipper_id: undefined,
+        payment_id: undefined,
+        agency_branch_id: undefined
+      }
+      delete data.agency_branch_id
+      delete data.payment_id
+      delete data.shipper_id
+      OrderService.updateOrderDetail(params.id, data)
+        .then(() => {
+          setTimeout(() => {
+            TagService.createTag(dataTags)
+
+            setIsLoadingSave(false)
+            handleAlertConfirm({
+              text: 'Lưu đơn hàng nhập thành công',
+              icon: 'success',
+              handleConfirmed: () => history.replace(`/app/purchase_orders/detail/${params.id}`)
+            })
+          }, 1000)
+        })
+        .catch(() =>
+          setTimeout(() => {
+            Swal.fire('', 'Lưu đơn hàng nhập thất bại', 'error')
+            setIsLoadingSave(false)
+          }, 1000)
+        )
+    }
   }
 
   const handleCreateBtn = async () => {
@@ -567,8 +576,7 @@ const CEPurchaseOrder = () => {
         )}
         <span>
           <ButtonLoading
-            className={canEdit && params.id ? 'm-0 mb-3 mr-2' : 'm-0 mb-3'}
-            variant={canEdit && params.id ? 'secondary' : 'primary'}
+            className='m-0 mb-3'
             loading={isLoadingSave || isLoadingCreate}
             disabled={isLoadingSave || isLoadingCreate}
             text={
@@ -577,23 +585,8 @@ const CEPurchaseOrder = () => {
                 {params.id ? 'Lưu' : 'Tạo đơn'}
               </>
             }
-            onSubmit={params.id ? () => handleSaveBtn('') : handleCreateBtn}
+            onSubmit={params.id ? handleSaveBtn : handleCreateBtn}
           />
-
-          {canEdit && params.id && (
-            <ButtonLoading
-              className='m-0 mb-3'
-              loading={isLoadingSave || isLoadingCreate}
-              disabled={isLoadingSave || isLoadingCreate}
-              text={
-                <>
-                  <i className={params.id ? 'feather icon-arrow-up-circle' : 'feather icon-upload'} />
-                  Lưu và nhập đơn
-                </>
-              }
-              onSubmit={() => handleSaveBtn('Nhập hàng')}
-            ></ButtonLoading>
-          )}
         </span>
       </div>
       <Row className='text-normal'>

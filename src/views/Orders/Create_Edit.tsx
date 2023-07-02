@@ -23,7 +23,7 @@ import StaffService from '~/services/staff.service'
 import PaymentService from '~/services/payment.service'
 import OrderService from '~/services/order.service'
 import { Link, useHistory, useParams } from 'react-router-dom'
-import { PurchaseOrder } from '~/types/PurchaseOrder.type'
+import { PurchaseOrder } from '~/types/Order.type'
 import { SelectProps } from '~/types/Select.type'
 import { TagService } from '~/services/tag.service'
 import { handleAlertConfirm } from '~/hooks/useAlertConfirm'
@@ -54,7 +54,7 @@ const OrdersCreate = () => {
   const params: { id: string } = useParams()
   const [isLoading, setIsLoading] = useState(true)
   const [isFetched, setIsFetched] = useState(false)
-  const [isLoadingCreate, setIsLoadingCreate] = useState(false)
+  const [showLoader, setShowLoader] = useState(false)
   const [listCustomer, setListCustomer] = useState<CustomerList[]>([])
   const [customerDetail, setCustomerDetail] = useState<Customer>()
   const [optionsProduct, setOptionsProduct] = useState([])
@@ -79,6 +79,8 @@ const OrdersCreate = () => {
   const [newTags, setNewTags] = useState<any>()
   const [productsList, setProductsList] = useState<ProductSell[]>([])
   const [priceValueID, setPriceValueID] = useState()
+  const [tagsDetail, setTagsDetail] = useState<{ label: string; value: string }[]>([])
+
   const handleListTags = useCallback((value: string[]) => {
     setTagList(value)
   }, [])
@@ -96,6 +98,24 @@ const OrdersCreate = () => {
     0
   )
   const totalPayment = totalAmount - totalDiscount
+
+  const dataOrder = {
+    supplier_id: valueCustomer?.value,
+    agency_branch_id: selectedBranch?.value,
+    shipper_id: selectedShipper?.value,
+    staff_id: selectedStaff?.value,
+    order_delivery_date: deliveryDate,
+    order_note: note,
+    payment_id: selectedPayment?.value,
+    // tags: [],
+    products: productList.map((product) => ({
+      p_variant_id: product.product_variant_detail_id,
+      unit: product.product_unit,
+      amount: product.product_amount,
+      price: product.product_price,
+      discount: product.product_discount
+    }))
+  }
 
   const dataDebtSupplier = [
     {
@@ -425,6 +445,12 @@ const OrdersCreate = () => {
           value: tag.Tag.id
         }))
       )
+      setTagsDetail(
+        data.order_tags.map((tag: any) => ({
+          label: tag.Tag.tag_title,
+          value: tag.Tag.id
+        }))
+      )
       setSelectedPayment({
         label: data.payment.payment_type,
         value: data.payment.id
@@ -499,8 +525,8 @@ const OrdersCreate = () => {
     return option.data.text.toLowerCase().includes(inputValue.toLowerCase())
   }
 
-  const handleCreateBtn = async () => {
-    setIsLoadingCreate(true)
+  const handleSaveBtn = async () => {
+    setShowLoader(true)
     const data = {
       tags: newTags
     }
@@ -512,27 +538,58 @@ const OrdersCreate = () => {
       const arr: { tag_title: string; id: string }[] = res.data.data
       const newArr = arr.filter((item1) => newTags.some((item2: any) => item2.tag_title === item1.tag_title))
       const arrTag = tagList?.concat(newArr.map((e) => e.id))
-      const dataOrder = {
-        supplier_id: valueCustomer?.value,
-        agency_branch_id: selectedBranch?.value,
-        shipper_id: selectedShipper?.value,
-        staff_id: selectedStaff?.value,
-        order_delivery_date: deliveryDate,
-        order_note: note,
-        payment_id: selectedPayment?.value,
+
+      const dataUpdate = {
+        ...dataOrder,
         tags: arrTag,
-        products: productList.map((product) => ({
-          p_variant_id: product.product_variant_detail_id,
-          unit: product.product_unit,
-          amount: product.product_amount.toString(),
-          price: product.product_price,
-          discount: product.product_discount.toString()
-        }))
+        agency_branch_id: undefined,
+        shipper_id: undefined,
+        payment_id: undefined
       }
-      OrderService.createSellOrder(dataOrder)
+      delete dataUpdate.agency_branch_id
+      delete dataUpdate.shipper_id
+      delete dataUpdate.payment_id
+
+      OrderService.updateOrderDetail(params.id, dataUpdate)
         .then(() => {
           setTimeout(() => {
-            setIsLoadingCreate(false)
+            setShowLoader(false)
+            handleAlertConfirm({
+              text: 'Lưu đơn hàng thành công',
+              icon: 'success',
+              handleConfirmed: () => history.replace(`/app/orders/detail/${params.id}`)
+            })
+          }, 1000)
+        })
+        .catch(() =>
+          setTimeout(() => {
+            Swal.fire('', 'Lưu đơn hàng thất bại', 'error')
+            setShowLoader(false)
+          }, 1000)
+        )
+    }
+  }
+
+  const handleCreateBtn = async () => {
+    setShowLoader(true)
+    const data = {
+      tags: newTags
+    }
+
+    const res = await TagService.createTag(data)
+
+    if (res.data.message === 'Success' && newTags) {
+      const res = await TagService.getListTag()
+      const arr: { tag_title: string; id: string }[] = res.data.data
+      const newArr = arr.filter((item1) => newTags.some((item2: any) => item2.tag_title === item1.tag_title))
+      const arrTag = tagList?.concat(newArr.map((e) => e.id))
+
+      const dataSubmit = { ...dataOrder, tags: arrTag }
+
+      OrderService.createSellOrder(dataSubmit)
+        .then(() => {
+          setTimeout(() => {
+            setShowLoader(false)
             handleAlertConfirm({
               text: 'Tạo đơn hàng thành công',
               icon: 'success',
@@ -543,7 +600,7 @@ const OrdersCreate = () => {
         .catch(() =>
           setTimeout(() => {
             Swal.fire('', 'Tạo đơn hàng thất bại', 'error')
-            setIsLoadingCreate(false)
+            setShowLoader(false)
           }, 1000)
         )
     }
@@ -602,11 +659,11 @@ const OrdersCreate = () => {
           path={params.id ? `/app/orders/detail/${params.id}` : '/app/orders/'}
         />
 
-        <Button className='m-0 mb-3' disabled={isLoadingCreate} onClick={handleCreateBtn}>
-          {isLoadingCreate ? (
+        <Button className='m-0 mb-3' disabled={showLoader} onClick={params.id ? handleSaveBtn : handleCreateBtn}>
+          {showLoader ? (
             <span>
               <Spinner size='sm' className='mr-2' animation='border' />
-              <span className={isLoadingCreate ? '' : 'mr-2'}>Đang tạo đơn...</span>
+              <span className={showLoader ? '' : 'mr-2'}>{params.id ? 'Đang lưu...' : 'Đang tạo đơn...'}</span>
             </span>
           ) : (
             <span>
@@ -846,6 +903,7 @@ const OrdersCreate = () => {
                     onChange={handleListTags}
                     onChangeNewTags={handleListNewTags}
                     position='top'
+                    tagsDetail={tagsDetail}
                   />
                 </Col>
                 <Col lg={3}>
