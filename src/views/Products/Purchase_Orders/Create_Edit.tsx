@@ -417,37 +417,49 @@ const CEPurchaseOrder = () => {
       })
   }, [params.id, getDataDebt])
 
-  const handleSaveBtn = () => {
+  const handleSaveBtn = async () => {
     setIsLoadingSave(true)
-
-    const data = { ...dataPurchaseOrder, shipper_id: undefined, payment_id: undefined, agency_branch_id: undefined }
-    delete data.agency_branch_id
-    delete data.payment_id
-    delete data.shipper_id
 
     const dataTags = {
       tags: newTags
     }
+    const res = await TagService.createTag(dataTags)
+    if (res.data.message === 'Success' && newTags) {
+      const res = await TagService.getListTag()
+      const arr: { tag_title: string; id: string }[] = res.data.data
+      const newArr = arr.filter((item1) => newTags.some((item2: any) => item2.tag_title === item1.tag_title))
+      const arrTag = valueTags?.concat(newArr.map((e) => e.id))
 
-    OrderService.updateOrderDetail(params.id, data)
-      .then(() => {
-        setTimeout(() => {
-          TagService.createTag(dataTags)
+      const data = {
+        ...dataPurchaseOrder,
+        tags: arrTag,
+        shipper_id: undefined,
+        payment_id: undefined,
+        agency_branch_id: undefined
+      }
+      delete data.agency_branch_id
+      delete data.payment_id
+      delete data.shipper_id
+      OrderService.updateOrderDetail(params.id, data)
+        .then(() => {
+          setTimeout(() => {
+            TagService.createTag(dataTags)
 
-          setIsLoadingSave(false)
-          handleAlertConfirm({
-            text: 'Lưu đơn hàng nhập thành công',
-            icon: 'success',
-            handleConfirmed: () => history.replace(`/app/purchase_orders/detail/${params.id}`)
-          })
-        }, 1000)
-      })
-      .catch(() =>
-        setTimeout(() => {
-          Swal.fire('', 'Lưu đơn hàng nhập thất bại', 'error')
-          setIsLoadingSave(false)
-        }, 1000)
-      )
+            setIsLoadingSave(false)
+            handleAlertConfirm({
+              text: 'Lưu đơn hàng nhập thành công',
+              icon: 'success',
+              handleConfirmed: () => history.replace(`/app/purchase_orders/detail/${params.id}`)
+            })
+          }, 1000)
+        })
+        .catch(() =>
+          setTimeout(() => {
+            Swal.fire('', 'Lưu đơn hàng nhập thất bại', 'error')
+            setIsLoadingSave(false)
+          }, 1000)
+        )
+    }
   }
 
   const handleCreateBtn = async () => {
