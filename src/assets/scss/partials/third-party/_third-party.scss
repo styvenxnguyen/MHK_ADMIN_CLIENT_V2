@@ -1,0 +1,49 @@
+@import 'node_modules/react-perfect-scrollbar/dist/css/styles';
+@import 'node_modules/sweetalert2/dist/sweetalert2';
+@import 'node_modules/react-toastify/dist/ReactToastify';
+
+// @import 'node_modules/dropzone/dist/min/dropzone.min.css';
+
+// @import 'node_modules/react-datepicker/dist/react-datepicker';
+// @import 'node_modules/rc-slider/assets/index';
+// @import 'node_modules/rc-tooltip/assets/bootstrap.css';
+
+// @import 'node_modules/slick-carousel/slick/slick.css';
+// @import 'node_modules/slick-carousel/slick/slick-theme.css';
+
+// @import 'node_modules/react-datetime/css/react-datetime';
+
+// @import 'node_modules/react-dual-listbox/src/scss/react-dual-listbox';
+
+// @import 'node_modules/nvd3/build/nv.d3.css';
+
+@import 'ngx-perfect-scrollbar';
+@import 'react-full-screen';
+@import 'react-trello';
+@import 'react-images';
+@import 'react-animated-modal';
+@import 'react-toast-notifications';
+@import 'css-animator';
+@import 'react-nestable';
+@import 'pnotify';
+@import 'react-rating';
+@import 'rc-slider';
+@import 'slick-carousel';
+@import 'deni-react-treeview';
+@import 'react-tag-automplete';
+@import 'react-loki/index';
+@import 'react-dual-listbox';
+@import 'datatables';
+@import 'peity';
+@import 'google-map';
+@import 'jquery-jvectormap-2.0.2.scss';
+@import 'react-stickies';
+@import 'ck-editor';
+
+@import 'react-bootstrap/react-bootstrap';
+
+.dropzone {
+  .dz-progress {
+    display: none;
+  }
+}
