@@ -245,7 +245,7 @@ const SupplierDetail = () => {
                               ? '---'
                               : customerData.tags.map((tag: any, index: any) => (
                                   <span key={`tag_${index}`}>
-                                    <Badge style={{ backgroundColor: 'burlywood' }} className='ml-2 p-1'>
+                                    <Badge variant='warning' className='ml-2 p-1'>
                                       {tag.tag_title}
                                     </Badge>
                                   </span>

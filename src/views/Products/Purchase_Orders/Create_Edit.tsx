@@ -657,7 +657,7 @@ const CEPurchaseOrder = () => {
                           <Col lg={6}>
                             <div className='font-weight-bold'>
                               <p>
-                                <Link className='text-click' to={`/app/suppliers/detail/${dataSupplier.customer_id}`}>
+                                <Link className='text-click' to={`/app/suppliers/detail/${dataSupplier.id}`}>
                                   {dataSupplier.customer_name}
                                 </Link>
                               </p>

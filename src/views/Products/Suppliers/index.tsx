@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Row, Col, Card, Button } from 'react-bootstrap'
+import { Row, Col, Card } from 'react-bootstrap'
 import CustomTable from '~/components/Table/CustomTable'
 import { useHistory } from 'react-router-dom'
 import moment from 'moment'
@@ -91,10 +91,10 @@ function SuppliersList() {
           <Card>
             <Card.Header className='flex-between'>
               <Card.Title as='h5'>Danh sách nhà cung cấp</Card.Title>
-              <Button className='m-0' onClick={() => history.push('#')}>
+              {/* <Button className='m-0' onClick={() => history.push('#')}>
                 <i className='feather icon-plus-circle mr-2'></i>
                 Thêm nhà cung cấp
-              </Button>{' '}
+              </Button>{' '} */}
             </Card.Header>
             <Card.Body>
               <CustomTable columns={columns} data={listSuppliers} handleRowClick={handleRowClick} />
